@@ -1,0 +1,43 @@
+-- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+--
+-- This file is part of dromozoa-graph.
+--
+-- dromozoa-graph is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- dromozoa-graph is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
+
+local vertices = require "dromozoa.graph.vertices"
+
+return function ()
+  local self = {}
+
+  self._v = vertices(self)
+
+  function self:new_vertex()
+    return self._v:new_vertex()
+  end
+
+  function self:set_vertex_property(id, k, v)
+    self._v:set_vertex_property(id, k, v)
+    return self
+  end
+
+  function self:get_vertex_property(id, k)
+    return self._v:get_vertex_property(id, k)
+  end
+
+  function self:each_vertex()
+    return self._v:each_vertex()
+  end
+
+  return self
+end
