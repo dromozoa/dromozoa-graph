@@ -15,30 +15,41 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local metatable = {}
+local edge = require "dromozoa.graph.edge"
+local properties = require "dromozoa.graph.properties"
+local vertex = require "dromozoa.graph.vertex"
 
-function metatable:__index(k)
-  return self:get_property(k)
+local function each_edge(ctx, e)
+  local id, u = next(ctx._u, e and e.id)
+  if id then
+    local g = ctx._g
+    local v = ctx._v[id]
+    return edge(g, id, vertex(g, u), vertex(g, v))
+  else
+    return nil
+  end
 end
 
-function metatable:__newindex(k, v)
-  return self:set_property(k, v)
-end
-
-return function (g, id)
+return function (g)
   local self = {
     _g = g;
-    id = id;
+    _id = 0;
+    _u = {};
+    _v = {};
+    _p = properties();
   }
 
-  function self:get_property(k)
-    return self._g._v._p:get_property(self.id, k)
+  function self:create_edge(u, v)
+    local id = self._id + 1
+    self._id = id
+    self._u[id] = u.id
+    self._v[id] = v.id
+    return edge(self._g, id, u, v)
   end
 
-  function self:set_property(k, v)
-    self._g._v._p:set_property(self.id, k, v)
-    return self
+  function self:each_edge()
+    return each_edge, self
   end
 
-  return setmetatable(self, metatable)
+  return self
 end

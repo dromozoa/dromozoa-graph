@@ -15,28 +15,29 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local edges = require "dromozoa.graph.edges"
 local vertices = require "dromozoa.graph.vertices"
 
 return function ()
   local self = {}
 
   self._v = vertices(self)
+  self._e = edges(self)
 
-  function self:new_vertex()
-    return self._v:new_vertex()
-  end
-
-  function self:set_vertex_property(id, k, v)
-    self._v:set_vertex_property(id, k, v)
-    return self
-  end
-
-  function self:get_vertex_property(id, k)
-    return self._v:get_vertex_property(id, k)
+  function self:create_vertex()
+    return self._v:create_vertex()
   end
 
   function self:each_vertex()
     return self._v:each_vertex()
+  end
+
+  function self:create_edge(u, v)
+    return self._e:create_edge(u, v)
+  end
+
+  function self:each_edge()
+    return self._e:each_edge()
   end
 
   return self

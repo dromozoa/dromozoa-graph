@@ -25,18 +25,20 @@ function metatable:__newindex(k, v)
   return self:set_property(k, v)
 end
 
-return function (g, id)
+return function (g, id, u, v)
   local self = {
     _g = g;
     id = id;
+    u = u;
+    v = v;
   }
 
   function self:get_property(k)
-    return self._g._v._p:get_property(self.id, k)
+    return self._g._e._p:get_property(self.id, k)
   end
 
   function self:set_property(k, v)
-    self._g._v._p:set_property(self.id, k, v)
+    self._g._e._p:set_property(self.id, k, v)
     return self
   end
 

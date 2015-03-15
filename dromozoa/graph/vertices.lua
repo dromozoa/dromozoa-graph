@@ -19,7 +19,7 @@ local properties = require "dromozoa.graph.properties"
 local vertex = require "dromozoa.graph.vertex"
 
 local function each_vertex(ctx, v)
-  local id = next(ctx._v, v:get_id())
+  local id = next(ctx._v, v and v.id)
   if id then
     return vertex(ctx._g, id)
   else
@@ -35,29 +35,15 @@ return function (g)
     _p = properties();
   }
 
-  function self:new_id()
+  function self:create_vertex()
     local id = self._id + 1
     self._id = id
-    return id
-  end
-
-  function self:new_vertex()
-    local id = self:new_id()
     self._v[id] = true
     return vertex(self._g, id)
   end
 
-  function self:set_vertex_property(id, k, v)
-    self._p:set_property(id, k, v)
-    return self
-  end
-
-  function self:get_vertex_property(id, k)
-    return self._p:get_property(id, k)
-  end
-
   function self:each_vertex()
-    return each_vertex, self, vertex()
+    return each_vertex, self
   end
 
   return self
