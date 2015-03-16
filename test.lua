@@ -81,6 +81,15 @@ assert(count == 1)
 
 local count = 0
 for k in g:each_edge_property_key() do
+  assert(k == "color")
   count = count + 1
 end
 assert(count == 1)
+
+g:clear_edge_properties("color")
+
+local count = 0
+for k in g:each_edge_property_key() do
+  count = count + 1
+end
+assert(count == 0)

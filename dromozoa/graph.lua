@@ -43,6 +43,10 @@ return function ()
     return self._v:create_vertex()
   end
 
+  function self:clear_vertex_properties(k)
+    self._vp:clear_properties(k)
+  end
+
   function self:each_vertex(k)
     return self._v:each_vertex(k)
   end
@@ -59,6 +63,10 @@ return function ()
     self._uv:append_edge(uid, eid)
     self._vu:append_edge(vid, eid)
     return e
+  end
+
+  function self:clear_edge_properties(k)
+    self._ep:clear_properties(k)
   end
 
   function self:each_edge(k)

@@ -31,6 +31,10 @@ return function ()
     _t = {};
   }
 
+  function self:clear_properties(k)
+    self._t[k] = nil
+  end
+
   function self:set_property(id, k, v)
     local t = self._t
     local c = t[k]
