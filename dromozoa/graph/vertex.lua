@@ -35,5 +35,17 @@ return function (g, id)
     self._g:remove_vertex(self)
   end
 
+  function self:each_neighbor(mode)
+    return self._g:each_neighbor(self, mode)
+  end
+
+  function self:empty_neighbor(mode)
+    return self._g:empty_neighbor(self, mode)
+  end
+
+  function self:count_neighbor(mode)
+    return self._g:count_neighbor(self, mode)
+  end
+
   return setmetatable(self, metatable)
 end

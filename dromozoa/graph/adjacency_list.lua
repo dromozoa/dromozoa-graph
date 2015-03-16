@@ -71,5 +71,14 @@ return function (g, a, b)
     end
   end
 
+  function self:empty_neighbor(uid)
+    return self:count_neighbor(uid) == 0
+  end
+
+  function self:count_neighbor(uid)
+    local r = self._t[uid]
+    return r and #r or 0
+  end
+
   return self
 end

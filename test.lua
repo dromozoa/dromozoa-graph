@@ -13,7 +13,7 @@ local e3 = g:create_edge(v2, v4)
 local e4 = g:create_edge(v3, v4)
 
 for v in g:each_vertex() do
-  print(v.id)
+  print(v.id, v:count_neighbor(), v:count_neighbor("v"))
 end
 
 print("--")

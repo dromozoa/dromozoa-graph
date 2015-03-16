@@ -70,13 +70,24 @@ return function ()
     return self._e:each_edge()
   end
 
-  function self:each_neighbor(u, mode)
-    local uid = type(u) == "table" and u.id or u
+  function self:neighbors(mode)
     if mode == "v" then
-      return self._vu:each_neighbor(uid)
+      return self._vu
     else
-      return self._uv:each_neighbor(uid)
+      return self._uv
     end
+  end
+
+  function self:each_neighbor(u, mode)
+    return self:neighbors(mode):each_neighbor(type(u) == "table" and u.id or u)
+  end
+
+  function self:empty_neighbor(u, mode)
+    return self:neighbors(mode):empty_neighbor(type(u) == "table" and u.id or u)
+  end
+
+  function self:count_neighbor(u, mode)
+    return self:neighbors(mode):count_neighbor(type(u) == "table" and u.id or u)
   end
 
   return self
