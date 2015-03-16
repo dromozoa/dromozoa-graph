@@ -72,14 +72,14 @@ assert(count == 2)
 v3.accept = true
 v1.start = nil
 local count = 0
-for k in g:each_vertex_property() do
+for k in g:each_vertex_property_key() do
   assert(k == "accept")
   count = count + 1
 end
 assert(count == 1)
 
 local count = 0
-for k in g:each_edge_property() do
+for k in g:each_edge_property_key() do
   count = count + 1
 end
 assert(count == 1)
