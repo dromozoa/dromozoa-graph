@@ -15,31 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local properties = require "dromozoa.graph.properties"
 local vertex = require "dromozoa.graph.vertex"
 
 local function each_vertex(ctx, v)
-  local id = next(ctx._v, v and v.id)
-  if id then
-    return vertex(ctx._g, id)
-  else
-    return nil
-  end
+  return ctx:get_vertex(next(ctx._v, v and v.id))
 end
 
 return function (g)
   local self = {
     _g = g;
-    _id = 0;
+    _n = 0;
     _v = {};
-    _p = properties();
   }
 
   function self:create_vertex()
-    local id = self._id + 1
-    self._id = id
+    local id = self._n + 1
+    self._n = id
     self._v[id] = true
     return vertex(self._g, id)
+  end
+
+  function self:get_vertex(id)
+    if id then
+      return vertex(ctx._g, id)
+    end
   end
 
   function self:each_vertex()

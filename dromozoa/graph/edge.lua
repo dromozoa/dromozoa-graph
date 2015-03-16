@@ -15,32 +15,35 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local vertex = require "dromozoa.graph.vertex"
+
 local metatable = {}
 
-function metatable:__index(k)
-  return self:get_property(k)
+function metatable:__index(k, v)
+  if k == "u" then
+    local u = vertex(self._g, self._u)
+    self.u = u
+    return u
+  elseif k == "v" then
+    local v = vertex(self._g, self._v)
+    self.v = v
+    return v
+  else
+    return self._g._ep:get_property(self.id, k)
+  end
 end
 
 function metatable:__newindex(k, v)
-  return self:set_property(k, v)
+  return self._g._ep:set_property(self.id, k, v)
 end
 
 return function (g, id, u, v)
   local self = {
     _g = g;
     id = id;
-    u = u;
-    v = v;
+    _u = u;
+    _v = v;
   }
-
-  function self:get_property(k)
-    return self._g._e._p:get_property(self.id, k)
-  end
-
-  function self:set_property(k, v)
-    self._g._e._p:set_property(self.id, k, v)
-    return self
-  end
 
   return setmetatable(self, metatable)
 end

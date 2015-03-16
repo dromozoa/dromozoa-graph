@@ -18,11 +18,11 @@
 local metatable = {}
 
 function metatable:__index(k)
-  return self:get_property(k)
+  return self._g._vp:get_property(self.id, k)
 end
 
 function metatable:__newindex(k, v)
-  return self:set_property(k, v)
+  self._g._vp:set_property(self.id, k, v)
 end
 
 return function (g, id)
@@ -30,15 +30,6 @@ return function (g, id)
     _g = g;
     id = id;
   }
-
-  function self:get_property(k)
-    return self._g._v._p:get_property(self.id, k)
-  end
-
-  function self:set_property(k, v)
-    self._g._v._p:set_property(self.id, k, v)
-    return self
-  end
 
   return setmetatable(self, metatable)
 end

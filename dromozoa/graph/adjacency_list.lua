@@ -15,36 +15,42 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
-local edges = require "dromozoa.graph.edges"
-local properties = require "dromozoa.graph.properties"
-local vertices = require "dromozoa.graph.vertices"
+local function each_neightbor(ctx)
+  local i = ctx._i + 1
+  ctx._i = 1
+  local e = ctx._g._e:get_edge(ctx._r[i])
+  if e then
+    if e._u == ctx._u then
+      return e.v, e
+    else
+      return e.u, e
+    end
+  end
+end
 
-return function ()
+return function (g)
   local self = {
-    _vp = properties();
-    _ep = properties();
+    _g = g;
+    _t = {};
   }
 
-  self._v = vertices(self)
-  self._e = edges(self)
-  self._a = adjacency_list(self)
-  self._b = adjacency_list(self)
-
-  function self:create_vertex()
-    return self._v:create_vertex()
+  function self:create_neighbor(u, v, e)
+    local t = self._t
+    local r = t[u]
+    if r then
+      r[#r + 1] = e
+    else
+      t[u] = { e }
+    end
   end
 
-  function self:each_vertex()
-    return self._v:each_vertex()
-  end
-
-  function self:create_edge(u, v)
-    return self._e:create_edge(u, v)
-  end
-
-  function self:each_edge()
-    return self._e:each_edge()
+  function self:each_neighbor(u)
+    return each_neighbor, {
+      _g = self._g;
+      _r = self._t[u];
+      _u = u;
+      _i = 0;
+    }
   end
 
   return self
