@@ -20,11 +20,11 @@ local metatable = {}
 function metatable:__index(k)
   if k == "u" then
     local u = self._g._v:get_vertex(self.uid)
-    self.u = u
+    rawset(self, "u", u)
     return u
   elseif k == "v" then
     local v = self._g._v:get_vertex(self.vid)
-    self.v = v
+    rawset(self, "v", v)
     return v
   else
     return self._g._ep:get_property(self.id, k)
@@ -46,6 +46,7 @@ return function (g, id, uid, vid)
   function self:remove()
     local g = self._g
     local id = self.id
+    g._ep:remove_item(id)
     g._uv:remove_edge(self.uid, id)
     g._vu:remove_edge(self.vid, id)
     g._e:remove_edge(id)

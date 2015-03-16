@@ -48,6 +48,48 @@ assert(result[3][1].id == 3)
 
 assert(v2:count_degree("u") == 0)
 assert(v2:count_degree("v") == 1)
+e2.removed = true
 e2:remove()
 assert(v2:count_degree("u") == 0)
 assert(v2:count_degree("v") == 0)
+
+v1.start = true
+local count = 0
+for v in g:each_vertex("start") do
+  assert(v.id == 1)
+  count = count + 1
+end
+assert(count == 1)
+
+e1.color = 1
+e3.color = 3
+local count = 0
+for e in g:each_edge("color") do
+  assert(e.id == e.color)
+  count = count + 1
+end
+assert(count == 2)
+
+v3.accept = true
+v1.start = nil
+local count = 0
+for k in g:each_vertex_property_key() do
+  assert(k == "accept")
+  count = count + 1
+end
+assert(count == 1)
+
+local count = 0
+for k in g:each_edge_property_key() do
+  assert(k == "color")
+  count = count + 1
+end
+assert(count == 1)
+
+g:clear_edge_properties("color")
+
+local count = 0
+for k in g:each_edge_property_key() do
+  count = count + 1
+end
+assert(count == 0)

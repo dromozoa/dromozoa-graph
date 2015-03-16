@@ -51,8 +51,12 @@ return function (g)
     end
   end
 
-  function self:each_edge()
-    return each_edge, self
+  function self:each_edge(k)
+    if k then
+      return self._g._ep:each_item(k, self, self.get_edge)
+    else
+      return each_edge, self
+    end
   end
 
   return self

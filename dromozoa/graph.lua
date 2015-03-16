@@ -43,8 +43,16 @@ return function ()
     return self._v:create_vertex()
   end
 
-  function self:each_vertex()
-    return self._v:each_vertex()
+  function self:clear_vertex_properties(k)
+    self._vp:clear_properties(k)
+  end
+
+  function self:each_vertex(k)
+    return self._v:each_vertex(k)
+  end
+
+  function self:each_vertex_property_key()
+    return self._vp:each_property_key()
   end
 
   function self:create_edge(u, v)
@@ -57,8 +65,16 @@ return function ()
     return e
   end
 
-  function self:each_edge()
-    return self._e:each_edge()
+  function self:clear_edge_properties(k)
+    self._ep:clear_properties(k)
+  end
+
+  function self:each_edge(k)
+    return self._e:each_edge(k)
+  end
+
+  function self:each_edge_property_key()
+    return self._ep:each_property_key()
   end
 
   return self
