@@ -71,10 +71,6 @@ return function (g, a, b)
     end
   end
 
-  function self:is_isolated(uid)
-    return not r or #r == 0
-  end
-
   function self:count_degree(uid)
     local r = self._t[uid]
     return r and #r or 0

@@ -39,10 +39,6 @@ return function (g, id)
     return self._g:adjacencies(mode):each_adjacent_vertex(self.id)
   end
 
-  function self:is_isolated(mode)
-    return self._g:adjacencies(mode):is_isolated(self.id)
-  end
-
   function self:count_degree(mode)
     return self._g:adjacencies(mode):count_degree(self.id)
   end
