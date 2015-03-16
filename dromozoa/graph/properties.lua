@@ -38,5 +38,12 @@ return function ()
     end
   end
 
+  function self:next_id(k, id)
+    local c = self._t[k]
+    if c then
+      return next(c, id)
+    end
+  end
+
   return self
 end

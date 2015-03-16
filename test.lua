@@ -51,3 +51,14 @@ assert(v2:count_degree("v") == 1)
 e2:remove()
 assert(v2:count_degree("u") == 0)
 assert(v2:count_degree("v") == 0)
+
+v1.start = true
+for v in g:each_vertex_with_property("start") do
+  assert(v.id == 1)
+end
+
+e1.color = 1
+e3.color = 3
+for e in g:each_edge_with_property("color") do
+  assert(e.id == e.color)
+end

@@ -47,6 +47,10 @@ return function ()
     return self._v:each_vertex()
   end
 
+  function self:each_vertex_with_property(k)
+    return self._v:each_vertex_with_property(k)
+  end
+
   function self:create_edge(u, v)
     local uid = type(u) == "table" and u.id or u
     local vid = type(v) == "table" and v.id or v
@@ -59,6 +63,10 @@ return function ()
 
   function self:each_edge()
     return self._e:each_edge()
+  end
+
+  function self:each_edge_with_property(k)
+    return self._e:each_edge_with_property(k)
   end
 
   return self
