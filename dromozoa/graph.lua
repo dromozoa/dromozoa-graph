@@ -35,6 +35,10 @@ return function ()
     return self._v:create_vertex()
   end
 
+  function self:remove_vertex(v)
+    self._v:remove_vertex(type(v) == "table" and v.id or v)
+  end
+
   function self:each_vertex()
     return self._v:each_vertex()
   end
@@ -47,6 +51,19 @@ return function ()
     self._uv:create_neighbor(uid, eid)
     self._vu:create_neighbor(vid, eid)
     return e
+  end
+
+  function self:remove_edge(e)
+    local eid
+    if type(e) == "table" then
+      eid = e.id
+    else
+      eid = e
+      e = self._e:get_edge(e)
+    end
+    self._uv:remove_neighbor(e.uid, eid)
+    self._vu:remove_neighbor(e.vid, eid)
+    self._e:remove_edge(eid)
   end
 
   function self:each_edge()

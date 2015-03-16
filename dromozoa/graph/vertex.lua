@@ -31,5 +31,9 @@ return function (g, id)
     id = id;
   }
 
+  function self:remove()
+    self._g:remove_vertex(self)
+  end
+
   return setmetatable(self, metatable)
 end

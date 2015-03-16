@@ -35,6 +35,10 @@ return function (g)
     return vertex(self._g, id)
   end
 
+  function self:remove_vertex(id)
+    self._v[id] = nil
+  end
+
   function self:get_vertex(id)
     if id then
       return vertex(self._g, id)

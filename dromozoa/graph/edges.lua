@@ -40,6 +40,11 @@ return function (g)
     return edge(self._g, id, uid, vid)
   end
 
+  function self:remove_edge(id)
+    self._u[id] = nil
+    self._v[id] = nil
+  end
+
   function self:get_edge(id)
     if id then
       return edge(self._g, id, self._u[id], self._v[id])

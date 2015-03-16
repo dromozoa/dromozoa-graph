@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local table_remove = table.remove
+
 local function each_neighbor_table(ctx)
   local i = ctx._i + 1
   ctx._i = i
@@ -43,6 +45,15 @@ return function (g, a, b)
       r[#r + 1] = eid
     else
       t[uid] = { eid }
+    end
+  end
+
+  function self:remove_neighbor(uid, eid)
+    local r = self._t[uid]
+    for i = #r, 1, -1 do
+      if r[i] == eid then
+        table_remove(r, i)
+      end
     end
   end
 

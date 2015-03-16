@@ -43,5 +43,9 @@ return function (g, id, uid, vid)
     vid = vid;
   }
 
+  function self:remove()
+    self._g:remove_edge(self)
+  end
+
   return setmetatable(self, metatable)
 end
