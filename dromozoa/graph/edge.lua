@@ -44,7 +44,11 @@ return function (g, id, uid, vid)
   }
 
   function self:remove()
-    self._g:remove_edge(self)
+    local g = self._g
+    local id = self.id
+    g._uv:remove_edge(self.uid, id)
+    g._vu:remove_edge(self.vid, id)
+    g._e:remove_edge(id)
   end
 
   return setmetatable(self, metatable)
