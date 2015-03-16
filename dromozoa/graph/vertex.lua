@@ -36,11 +36,11 @@ return function (g, id)
   end
 
   function self:each_adjacent_vertex(mode)
-    return self._g:adjacencies(mode):each_adjacent_vertex(self.id)
+    return self._g:_a(mode):each_adjacent_vertex(self.id)
   end
 
   function self:count_degree(mode)
-    return self._g:adjacencies(mode):count_degree(self.id)
+    return self._g:_a(mode):count_degree(self.id)
   end
 
   return setmetatable(self, metatable)

@@ -26,6 +26,13 @@ local function each_adjacent_vertex_table(ctx)
   end
 end
 
+local function each_adjacent_vertex_value(ctx, v)
+  if not v then
+    local e = ctx._r
+    return e[ctx._b], e
+  end
+end
+
 local function each_adjacent_vertex_empty()
   return nil
 end
@@ -42,30 +49,53 @@ return function (g, a, b)
     local t = self._t
     local r = t[uid]
     if r then
-      r[#r + 1] = eid
+      if type(r) == "table" then
+        r[#r + 1] = eid
+      else
+        t[uid] = { r, eid }
+      end
     else
-      t[uid] = { eid }
+      t[uid] = eid
     end
   end
 
   function self:remove_edge(uid, eid)
-    local r = self._t[uid]
-    for i = #r, 1, -1 do
-      if r[i] == eid then
-        table_remove(r, i)
+    local t = self._t
+    local r = t[uid]
+    if type(r) == "table" then
+      for i = #r, 1, -1 do
+        if r[i] == eid then
+          table_remove(r, i)
+        end
+      end
+      if #r == 1 then
+        t[uid] = r[1]
+      end
+    else
+      if r == eid then
+        t[uid] = nil
       end
     end
+
   end
 
   function self:each_adjacent_vertex(uid)
     local r = self._t[uid]
     if r then
-      return each_adjacent_vertex_table, {
-        _g = self._g;
-        _b = self._b;
-        _r = r;
-        _i = 0;
-      }
+      if type(r) == "table" then
+        return each_adjacent_vertex_table, {
+          _g = self._g;
+          _b = self._b;
+          _r = r;
+          _i = 0;
+        }
+      else
+        return each_adjacent_vertex_value, {
+          _g = self._g;
+          _b = self._b;
+          _r = r;
+        }
+      end
     else
       return each_adjacent_vertex_empty
     end
@@ -73,7 +103,15 @@ return function (g, a, b)
 
   function self:count_degree(uid)
     local r = self._t[uid]
-    return r and #r or 0
+    if r then
+      if type(r) == "table" then
+        return #r
+      else
+        return 1
+      end
+    else
+      return 0
+    end
   end
 
   return self

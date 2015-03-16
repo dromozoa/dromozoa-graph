@@ -31,6 +31,14 @@ return function ()
   self._uv = adjacency_list(self, "u", "v")
   self._vu = adjacency_list(self, "v", "u")
 
+  function self:_a(mode)
+    if mode == "v" then
+      return self._vu
+    else
+      return self._uv
+    end
+  end
+
   function self:create_vertex()
     return self._v:create_vertex()
   end
@@ -51,14 +59,6 @@ return function ()
 
   function self:each_edge()
     return self._e:each_edge()
-  end
-
-  function self:adjacencies(mode)
-    if mode == "v" then
-      return self._vu
-    else
-      return self._uv
-    end
   end
 
   return self
