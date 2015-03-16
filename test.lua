@@ -13,11 +13,11 @@ local e3 = g:create_edge(v2, v4)
 local e4 = g:create_edge(v3, v4)
 
 for v in g:each_vertex() do
-  print(v.id, v:count_neighbor(), v:count_neighbor("v"))
+  print(v.id, v:count_degree(), v:count_degree("v"))
 end
 
 print("--")
 
-for v, e in g:each_neighbor(v1) do
+for v, e in v1:each_adjacent_vertex() do
   print(v.id, e.uid, e.vid)
 end

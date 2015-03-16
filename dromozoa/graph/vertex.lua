@@ -35,21 +35,17 @@ return function (g, id)
     self._g:remove_vertex(self)
   end
 
-  function self:each_neighbor(mode)
-    return self._g:each_neighbor(self, mode)
+  function self:each_adjacent_vertex(mode)
+    return self._g:adjacencies(mode):each_adjacent_vertex(self.id)
   end
 
-  function self:empty_neighbor(mode)
-    return self._g:empty_neighbor(self, mode)
+  function self:is_isolated(mode)
+    return self._g:adjacencies(mode):is_isolated(self.id)
   end
 
-  function self:count_neighbor(mode)
-    return self._g:count_neighbor(self, mode)
+  function self:count_degree(mode)
+    return self._g:adjacencies(mode):count_degree(self.id)
   end
-
-  -- adjacencies(mode):each_adjacent_vertex(self)
-  -- adjacencies(mode):is_isolated(self)
-  -- adjacencies(mode):count_degree(self)
 
   return setmetatable(self, metatable)
 end

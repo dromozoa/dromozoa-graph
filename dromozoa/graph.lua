@@ -48,8 +48,8 @@ return function ()
     local vid = type(v) == "table" and v.id or v
     local e = self._e:create_edge(uid, vid)
     local eid = e.id
-    self._uv:create_neighbor(uid, eid)
-    self._vu:create_neighbor(vid, eid)
+    self._uv:append_edge(uid, eid)
+    self._vu:append_edge(vid, eid)
     return e
   end
 
@@ -61,8 +61,8 @@ return function ()
       eid = e
       e = self._e:get_edge(e)
     end
-    self._uv:remove_neighbor(e.uid, eid)
-    self._vu:remove_neighbor(e.vid, eid)
+    self._uv:remove_edge(e.uid, eid)
+    self._vu:remove_edge(e.vid, eid)
     self._e:remove_edge(eid)
   end
 
@@ -70,24 +70,12 @@ return function ()
     return self._e:each_edge()
   end
 
-  function self:neighbors(mode)
+  function self:adjacencies(mode)
     if mode == "v" then
       return self._vu
     else
       return self._uv
     end
-  end
-
-  function self:each_neighbor(u, mode)
-    return self:neighbors(mode):each_neighbor(type(u) == "table" and u.id or u)
-  end
-
-  function self:empty_neighbor(u, mode)
-    return self:neighbors(mode):empty_neighbor(type(u) == "table" and u.id or u)
-  end
-
-  function self:count_neighbor(u, mode)
-    return self:neighbors(mode):count_neighbor(type(u) == "table" and u.id or u)
   end
 
   return self

@@ -17,7 +17,7 @@
 
 local table_remove = table.remove
 
-local function each_neighbor_table(ctx)
+local function each_adjacent_vertex_table(ctx)
   local i = ctx._i + 1
   ctx._i = i
   local e = ctx._g._e:get_edge(ctx._r[i])
@@ -26,7 +26,7 @@ local function each_neighbor_table(ctx)
   end
 end
 
-local function each_neighbor_empty()
+local function each_adjacent_vertex_empty()
   return nil
 end
 
@@ -38,7 +38,7 @@ return function (g, a, b)
     _t = {};
   }
 
-  function self:create_neighbor(uid, eid)
+  function self:append_edge(uid, eid)
     local t = self._t
     local r = t[uid]
     if r then
@@ -48,7 +48,7 @@ return function (g, a, b)
     end
   end
 
-  function self:remove_neighbor(uid, eid)
+  function self:remove_edge(uid, eid)
     local r = self._t[uid]
     for i = #r, 1, -1 do
       if r[i] == eid then
@@ -57,25 +57,25 @@ return function (g, a, b)
     end
   end
 
-  function self:each_neighbor(uid)
+  function self:each_adjacent_vertex(uid)
     local r = self._t[uid]
     if r then
-      return each_neighbor_table, {
+      return each_adjacent_vertex_table, {
         _g = self._g;
         _b = self._b;
         _r = r;
         _i = 0;
       }
     else
-      return each_neighbor_empty
+      return each_adjacent_vertex_empty
     end
   end
 
-  function self:empty_neighbor(uid)
-    return self:count_neighbor(uid) == 0
+  function self:is_isolated(uid)
+    return not r or #r == 0
   end
 
-  function self:count_neighbor(uid)
+  function self:count_degree(uid)
     local r = self._t[uid]
     return r and #r or 0
   end
