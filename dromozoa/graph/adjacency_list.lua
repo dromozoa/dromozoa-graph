@@ -15,8 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local table_remove = table.remove
-
 local function each_adjacent_vertex_table(ctx)
   local i = ctx.i + 1
   ctx.i = i
@@ -64,7 +62,7 @@ return function (g, a, b)
       local n = #r
       for i = 1, n do
         if r[i] == eid then
-          table_remove(r, i)
+          table.remove(r, i)
           if n == 2 then
             t[uid] = r[1]
           end

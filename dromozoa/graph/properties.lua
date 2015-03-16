@@ -15,6 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local function each_property(ctx, k)
+  return next(ctx._t, k)
+end
+
 local function each_item_table(ctx, i)
   return ctx.f(ctx.o, next(ctx.c, i and i.id))
 end
@@ -28,6 +32,7 @@ return function ()
   }
 
   function self:set_property(id, k, v)
+    print(id, k, v)
     local t = self._t
     local c = t[k]
     if not c then
@@ -35,6 +40,9 @@ return function ()
       t[k] = c
     end
     c[id] = v
+    if next(c) == nil then
+      t[k] = nil
+    end
   end
 
   function self:get_property(id, k)
@@ -45,11 +53,8 @@ return function ()
     end
   end
 
-  function self:next_id(k, id)
-    local c = self._t[k]
-    if c then
-      return next(c, id)
-    end
+  function self:each_property()
+    return each_property, self
   end
 
   function self:each_item(k, o, f)

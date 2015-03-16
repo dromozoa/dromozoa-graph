@@ -68,3 +68,18 @@ for e in g:each_edge("color") do
   count = count + 1
 end
 assert(count == 2)
+
+v3.accept = true
+v1.start = nil
+local count = 0
+for k in g:each_vertex_property() do
+  assert(k == "accept")
+  count = count + 1
+end
+assert(count == 1)
+
+local count = 0
+for k in g:each_edge_property() do
+  count = count + 1
+end
+assert(count == 1)
