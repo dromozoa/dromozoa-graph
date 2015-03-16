@@ -28,8 +28,8 @@ return function ()
 
   self._v = vertices(self)
   self._e = edges(self)
-  self._a = adjacency_list(self)
-  self._b = adjacency_list(self)
+  self._uv = adjacency_list(self, "u", "v")
+  self._vu = adjacency_list(self, "v", "u")
 
   function self:create_vertex()
     return self._v:create_vertex()
@@ -40,11 +40,26 @@ return function ()
   end
 
   function self:create_edge(u, v)
-    return self._e:create_edge(u, v)
+    local uid = type(u) == "table" and u.id or u
+    local vid = type(v) == "table" and v.id or v
+    local e = self._e:create_edge(uid, vid)
+    local eid = e.id
+    self._uv:create_neighbor(uid, eid)
+    self._vu:create_neighbor(vid, eid)
+    return e
   end
 
   function self:each_edge()
     return self._e:each_edge()
+  end
+
+  function self:each_neighbor(u, mode)
+    local uid = type(u) == "table" and u.id or u
+    if mode == "v" then
+      return self._vu:each_neighbor(uid)
+    else
+      return self._uv:each_neighbor(uid)
+    end
   end
 
   return self

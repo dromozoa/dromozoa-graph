@@ -35,8 +35,6 @@ return function ()
     local c = t[k]
     if c then
       return c[id]
-    else
-      return nil
     end
   end
 

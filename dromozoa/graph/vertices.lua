@@ -37,7 +37,7 @@ return function (g)
 
   function self:get_vertex(id)
     if id then
-      return vertex(ctx._g, id)
+      return vertex(self._g, id)
     end
   end
 

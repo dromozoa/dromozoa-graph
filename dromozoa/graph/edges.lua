@@ -18,9 +18,9 @@
 local edge = require "dromozoa.graph.edge"
 
 local function each_edge(ctx, e)
-  local id, u = next(ctx._u, e and e.id)
+  local id, uid = next(ctx._u, e and e.id)
   if id then
-    return edge(ctx._g, id, u, ctx._v[id])
+    return edge(ctx._g, id, uid, ctx._v[id])
   end
 end
 
@@ -32,15 +32,12 @@ return function (g)
     _v = {};
   }
 
-  function self:create_edge(u, v)
+  function self:create_edge(uid, vid)
     local id = self._n + 1
     self._n = id
-    self._u[id] = u
-    self._v[id] = v
-    local g = self._g
-    g._a:create_neighbor(u, v, id)
-    g._b:create_neighbor(v, u, id)
-    return edge(g, id, u, v)
+    self._u[id] = uid
+    self._v[id] = vid
+    return edge(self._g, id, uid, vid)
   end
 
   function self:get_edge(id)

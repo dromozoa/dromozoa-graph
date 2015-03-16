@@ -15,42 +15,49 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function each_neightbor(ctx)
+local function each_neighbor_table(ctx)
   local i = ctx._i + 1
-  ctx._i = 1
+  ctx._i = i
   local e = ctx._g._e:get_edge(ctx._r[i])
   if e then
-    if e._u == ctx._u then
-      return e.v, e
-    else
-      return e.u, e
-    end
+    return e[ctx._b], e
   end
 end
 
-return function (g)
+local function each_neighbor_empty()
+  return nil
+end
+
+return function (g, a, b)
   local self = {
     _g = g;
+    _a = a;
+    _b = b;
     _t = {};
   }
 
-  function self:create_neighbor(u, v, e)
+  function self:create_neighbor(uid, eid)
     local t = self._t
-    local r = t[u]
+    local r = t[uid]
     if r then
-      r[#r + 1] = e
+      r[#r + 1] = eid
     else
-      t[u] = { e }
+      t[uid] = { eid }
     end
   end
 
-  function self:each_neighbor(u)
-    return each_neighbor, {
-      _g = self._g;
-      _r = self._t[u];
-      _u = u;
-      _i = 0;
-    }
+  function self:each_neighbor(uid)
+    local r = self._t[uid]
+    if r then
+      return each_neighbor_table, {
+        _g = self._g;
+        _b = self._b;
+        _r = r;
+        _i = 0;
+      }
+    else
+      return each_neighbor_empty
+    end
   end
 
   return self
