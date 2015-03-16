@@ -32,7 +32,10 @@ return function (g, id)
   }
 
   function self:remove()
-    self._g._v:remove_vertex(self.id)
+    local g = self._g
+    local id = self.id
+    g._ep:remove_item(id)
+    g._v:remove_vertex(id)
   end
 
   function self:each_adjacent_vertex(mode)

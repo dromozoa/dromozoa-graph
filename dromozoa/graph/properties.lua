@@ -58,6 +58,16 @@ return function ()
     end
   end
 
+  function self:remove_item(id)
+    local t = self._t
+    for k, c in pairs(t) do
+      c[id] = nil
+      if next(c) == nil then
+        t[k] = nil
+      end
+    end
+  end
+
   function self:each_property_key()
     return each_property_key, self
   end

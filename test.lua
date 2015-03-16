@@ -48,6 +48,7 @@ assert(result[3][1].id == 3)
 
 assert(v2:count_degree("u") == 0)
 assert(v2:count_degree("v") == 1)
+e2.removed = true
 e2:remove()
 assert(v2:count_degree("u") == 0)
 assert(v2:count_degree("v") == 0)
