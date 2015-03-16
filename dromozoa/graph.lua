@@ -43,12 +43,8 @@ return function ()
     return self._v:create_vertex()
   end
 
-  function self:each_vertex()
-    return self._v:each_vertex()
-  end
-
-  function self:each_vertex_with_property(k)
-    return self._v:each_vertex_with_property(k)
+  function self:each_vertex(k)
+    return self._v:each_vertex(k)
   end
 
   function self:create_edge(u, v)
@@ -61,12 +57,8 @@ return function ()
     return e
   end
 
-  function self:each_edge()
-    return self._e:each_edge()
-  end
-
-  function self:each_edge_with_property(k)
-    return self._e:each_edge_with_property(k)
+  function self:each_edge(k)
+    return self._e:each_edge(k)
   end
 
   return self

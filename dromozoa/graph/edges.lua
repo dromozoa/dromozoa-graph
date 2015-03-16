@@ -24,10 +24,6 @@ local function each_edge(ctx, e)
   end
 end
 
-local function each_edge_with_property(ctx, e)
-  return ctx.e:get_edge(ctx.p:next_id(ctx.k, e and e.id))
-end
-
 return function (g)
   local self = {
     _g = g;
@@ -55,16 +51,12 @@ return function (g)
     end
   end
 
-  function self:each_edge()
-    return each_edge, self
-  end
-
-  function self:each_edge_with_property(k)
-    return each_edge_with_property, {
-      e = self,
-      p = self._g._ep;
-      k = k;
-    }
+  function self:each_edge(k)
+    if k then
+      return self._g._ep:each_item(k, self, self.get_edge)
+    else
+      return each_edge, self
+    end
   end
 
   return self

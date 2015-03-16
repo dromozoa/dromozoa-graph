@@ -21,10 +21,6 @@ local function each_vertex(ctx, v)
   return ctx:get_vertex(next(ctx._v, v and v.id))
 end
 
-local function each_vertex_with_property(ctx, v)
-  return ctx.v:get_vertex(ctx.p:next_id(ctx.k, v and v.id))
-end
-
 return function (g)
   local self = {
     _g = g;
@@ -49,16 +45,12 @@ return function (g)
     end
   end
 
-  function self:each_vertex()
-    return each_vertex, self
-  end
-
-  function self:each_vertex_with_property(k)
-    return each_vertex_with_property, {
-      v = self;
-      p = self._g._vp;
-      k = k;
-    }
+  function self:each_vertex(k)
+    if k then
+      return self._g._vp:each_item(k, self, self.get_vertex)
+    else
+      return each_vertex, self
+    end
   end
 
   return self

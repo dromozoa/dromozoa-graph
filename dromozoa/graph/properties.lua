@@ -15,6 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local function each_item_table(ctx, i)
+  return ctx.f(ctx.o, next(ctx.c, i and i.id))
+end
+
+local function each_item_empty()
+end
+
 return function ()
   local self = {
     _t = {};
@@ -42,6 +49,19 @@ return function ()
     local c = self._t[k]
     if c then
       return next(c, id)
+    end
+  end
+
+  function self:each_item(k, o, f)
+    local c = self._t[k]
+    if c then
+      return each_item_table, {
+        c = c;
+        o = o;
+        f = f;
+      }
+    else
+      return each_item_empty
     end
   end
 
