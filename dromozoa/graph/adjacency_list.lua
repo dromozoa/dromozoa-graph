@@ -18,23 +18,21 @@
 local table_remove = table.remove
 
 local function each_adjacent_vertex_table(ctx)
-  local i = ctx._i + 1
-  ctx._i = i
-  local e = ctx._g._e:get_edge(ctx._r[i])
+  local i = ctx.i + 1
+  ctx.i = i
+  local e = ctx.e:get_edge(ctx.r[i])
   if e then
-    return e[ctx._b], e
+    return e[ctx.b], e
   end
 end
 
 local function each_adjacent_vertex_value(ctx, v)
   if not v then
-    local e = ctx._r
-    return e[ctx._b], e
+    return ctx.v, ctx.e
   end
 end
 
 local function each_adjacent_vertex_empty()
-  return nil
 end
 
 return function (g, a, b)
@@ -63,20 +61,23 @@ return function (g, a, b)
     local t = self._t
     local r = t[uid]
     if type(r) == "table" then
-      for i = #r, 1, -1 do
+      local n = #r
+      for i = 1, n do
         if r[i] == eid then
           table_remove(r, i)
+          if n == 2 then
+            t[uid] = r[1]
+          end
+          return
         end
-      end
-      if #r == 1 then
-        t[uid] = r[1]
       end
     else
       if r == eid then
         t[uid] = nil
+        return
       end
     end
-
+    error "could not remove_edge"
   end
 
   function self:each_adjacent_vertex(uid)
@@ -84,16 +85,16 @@ return function (g, a, b)
     if r then
       if type(r) == "table" then
         return each_adjacent_vertex_table, {
-          _g = self._g;
-          _b = self._b;
-          _r = r;
-          _i = 0;
+          e = self._g._e;
+          b = self._b;
+          r = r;
+          i = 0;
         }
       else
+        local e = self._g._e:get_edge(r)
         return each_adjacent_vertex_value, {
-          _g = self._g;
-          _b = self._b;
-          _r = r;
+          e = e;
+          v = e[self._b];
         }
       end
     else

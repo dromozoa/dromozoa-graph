@@ -5,35 +5,49 @@ local g = graph()
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
-local v4 = g:create_vertex()
-local v5 = g:create_vertex()
 
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v1, v3)
-local e3 = g:create_edge(v2, v4)
-local e4 = g:create_edge(v3, v4)
-local e5 = g:create_edge(v4, v5)
+assert(v1:count_degree("u") == 0)
+assert(v1:count_degree("v") == 0)
 
-print("--")
+local result = {}
+for v, e in v1:each_adjacent_vertex() do result[#result + 1] = { v, e } end
+assert(#result == 0)
 
-for v in g:each_vertex() do
-  print(v.id, v:count_degree("u"), v:count_degree("v"))
-end
+local e1 = g:create_edge(v1, v1)
 
-print("--")
+assert(v1:count_degree("u") == 1)
+assert(v1:count_degree("v") == 1)
 
-for v, e in v1:each_adjacent_vertex() do
-  print(v.id, e.uid, e.vid)
-end
+local result = {}
+for v, e in v1:each_adjacent_vertex() do result[#result + 1] = { v, e } end
+assert(#result == 1)
+assert(result[1][1].id == 1)
 
+local e2 = g:create_edge(v1, v2)
+
+assert(v1:count_degree("u") == 2)
+assert(v1:count_degree("v") == 1)
+
+local result = {}
+for v, e in v1:each_adjacent_vertex() do result[#result + 1] = { v, e } end
+assert(#result == 2)
+assert(result[1][1].id == 1)
+assert(result[2][1].id == 2)
+
+local e3 = g:create_edge(v1, v3)
+
+assert(v1:count_degree("u") == 3)
+assert(v1:count_degree("v") == 1)
+
+local result = {}
+for v, e in v1:each_adjacent_vertex() do result[#result + 1] = { v, e } end
+assert(#result == 3)
+assert(result[1][1].id == 1)
+assert(result[2][1].id == 2)
+assert(result[3][1].id == 3)
+
+assert(v2:count_degree("u") == 0)
+assert(v2:count_degree("v") == 1)
 e2:remove()
-e4:remove()
-v3:remove()
-
-print("--")
-
-for v in g:each_vertex() do
-  print(v.id, v:count_degree("u"), v:count_degree("v"))
-end
-
-
+assert(v2:count_degree("u") == 0)
+assert(v2:count_degree("v") == 0)
