@@ -47,5 +47,9 @@ return function (g, id)
     return self._g:count_neighbor(self, mode)
   end
 
+  -- adjacencies(mode):each_adjacent_vertex(self)
+  -- adjacencies(mode):is_isolated(self)
+  -- adjacencies(mode):count_degree(self)
+
   return setmetatable(self, metatable)
 end
