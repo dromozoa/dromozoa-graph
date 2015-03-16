@@ -48,8 +48,8 @@ return function ()
     local vid = type(v) == "table" and v.id or v
     local e = self._e:create_edge(uid, vid)
     local eid = e.id
-    self._uv:append_edge(uid, eid)
-    self._vu:append_edge(vid, eid)
+    self._uv:append_edge(eid, uid)
+    self._vu:append_edge(eid, vid)
     return e
   end
 
@@ -61,8 +61,8 @@ return function ()
       eid = e
       e = self._e:get_edge(e)
     end
-    self._uv:remove_edge(e.uid, eid)
-    self._vu:remove_edge(e.vid, eid)
+    self._uv:remove_edge(eid, e.uid)
+    self._vu:remove_edge(eid, e.vid)
     self._e:remove_edge(eid)
   end
 

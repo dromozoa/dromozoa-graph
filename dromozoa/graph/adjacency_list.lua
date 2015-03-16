@@ -38,7 +38,7 @@ return function (g, a, b)
     _t = {};
   }
 
-  function self:append_edge(uid, eid)
+  function self:append_edge(eid, uid)
     local t = self._t
     local r = t[uid]
     if r then
@@ -48,7 +48,7 @@ return function (g, a, b)
     end
   end
 
-  function self:remove_edge(uid, eid)
+  function self:remove_edge(eid, uid)
     local r = self._t[uid]
     for i = #r, 1, -1 do
       if r[i] == eid then
