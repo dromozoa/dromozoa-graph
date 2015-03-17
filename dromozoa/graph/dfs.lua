@@ -20,8 +20,8 @@ local function dfs(g, visitor, u, mode, color)
   visitor:discover_vertex(g, u)
   color[uid] = 2
   for v, e in u:each_adjacent_vertex(mode) do
-    local c = color[v.id]
     visitor:examine_edge(g, e, u, v)
+    local c = color[v.id]
     if c == 1 then
       visitor:tree_edge(g, e, u, v)
       dfs(g, visitor, v, mode, color)

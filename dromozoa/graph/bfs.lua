@@ -28,9 +28,9 @@ return function (g, visitor, s, mode)
     q[#q] = nil
     visitor:examine_vertex(g, u)
     for v, e in u:each_adjacent_vertex(mode) do
+      visitor:examine_edge(g, e, u, v)
       local vid = v.id
       local c = color[vid]
-      visitor:examine_edge(g, e, u, v)
       if c == 1 then
         visitor:tree_edge(g, e, u, v)
         color[vid] = 2
