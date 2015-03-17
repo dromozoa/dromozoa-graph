@@ -15,42 +15,27 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs = require "dromozoa.graph.dfs"
+local event = {
+  "initialize_vertex",
+  "start_vertex",
+  "discover_vertex",
+  "examine_edge",
+  "tree_edge",
+  "back_edge",
+  "forward_or_cross_edge",
+  "finish_edge",
+  "finish_vertex",
+}
 
-local metatable = {}
-
-function metatable:__index(k)
-  return self._g._vp:get_property(self.id, k)
+local function empty()
 end
 
-function metatable:__newindex(k, v)
-  self._g._vp:set_property(self.id, k, v)
-end
-
-return function (g, id)
-  local self = {
-    _g = g;
-    id = id;
-  }
-
-  function self:remove()
-    local g = self._g
-    local id = self.id
-    g._ep:remove_item(id)
-    g._v:remove_vertex(id)
+return function (visitor)
+  for i = 1, #event do
+    local v = event[i]
+    if not visitor[v] then
+      visitor[v] = empty
+    end
   end
-
-  function self:each_adjacent_vertex(mode)
-    return self._g:_a(mode):each_adjacent_vertex(self.id)
-  end
-
-  function self:count_degree(mode)
-    return self._g:_a(mode):count_degree(self.id)
-  end
-
-  function self:dfs(visitor, mode)
-    dfs(self._g, visitor, self, mode)
-  end
-
-  return setmetatable(self, metatable)
+  return visitor
 end

@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
+local dfs = require "dromozoa.graph.dfs"
 local edges = require "dromozoa.graph.edges"
 local properties = require "dromozoa.graph.properties"
 local vertices = require "dromozoa.graph.vertices"
@@ -75,6 +76,10 @@ return function ()
 
   function self:each_edge_property_key()
     return self._ep:each_property_key()
+  end
+
+  function self:dfs(visitor, mode)
+    dfs(self, visitor, nil, mode)
   end
 
   return self
