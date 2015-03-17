@@ -32,22 +32,23 @@ return function (g, visitor, s, mode)
     i = i + 1
     visitor:examine_vertex(g, u)
     for v, e in u:each_adjacent_vertex(mode) do
-      visitor:examine_edge(g, e, u, v)
-      local vid = v.id
-      local c = color[vid]
-      if c == 1 then
-        visitor:tree_edge(g, e, u, v)
-        color[vid] = 2
-        -- push queue
-        q[j] = v
-        j = j + 1
-        visitor:discover_vertex(g, v)
-      else
-        visitor:non_tree_edge(g, e, u, v)
-        if c == 2 then
-          visitor:gray_target(g, e, u, v)
+      if visitor:examine_edge(g, e, u, v) ~= false then
+        local vid = v.id
+        local c = color[vid]
+        if c == 1 then
+          visitor:tree_edge(g, e, u, v)
+          color[vid] = 2
+          -- push queue
+          q[j] = v
+          j = j + 1
+          visitor:discover_vertex(g, v)
         else
-          visitor:black_target(g, e, u, v)
+          visitor:non_tree_edge(g, e, u, v)
+          if c == 2 then
+            visitor:gray_target(g, e, u, v)
+          else
+            visitor:black_target(g, e, u, v)
+          end
         end
       end
     end

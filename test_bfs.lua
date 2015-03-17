@@ -53,3 +53,15 @@ assert(result[3] == 3)
 assert(result[4] == 4)
 assert(result[5] == 5)
 
+local result = {}
+v1:bfs(bfs_visitor {
+  examine_edge = function (ctx, g, e, u, v)
+    return e.id ~= 1
+  end;
+  examine_vertex = function (ctx, g, u)
+    result[#result + 1] = u.id
+  end;
+})
+assert(result[1] == 1)
+assert(result[2] == 3)
+assert(result[3] == 5)
