@@ -43,7 +43,7 @@ g:create_edge(v3, v5)
 
 local result = {}
 v1:bfs(bfs_visitor {
-  examine_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, g, u)
     result[#result + 1] = u.id
   end;
 })
@@ -58,7 +58,7 @@ v1:bfs(bfs_visitor {
   examine_edge = function (ctx, g, e, u, v)
     return e.id ~= 1
   end;
-  examine_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, g, u)
     result[#result + 1] = u.id
   end;
 })
