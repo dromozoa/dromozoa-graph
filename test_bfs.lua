@@ -44,10 +44,12 @@ g:create_edge(v3, v5)
 local result = {}
 v1:bfs(bfs_visitor {
   examine_vertex = function (ctx, g, u)
-    print(u.id)
     result[#result + 1] = u.id
   end;
 })
 assert(result[1] == 1)
 assert(result[2] == 2)
 assert(result[3] == 3)
+assert(result[4] == 4)
+assert(result[5] == 5)
+
