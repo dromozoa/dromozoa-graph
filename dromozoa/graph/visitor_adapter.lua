@@ -15,20 +15,15 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visitor_adapter = require "dromozoa.graph.visitor_adapter"
+local function empty()
+end
 
-local event = {
-  "initialize_vertex",
-  "start_vertex",
-  "discover_vertex",
-  "examine_edge",
-  "tree_edge",
-  "back_edge",
-  "forward_or_cross_edge",
-  "finish_edge",
-  "finish_vertex",
-}
-
-return function (visitor)
-  return visitor_adapter(visitor, event)
+return function (visitor, event)
+  for i = 1, #event do
+    local v = event[i]
+    if not visitor[v] then
+      visitor[v] = empty
+    end
+  end
+  return visitor
 end
