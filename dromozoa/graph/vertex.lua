@@ -15,6 +15,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local bfs = require "dromozoa.graph.bfs"
+local dfs = require "dromozoa.graph.dfs"
+
 local metatable = {}
 
 function metatable:__index(k)
@@ -44,6 +47,14 @@ return function (g, id)
 
   function self:count_degree(mode)
     return self._g:_a(mode):count_degree(self.id)
+  end
+
+  function self:bfs(visitor, mode)
+    bfs(self._g, visitor, self, mode)
+  end
+
+  function self:dfs(visitor, mode)
+    dfs(self._g, visitor, self, mode)
   end
 
   return setmetatable(self, metatable)
