@@ -22,10 +22,14 @@ return function (g, visitor, s, mode)
     color[u.id] = 1
   end
   local q = { s }
+  local i = 1
+  local j = 2
   visitor:discover_vertex(g, s)
-  while #q > 0 do
-    local u = q[#q]
-    q[#q] = nil
+  while i < j do
+    -- pop queue
+    local u = q[i]
+    q[i] = nil
+    i = i + 1
     visitor:examine_vertex(g, u)
     for v, e in u:each_adjacent_vertex(mode) do
       visitor:examine_edge(g, e, u, v)
@@ -34,7 +38,9 @@ return function (g, visitor, s, mode)
       if c == 1 then
         visitor:tree_edge(g, e, u, v)
         color[vid] = 2
-        q[#q + 1] = v
+        -- push queue
+        q[j] = v
+        j = j + 1
         visitor:discover_vertex(g, v)
       else
         visitor:non_tree_edge(g, e, u, v)
