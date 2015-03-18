@@ -44,12 +44,16 @@ return function ()
     return self._v:create_vertex()
   end
 
-  function self:clear_vertex_properties(k)
-    self._vp:clear_properties(k)
+  function self:get_vertex(id)
+    return self._v:get_vertex(id)
   end
 
   function self:each_vertex(k)
     return self._v:each_vertex(k)
+  end
+
+  function self:clear_vertex_properties(k)
+    self._vp:clear_properties(k)
   end
 
   function self:each_vertex_property_key()
@@ -66,12 +70,16 @@ return function ()
     return e
   end
 
-  function self:clear_edge_properties(k)
-    self._ep:clear_properties(k)
+  function self:get_edge(id)
+    return self:_e:get_edge(id)
   end
 
   function self:each_edge(k)
     return self._e:each_edge(k)
+  end
+
+  function self:clear_edge_properties(k)
+    self._ep:clear_properties(k)
   end
 
   function self:each_edge_property_key()
