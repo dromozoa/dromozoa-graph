@@ -110,3 +110,13 @@ for k in g:each_edge_property_key() do
   count = count + 1
 end
 assert(count == 0)
+
+local g = graph()
+
+local u = g:create_vertex()
+local v = g:create_vertex()
+local e = g:create_edge(u, v)
+
+assert(g:get_vertex(u.id).id == u.id)
+assert(g:get_vertex(v.id).id == v.id)
+assert(g:get_edge(e.id).id == e.id)
