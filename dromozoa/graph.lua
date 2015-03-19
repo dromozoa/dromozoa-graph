@@ -71,7 +71,7 @@ return function ()
   end
 
   function self:get_edge(id)
-    return self:_e:get_edge(id)
+    return self._e:get_edge(id)
   end
 
   function self:each_edge(k)
