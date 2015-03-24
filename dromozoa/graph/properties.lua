@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local copy = require "dromozoa.graph.copy"
+local clone = require "dromozoa.graph.clone"
 
 local function each_property_key(ctx, k)
   return next(ctx._t, k)
@@ -31,7 +31,7 @@ end
 local function construct(self)
   function self:clone()
     return construct {
-      _t = copy(self._t);
+      _t = clone(self._t);
     }
   end
 

@@ -15,19 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function copy(this)
+local function clone(this)
   -- not check recursion
   if type(this) == "table" then
     local that = {}
     for k, v in pairs(this) do
-      -- not copy k
-      that[k] = copy(v)
+      -- not clone k
+      that[k] = clone(v)
     end
-    -- not copy metatable
+    -- not clone metatable
     return that
   else
     return this
   end
 end
 
-return copy
+return clone

@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local copy = require "dromozoa.graph.copy"
+local clone = require "dromozoa.graph.clone"
 
 local function each_adjacent_vertex_table(ctx)
   local i = ctx.i + 1
@@ -39,9 +39,9 @@ local function construct(self)
   function self:clone(g)
     return construct {
       _g = g;
-      _a = copy(self._a);
-      _b = copy(self._b);
-      _t = copy(self._t);
+      _a = clone(self._a);
+      _b = clone(self._b);
+      _t = clone(self._t);
     }
   end
 
