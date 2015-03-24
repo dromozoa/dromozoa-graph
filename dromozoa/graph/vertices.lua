@@ -15,18 +15,21 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local copy = require "dromozoa.graph.copy"
 local vertex = require "dromozoa.graph.vertex"
 
 local function each_vertex(ctx, v)
   return ctx:get_vertex(next(ctx._v, v and v.id))
 end
 
-return function (g)
-  local self = {
-    _g = g;
-    _n = 0;
-    _v = {};
-  }
+local function construct(self)
+  function self:clone(g)
+    return construct {
+      _g = g;
+      _n = copy(self._n);
+      _v = copy(self._v);
+    }
+  end
 
   function self:create_vertex()
     local id = self._n + 1
@@ -54,4 +57,12 @@ return function (g)
   end
 
   return self
+end
+
+return function (g)
+  return construct {
+    _g = g;
+    _n = 0;
+    _v = {};
+  }
 end

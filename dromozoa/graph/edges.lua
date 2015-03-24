@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local copy = require "dromozoa.graph.copy"
 local edge = require "dromozoa.graph.edge"
 
 local function each_edge(ctx, e)
@@ -24,13 +25,15 @@ local function each_edge(ctx, e)
   end
 end
 
-return function (g)
-  local self = {
-    _g = g;
-    _n = 0;
-    _u = {};
-    _v = {};
-  }
+local function construct(self)
+  function self:clone(g)
+    return construct {
+      _g = g;
+      _n = copy(self._n);
+      _u = copy(self._u);
+      _v = copy(self._v);
+    }
+  end
 
   function self:create_edge(uid, vid)
     local id = self._n + 1
@@ -60,4 +63,13 @@ return function (g)
   end
 
   return self
+end
+
+return function (g)
+  return construct {
+    _g = g;
+    _n = 0;
+    _u = {};
+    _v = {};
+  }
 end

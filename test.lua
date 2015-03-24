@@ -72,8 +72,8 @@ assert(v2:count_degree("v") == 0)
 
 v1.start = true
 local count = 0
-for v in g:each_vertex("start") do
-  assert(v.id == 1)
+for u in g:each_vertex("start") do
+  assert(u.id == 1)
   count = count + 1
 end
 assert(count == 1)
@@ -120,3 +120,22 @@ local e = g:create_edge(u, v)
 assert(g:get_vertex(u.id).id == u.id)
 assert(g:get_vertex(v.id).id == v.id)
 assert(g:get_edge(e.id).id == e.id)
+
+u.color = 1
+v.color = 2
+e.color = 1
+g:create_edge(v, u).color = 2
+
+local clone = g:clone()
+
+for u in g:each_vertex() do
+  local c = clone:get_vertex(u.id)
+  assert(u.id == c.id)
+  assert(u.color == c.color)
+end
+
+for e in g:each_edge() do
+  local c = clone:get_edge(e.id)
+  assert(e.id == c.id)
+  assert(e.color == c.color)
+end
