@@ -21,23 +21,29 @@ local edges = require "dromozoa.graph.edges"
 local properties = require "dromozoa.graph.properties"
 local vertices = require "dromozoa.graph.vertices"
 
-return function ()
-  local self = {
-    _vp = properties();
-    _ep = properties();
-  }
-
-  self._v = vertices(self)
-  self._e = edges(self)
-  self._uv = adjacency_list(self, "u", "v")
-  self._vu = adjacency_list(self, "v", "u")
-
+local function construct(self)
   function self:_a(mode)
     if mode == "v" then
       return self._vu
     else
       return self._uv
     end
+  end
+
+  function self:clone()
+    local that = {
+      _vp = self._vp:clone();
+      _ep = self._ep:clone();
+    }
+    that._v = self._v:clone(that)
+    that._e = self._e:clone(that)
+    that._uv = self._uv:clone(that)
+    that._vu = self._vu:clone(that)
+    return construct(that)
+  end
+
+  function self:empty()
+    return self._v:empty()
   end
 
   function self:create_vertex()
@@ -91,4 +97,16 @@ return function ()
   end
 
   return self
+end
+
+return function ()
+  local self = {
+    _vp = properties();
+    _ep = properties();
+  }
+  self._v = vertices(self)
+  self._e = edges(self)
+  self._uv = adjacency_list(self, "u", "v")
+  self._vu = adjacency_list(self, "v", "u")
+  return construct(self)
 end
