@@ -31,6 +31,10 @@ local function construct(self)
     }
   end
 
+  function self:empty()
+    return not next(self._v)
+  end
+
   function self:create_vertex()
     local id = self._n + 1
     self._n = id

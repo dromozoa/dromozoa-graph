@@ -22,6 +22,14 @@ local properties = require "dromozoa.graph.properties"
 local vertices = require "dromozoa.graph.vertices"
 
 local function construct(self)
+  function self:_a(mode)
+    if mode == "v" then
+      return self._vu
+    else
+      return self._uv
+    end
+  end
+
   function self:clone()
     local that = {
       _vp = self._vp:clone();
@@ -34,12 +42,8 @@ local function construct(self)
     return construct(that)
   end
 
-  function self:_a(mode)
-    if mode == "v" then
-      return self._vu
-    else
-      return self._uv
-    end
+  function self:empty()
+    return self._v:empty()
   end
 
   function self:create_vertex()

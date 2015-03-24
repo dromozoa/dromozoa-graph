@@ -112,11 +112,13 @@ end
 assert(count == 0)
 
 local g = graph()
+assert(g:empty())
 
 local u = g:create_vertex()
 local v = g:create_vertex()
 local e = g:create_edge(u, v)
 
+assert(not g:empty())
 assert(g:get_vertex(u.id).id == u.id)
 assert(g:get_vertex(v.id).id == v.id)
 assert(g:get_edge(e.id).id == e.id)
