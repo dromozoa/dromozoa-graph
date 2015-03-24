@@ -39,8 +39,8 @@ local function construct(self)
   function self:clone(g)
     return construct {
       _g = g;
-      _a = clone(self._a);
-      _b = clone(self._b);
+      _a = self._a;
+      _b = self._b;
       _t = clone(self._t);
     }
   end
