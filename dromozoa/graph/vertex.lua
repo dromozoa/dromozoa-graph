@@ -37,7 +37,7 @@ return function (g, id)
   function self:remove()
     local g = self._g
     local id = self.id
-    g._ep:remove_item(id)
+    g._vp:remove_item(id)
     g._v:remove_vertex(id)
   end
 
