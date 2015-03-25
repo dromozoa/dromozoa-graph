@@ -52,5 +52,24 @@ return function (g, id, uid, vid)
     g._e:remove_edge(id)
   end
 
+  function self:collapse()
+    local that = {}
+    for v, e in self.v:each_adjacent_vertex() do
+      that[#that + 1] = e
+    end
+    local g = self._g
+    local uid = self.uid
+    local uv = g._uv
+    for i = 1, #that do
+      local e = that[i]
+      local id = e.id
+      g._e:reset_edge(id, uid, e.vid)
+      uv:remove_edge(e.uid, id)
+      uv:append_edge(uid, id)
+    end
+    self.v:remove()
+    self:remove()
+  end
+
   return setmetatable(self, metatable)
 end
