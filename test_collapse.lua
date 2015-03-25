@@ -39,6 +39,13 @@ for v, e in v1:each_adjacent_vertex() do
 end
 assert(n == 2)
 
+local result = {}
+for v in g:each_vertex() do
+  result[v.id] = true
+end
+assert(result[v1.id])
+assert(not result[v2.id])
+
 io.write "digraph \"graph\" { \n  graph [rankdir = LR];\n"
 for e in g:each_edge() do
   io.write("  ", e.uid, " -> ", e.vid, ";\n")

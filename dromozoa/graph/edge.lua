@@ -67,7 +67,7 @@ return function (g, id, uid, vid)
       uv:remove_edge(e.uid, id)
       uv:append_edge(uid, id)
     end
-    self.u:remove()
+    self.v:remove()
     self:remove()
   end
 
