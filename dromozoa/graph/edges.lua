@@ -48,6 +48,11 @@ local function construct(self)
     self._v[id] = nil
   end
 
+  function self:reset_edge(id, uid, vid)
+    self._u[id] = uid
+    self._v[id] = vid
+  end
+
   function self:get_edge(id)
     if id then
       return edge(self._g, id, self._u[id], self._v[id])
