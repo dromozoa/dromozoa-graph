@@ -61,7 +61,7 @@ local function construct(self)
 
   function self:each_edge(k)
     if k then
-      return self._g._ep:each_item(k, self, self.get_edge)
+      return self._g._ep:each_item(k, self.get_edge, self)
     else
       return each_edge, self
     end

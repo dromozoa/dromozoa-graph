@@ -54,7 +54,7 @@ local function construct(self)
 
   function self:each_vertex(k)
     if k then
-      return self._g._vp:each_item(k, self, self.get_vertex)
+      return self._g._vp:each_item(k, self.get_vertex, self)
     else
       return each_vertex, self
     end

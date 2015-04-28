@@ -35,11 +35,11 @@ local function construct(self, dataset)
     end
   end
 
-  function self:each_item(key, that, fn)
+  function self:each_item(key, fn, context)
     local data = dataset[key]
     if data then
       return function (_, i)
-        return fn(that, next(data, i and i.id))
+        return fn(context, next(data, i and i.id))
       end
     else
       return function () end
