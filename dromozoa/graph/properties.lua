@@ -17,18 +17,71 @@
 
 local clone = require "dromozoa.graph.clone"
 
-local function each_property_key(ctx, k)
-  return next(ctx._t, k)
+local function construct(self, dataset)
+  function self:clone()
+    return construct({}, clone(dataset))
+  end
+
+  function self:clear_properties(key)
+    dataset[key] = nil
+  end
+
+  function self:set_property(id, key, value)
+    local data = dataset[key]
+    if value == nil then
+      if data then
+        data[id] = nil
+        if next(data) == nil then
+          dataset[key] = nil
+        end
+      end
+    else
+      if data then
+        data[id] = value
+      else
+        dataset[key] = { [id] = value }
+      end
+    end
+  end
+
+  function self:get_property(id, key)
+    local data = dataset[key]
+    if data then
+      return data[id]
+    end
+  end
+
+  function self:remove_item(id)
+    local data = dataset
+    for key, data in pairs(dataset) do
+      data[id] = nil
+      if next(data) == nil then
+        dataset[key] = nil
+      end
+    end
+  end
+
+  function self:each_property_key()
+    return next, dataset
+  end
+
+  function self:each_item(key, that, fn)
+    local data = dataset[key]
+    if data then
+      return function (ctx, i)
+        return fn(that, next(data, i and i.id))
+      end
+    else
+      return function () end
+    end
+  end
+
+  return self
 end
 
-local function each_item_table(ctx, i)
-  return ctx.f(ctx.o, next(ctx.c, i and i.id))
-end
-
-local function each_item_empty()
-end
-
+--[====[
 local function construct(self)
+
   function self:clone()
     return construct {
       _t = clone(self._t);
@@ -77,7 +130,7 @@ local function construct(self)
   end
 
   function self:each_property_key()
-    return each_property_key, self
+    return next, self._t
   end
 
   function self:each_item(k, o, f)
@@ -89,15 +142,14 @@ local function construct(self)
         f = f;
       }
     else
-      return each_item_empty
+      return function () end
     end
   end
 
   return self
 end
+]====]
 
 return function ()
-  return construct {
-    _t = {};
-  }
+  return construct({}, {})
 end
