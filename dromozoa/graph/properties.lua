@@ -26,6 +26,26 @@ local function construct(self, dataset)
     dataset[key] = nil
   end
 
+  function self:remove_item(id)
+    for key, data in pairs(dataset) do
+      data[id] = nil
+      if next(data) == nil then
+        dataset[key] = nil
+      end
+    end
+  end
+
+  function self:each_item(key, that, fn)
+    local data = dataset[key]
+    if data then
+      return function (_, i)
+        return fn(that, next(data, i and i.id))
+      end
+    else
+      return function () end
+    end
+  end
+
   function self:set_property(id, key, value)
     local data = dataset[key]
     if data then
@@ -48,30 +68,6 @@ local function construct(self, dataset)
     local data = dataset[key]
     if data then
       return data[id]
-    end
-  end
-
-  function self:remove_item(id)
-    for key, data in pairs(dataset) do
-      data[id] = nil
-      if next(data) == nil then
-        dataset[key] = nil
-      end
-    end
-  end
-
-  function self:each_property_key()
-    return next, dataset
-  end
-
-  function self:each_item(key, that, fn)
-    local data = dataset[key]
-    if data then
-      return function (_, i)
-        return fn(that, next(data, i and i.id))
-      end
-    else
-      return function () end
     end
   end
 

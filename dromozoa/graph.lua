@@ -62,10 +62,6 @@ local function construct(self)
     self._vp:clear_properties(k)
   end
 
-  function self:each_vertex_property_key()
-    return self._vp:each_property_key()
-  end
-
   function self:create_edge(u, v)
     local uid = type(u) == "table" and u.id or u
     local vid = type(v) == "table" and v.id or v
@@ -86,10 +82,6 @@ local function construct(self)
 
   function self:clear_edge_properties(k)
     self._ep:clear_properties(k)
-  end
-
-  function self:each_edge_property_key()
-    return self._ep:each_property_key()
   end
 
   function self:dfs(visitor, mode)
