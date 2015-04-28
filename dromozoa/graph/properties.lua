@@ -39,7 +39,11 @@ local function construct(self, dataset)
     local data = dataset[key]
     if data then
       return function (_, i)
-        return fn(context, next(data, i and i.id))
+        if i then
+          return fn(context, next(data, i.id))
+        else
+          return fn(context, next(data))
+        end
       end
     else
       return function () end

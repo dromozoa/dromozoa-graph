@@ -20,12 +20,12 @@ local dfs = require "dromozoa.graph.dfs"
 
 local metatable = {}
 
-function metatable:__index(k)
-  return self:get_property(k)
+function metatable:__index(key)
+  return self:get_property(key)
 end
 
-function metatable:__newindex(k, v)
-  self:set_property(k, v)
+function metatable:__newindex(key, value)
+  self:set_property(key, value)
 end
 
 return function (g, id)

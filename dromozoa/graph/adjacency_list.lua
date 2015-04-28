@@ -17,65 +17,39 @@
 
 local clone = require "dromozoa.graph.clone"
 
-local function each_adjacent_vertex_table(ctx)
-  local i = ctx.i + 1
-  ctx.i = i
-  local e = ctx.e:get_edge(ctx.r[i])
-  if e then
-    return e[ctx.b], e
-  end
-end
-
-local function each_adjacent_vertex_value(ctx, v)
-  if not v then
-    return ctx.v, ctx.e
-  end
-end
-
-local function each_adjacent_vertex_empty()
-end
-
-local function construct(self)
+local function construct(self, g, a, b, dataset)
   function self:clone(g)
-    return construct {
-      _g = g;
-      _a = self._a;
-      _b = self._b;
-      _t = clone(self._t);
-    }
+    return construct({}, g, a, b, clone(dataset))
   end
 
   function self:append_edge(uid, eid)
-    local t = self._t
-    local r = t[uid]
-    if r then
-      if type(r) == "table" then
-        r[#r + 1] = eid
+    local data = dataset[uid]
+    if data then
+      if type(data) == "table" then
+        data[#data + 1] = eid
       else
-        t[uid] = { r, eid }
+        dataset[uid] = { data, eid }
       end
     else
-      t[uid] = eid
+      dataset[uid] = eid
     end
   end
 
   function self:remove_edge(uid, eid)
-    local t = self._t
-    local r = t[uid]
-    if type(r) == "table" then
-      local n = #r
-      for i = 1, n do
-        if r[i] == eid then
-          table.remove(r, i)
-          if n == 2 then
-            t[uid] = r[1]
+    local data = dataset[uid]
+    if type(data) == "table" then
+      for i = 1, #data do
+        if data[i] == eid then
+          table.remove(data, i)
+          if #data == 1 then
+            dataset[uid] = data[1]
           end
           return
         end
       end
     else
-      if r == eid then
-        t[uid] = nil
+      if data == eid then
+        dataset[uid] = nil
         return
       end
     end
@@ -83,32 +57,35 @@ local function construct(self)
   end
 
   function self:each_adjacent_vertex(uid)
-    local r = self._t[uid]
-    if r then
-      if type(r) == "table" then
-        return each_adjacent_vertex_table, {
-          e = self._g._e;
-          b = self._b;
-          r = r;
-          i = 0;
-        }
+    local data = dataset[uid]
+    if data then
+      if type(data) == "table" then
+        local i = 0
+        return function ()
+          i = i + 1
+          local e = g._e:get_edge(data[i])
+          if e then
+            return e[b], e
+          end
+        end
       else
-        local e = self._g._e:get_edge(r)
-        return each_adjacent_vertex_value, {
-          e = e;
-          v = e[self._b];
-        }
+        return function (_, i)
+          if not i then
+            local e = g._e:get_edge(data)
+            return e[b], e
+          end
+        end
       end
     else
-      return each_adjacent_vertex_empty
+      return function () end
     end
   end
 
   function self:count_degree(uid)
-    local r = self._t[uid]
-    if r then
-      if type(r) == "table" then
-        return #r
+    local data = dataset[uid]
+    if data then
+      if type(data) == "table" then
+        return #data
       else
         return 1
       end
@@ -121,10 +98,5 @@ local function construct(self)
 end
 
 return function (g, a, b)
-  return construct {
-    _g = g;
-    _a = a;
-    _b = b;
-    _t = {};
-  }
+  return construct({}, g, a, b, {})
 end
