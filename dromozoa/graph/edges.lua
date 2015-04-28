@@ -25,45 +25,48 @@ local function each_edge(ctx, e)
   end
 end
 
-local function construct(self)
+local function construct(self, g, n, u, v)
+  local p = g._ep
+
   function self:clone(g)
-    return construct {
-      _g = g;
-      _n = self._n;
-      _u = clone(self._u);
-      _v = clone(self._v);
-    }
+    return construct({}, g, n, clone(u), clone(v))
   end
 
   function self:create_edge(uid, vid)
-    local id = self._n + 1
-    self._n = id
-    self._u[id] = uid
-    self._v[id] = vid
-    return edge(self._g, id, uid, vid)
+    local id = n
+    n = id + 1
+    u[id] = uid
+    v[id] = vid
+    return edge(g, id, uid, vid)
   end
 
   function self:remove_edge(id)
-    self._u[id] = nil
-    self._v[id] = nil
+    u[id] = nil
+    v[id] = nil
   end
 
   function self:reset_edge(id, uid, vid)
-    self._u[id] = uid
-    self._v[id] = vid
+    u[id] = uid
+    v[id] = vid
   end
 
   function self:get_edge(id)
     if id then
-      return edge(self._g, id, self._u[id], self._v[id])
+      return edge(g, id, u[id], v[id])
     end
   end
 
-  function self:each_edge(k)
-    if k then
-      return self._g._ep:each_item(k, self.get_edge, self)
+  function self:each_edge(key)
+    if key then
+      return p:each_item(key, self.get_edge, self)
     else
-      return each_edge, self
+      return function (_, i)
+        if i then
+          return self:get_edge(next(u, i.id))
+        else
+          return self:get_edge(next(u))
+        end
+      end
     end
   end
 
@@ -71,10 +74,5 @@ local function construct(self)
 end
 
 return function (g)
-  return construct {
-    _g = g;
-    _n = 0;
-    _u = {};
-    _v = {};
-  }
+  return construct({}, g, 1, {}, {})
 end

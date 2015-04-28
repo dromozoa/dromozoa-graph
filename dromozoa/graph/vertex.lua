@@ -29,21 +29,24 @@ function metatable:__newindex(key, value)
 end
 
 return function (g, id)
+  local p = g._vp
+  local v = g._v
+
   local self = {
     id = id;
   }
 
   function self:remove()
-    g._vp:remove_item(id)
-    g._v:remove_vertex(id)
+    p:remove_item(id)
+    v:remove_vertex(id)
   end
 
   function self:get_property(k)
-    return g._vp:get_property(id, k)
+    return p:get_property(id, k)
   end
 
   function self:set_property(k, v)
-    g._vp:set_property(id, k, v)
+    p:set_property(id, k, v)
   end
 
   function self:each_adjacent_vertex(mode)

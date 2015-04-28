@@ -18,11 +18,11 @@
 local clone = require "dromozoa.graph.clone"
 local vertex = require "dromozoa.graph.vertex"
 
-local function construct(self, g, data, n)
+local function construct(self, g, n, data)
   local p = g._vp
 
   function self:clone(g)
-    return construct({}, g, clone(data), n)
+    return construct({}, g, n, clone(data))
   end
 
   function self:empty()
@@ -64,5 +64,5 @@ local function construct(self, g, data, n)
 end
 
 return function (g)
-  return construct({}, g, {}, 1)
+  return construct({}, g, 1, {})
 end
