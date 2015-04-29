@@ -18,11 +18,13 @@
 local clone = require "dromozoa.graph.clone"
 local edge = require "dromozoa.graph.edge"
 
-local function construct(self, _g, _n, _u, _v)
+local function construct(_g, _n, _u, _v)
   local _p = _g._ep
 
+  local self = {}
+
   function self:clone(g)
-    return construct({}, g, _n, clone(_u), clone(_v))
+    return construct(g, _n, clone(_u), clone(_v))
   end
 
   function self:create_edge(uid, vid)
@@ -67,5 +69,5 @@ local function construct(self, _g, _n, _u, _v)
 end
 
 return function (g)
-  return construct({}, g, 0, {}, {})
+  return construct(g, 0, {}, {})
 end
