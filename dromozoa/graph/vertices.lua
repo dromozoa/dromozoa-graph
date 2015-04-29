@@ -18,43 +18,45 @@
 local clone = require "dromozoa.graph.clone"
 local vertex = require "dromozoa.graph.vertex"
 
-local function construct(self, g, n, data)
-  local p = g._vp
+local function construct(_g, _n, _data)
+  local _p = _g._vp
+
+  local self = {}
 
   function self:clone(g)
-    return construct({}, g, n, clone(data))
+    return construct(g, _n, clone(_data))
   end
 
   function self:empty()
-    return not next(data)
+    return not next(_data)
   end
 
   function self:create_vertex()
-    local id = n
-    n = id + 1
-    data[id] = true
-    return vertex(g, id)
+    local id = _n + 1
+    _n = id
+    _data[id] = true
+    return vertex(_g, id)
   end
 
   function self:remove_vertex(id)
-    data[id] = nil
+    _data[id] = nil
   end
 
   function self:get_vertex(id)
     if id then
-      return vertex(g, id)
+      return vertex(_g, id)
     end
   end
 
   function self:each_vertex(key)
     if key then
-      return p:each_item(key, self.get_vertex, self)
+      return _p:each_item(key, self.get_vertex, self)
     else
       return function (_, i)
         if i then
-          return self:get_vertex(next(data, i.id))
+          return self:get_vertex(next(_data, i.id))
         else
-          return self:get_vertex(next(data))
+          return self:get_vertex(next(_data))
         end
       end
     end
@@ -64,5 +66,5 @@ local function construct(self, g, n, data)
 end
 
 return function (g)
-  return construct({}, g, 1, {})
+  return construct(g, 0, {})
 end
