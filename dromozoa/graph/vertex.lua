@@ -28,41 +28,41 @@ function metatable:__newindex(key, value)
   self:set_property(key, value)
 end
 
-return function (g, id)
-  local p = g._vp
-  local v = g._v
+return function (_g, id)
+  local _v = _g._v
+  local _p = _g._vp
 
   local self = {
     id = id;
   }
 
   function self:remove()
-    p:remove_item(id)
-    v:remove_vertex(id)
+    _p:remove_item(id)
+    _v:remove_vertex(id)
   end
 
   function self:get_property(k)
-    return p:get_property(id, k)
+    return _p:get_property(id, k)
   end
 
   function self:set_property(k, v)
-    p:set_property(id, k, v)
+    _p:set_property(id, k, v)
   end
 
   function self:each_adjacent_vertex(mode)
-    return g:_a(mode):each_adjacent_vertex(id)
+    return _g:_a(mode):each_adjacent_vertex(id)
   end
 
   function self:count_degree(mode)
-    return g:_a(mode):count_degree(id)
+    return _g:_a(mode):count_degree(id)
   end
 
   function self:bfs(visitor, mode)
-    bfs(g, visitor, self, mode)
+    bfs(_g, visitor, self, mode)
   end
 
   function self:dfs(visitor, mode)
-    dfs(g, visitor, self, mode)
+    dfs(_g, visitor, self, mode)
   end
 
   return setmetatable(self, metatable)
