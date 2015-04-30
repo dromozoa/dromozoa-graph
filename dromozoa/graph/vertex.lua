@@ -21,11 +21,11 @@ local dfs = require "dromozoa.graph.dfs"
 local metatable = {}
 
 function metatable:__index(key)
-  return self:get_property(key)
+  return self:impl_get_property(key)
 end
 
 function metatable:__newindex(key, value)
-  self:set_property(key, value)
+  self:impl_set_property(key, value)
 end
 
 return function (_g, _id)
@@ -41,11 +41,11 @@ return function (_g, _id)
     _v:remove_vertex(_id)
   end
 
-  function self:get_property(key)
+  function self:impl_get_property(key)
     return _p:get_property(_id, key)
   end
 
-  function self:set_property(key, value)
+  function self:impl_set_property(key, value)
     _p:set_property(_id, key, value)
   end
 
