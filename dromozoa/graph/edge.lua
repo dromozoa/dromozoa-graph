@@ -17,25 +17,25 @@
 
 local metatable = {}
 
-function metatable:__index(k)
-  if k == "u" then
-    local u = self._g._v:get_vertex(self.uid)
-    rawset(self, "u", u)
-    return u
-  elseif k == "v" then
-    local v = self._g._v:get_vertex(self.vid)
-    rawset(self, "v", v)
-    return v
+function metatable:__index(key)
+  if key == "u" then
+    return self:impl_get_u()
+  elseif key == "v" then
+    return self:impl_get_v()
   else
-    return self._g._ep:get_property(self.id, k)
+    return self:impl_get_property(key)
   end
 end
 
-function metatable:__newindex(k, v)
-  return self._g._ep:set_property(self.id, k, v)
+function metatable:__newindex(key, value)
+  self:impl_set_property(key, value)
 end
 
 return function (g, id, uid, vid)
+  local _v = g._v
+  local _e = g._e
+  local _p = g._ep
+
   local self = {
     _g = g;
     id = id;
@@ -69,6 +69,26 @@ return function (g, id, uid, vid)
     end
     self.v:remove()
     self:remove()
+  end
+
+  function self:impl_get_u()
+    local u = _v:get_vertex(self.uid)
+    rawset(self, "u", u)
+    return u
+  end
+
+  function self:impl_get_v()
+    local v = _v:get_vertex(self.vid)
+    rawset(self, "v", v)
+    return v
+  end
+
+  function self:impl_get_property(key)
+    return _p:get_property(id, key)
+  end
+
+  function self:impl_set_property(key, value)
+    _p:set_property(id, key, value)
   end
 
   return setmetatable(self, metatable)
