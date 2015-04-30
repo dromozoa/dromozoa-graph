@@ -98,7 +98,7 @@ return function ()
   }
   self._v = vertices(self)
   self._e = edges(self)
-  self._uv = adjacency_list(self, "u", "v")
-  self._vu = adjacency_list(self, "v", "u")
+  self._uv = adjacency_list(self, "v")
+  self._vu = adjacency_list(self, "u")
   return construct(self)
 end

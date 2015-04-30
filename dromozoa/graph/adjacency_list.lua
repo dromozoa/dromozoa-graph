@@ -17,39 +17,43 @@
 
 local clone = require "dromozoa.graph.clone"
 
-local function construct(self, g, a, b, dataset)
+local function construct(_g, _mode, _dataset)
+  local _e = _g._e
+
+  local self = {}
+
   function self:clone(g)
-    return construct({}, g, a, b, clone(dataset))
+    return construct(g, _mode, clone(_dataset))
   end
 
   function self:append_edge(uid, eid)
-    local data = dataset[uid]
+    local data = _dataset[uid]
     if data then
       if type(data) == "table" then
         data[#data + 1] = eid
       else
-        dataset[uid] = { data, eid }
+        _dataset[uid] = { data, eid }
       end
     else
-      dataset[uid] = eid
+      _dataset[uid] = eid
     end
   end
 
   function self:remove_edge(uid, eid)
-    local data = dataset[uid]
+    local data = _dataset[uid]
     if type(data) == "table" then
       for i = 1, #data do
         if data[i] == eid then
           table.remove(data, i)
           if #data == 1 then
-            dataset[uid] = data[1]
+            _dataset[uid] = data[1]
           end
           return
         end
       end
     else
       if data == eid then
-        dataset[uid] = nil
+        _dataset[uid] = nil
         return
       end
     end
@@ -57,22 +61,23 @@ local function construct(self, g, a, b, dataset)
   end
 
   function self:each_adjacent_vertex(uid)
-    local data = dataset[uid]
+    local data = _dataset[uid]
     if data then
       if type(data) == "table" then
-        local i = 0
+        local index = 0
         return function ()
-          i = i + 1
-          local e = g._e:get_edge(data[i])
+          local i = index + 1
+          index = i
+          local e = _e:get_edge(data[i])
           if e then
-            return e[b], e
+            return e[_mode], e
           end
         end
       else
         return function (_, i)
           if not i then
-            local e = g._e:get_edge(data)
-            return e[b], e
+            local e = _e:get_edge(data)
+            return e[_mode], e
           end
         end
       end
@@ -82,7 +87,7 @@ local function construct(self, g, a, b, dataset)
   end
 
   function self:count_degree(uid)
-    local data = dataset[uid]
+    local data = _dataset[uid]
     if data then
       if type(data) == "table" then
         return #data
@@ -97,6 +102,6 @@ local function construct(self, g, a, b, dataset)
   return self
 end
 
-return function (g, a, b)
-  return construct({}, g, a, b, {})
+return function (g, mode)
+  return construct(g, mode, {})
 end
