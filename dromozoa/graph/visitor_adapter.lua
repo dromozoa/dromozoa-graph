@@ -15,14 +15,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function empty()
-end
-
-return function (visitor, event)
-  for i = 1, #event do
-    local v = event[i]
-    if not visitor[v] then
-      visitor[v] = empty
+return function (visitor, events)
+  for i = 1, #events do
+    local event = events[i]
+    if not visitor[event] then
+      visitor[event] = function () end
     end
   end
   return visitor

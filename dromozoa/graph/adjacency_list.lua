@@ -57,7 +57,7 @@ local function construct(_g, _mode, _dataset)
         return
       end
     end
-    error "could not remove_edge"
+    error "could not remove edge"
   end
 
   function self:each_adjacent_vertex(uid)

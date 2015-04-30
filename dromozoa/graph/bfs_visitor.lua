@@ -17,7 +17,7 @@
 
 local visitor_adapter = require "dromozoa.graph.visitor_adapter"
 
-local event = {
+local events = {
   "initialize_vertex",
   "discover_vertex",
   "examine_vertex",
@@ -30,5 +30,5 @@ local event = {
 }
 
 return function (visitor)
-  return visitor_adapter(visitor, event)
+  return visitor_adapter(visitor, events)
 end
