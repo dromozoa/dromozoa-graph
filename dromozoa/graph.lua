@@ -22,58 +22,66 @@ local properties = require "dromozoa.graph.properties"
 local vertices = require "dromozoa.graph.vertices"
 
 local function construct(self)
+  local _vp = self._vp
+  local _ep = self._ep
+  local _v = self._v
+  local _e = self._e
+  local _uv = self._uv
+  local _vu = self._vu
+
   function self:clone()
     local that = {
-      _vp = self._vp:clone();
-      _ep = self._ep:clone();
+      _vp = _vp:clone();
+      _ep = _ep:clone();
     }
-    that._v = self._v:clone(that)
-    that._e = self._e:clone(that)
-    that._uv = self._uv:clone(that)
-    that._vu = self._vu:clone(that)
+    that._v = _v:clone(that)
+    that._e = _e:clone(that)
+    that._uv = _uv:clone(that)
+    that._vu = _vu:clone(that)
     return construct(that)
   end
 
   function self:empty()
-    return self._v:empty()
+    return _v:empty()
   end
 
   function self:create_vertex()
-    return self._v:create_vertex()
+    return _v:create_vertex()
   end
 
   function self:get_vertex(id)
-    return self._v:get_vertex(id)
+    return _v:get_vertex(id)
   end
 
-  function self:each_vertex(k)
-    return self._v:each_vertex(k)
+  function self:each_vertex(key)
+    return _v:each_vertex(key)
   end
 
-  function self:clear_vertex_properties(k)
-    self._vp:clear_properties(k)
+  function self:clear_vertex_properties(key)
+    _vp:clear_properties(key)
   end
 
   function self:create_edge(u, v)
-    local uid = type(u) == "table" and u.id or u
-    local vid = type(v) == "table" and v.id or v
-    local e = self._e:create_edge(uid, vid)
+    local uid, vid
+    if type(u) == "table" then uid = u.id else uid = u end
+    if type(v) == "table" then vid = v.id else vid = v end
+    local e = _e:create_edge(uid, vid)
     local eid = e.id
-    self._uv:append_edge(uid, eid)
-    self._vu:append_edge(vid, eid)
+    _uv:append_edge(uid, eid)
+    _vu:append_edge(vid, eid)
     return e
   end
 
   function self:get_edge(id)
-    return self._e:get_edge(id)
+    return _e:get_edge(id)
   end
 
-  function self:each_edge(k)
-    return self._e:each_edge(k)
+  function self:each_edge(key)
+    return _e:each_edge(key)
   end
 
-  function self:clear_edge_properties(k)
-    self._ep:clear_properties(k)
+  function self:clear_edge_properties(key)
+    _ep:clear_properties(key)
   end
 
   function self:dfs(visitor, mode)
@@ -82,9 +90,9 @@ local function construct(self)
 
   function self:impl_get_adjacencies(mode)
     if mode == "v" then
-      return self._vu
+      return _vu
     else
-      return self._uv
+      return _uv
     end
   end
 

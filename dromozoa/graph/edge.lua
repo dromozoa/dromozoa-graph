@@ -45,9 +45,9 @@ return function (_g, _id, _uid, _vid)
   }
 
   function self:remove()
-    _p:remove_item(_id)
     _uv:remove_edge(_uid, _id)
     _vu:remove_edge(_vid, _id)
+    _p:remove_item(_id)
     _e:remove_edge(_id)
   end
 
