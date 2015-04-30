@@ -22,14 +22,6 @@ local properties = require "dromozoa.graph.properties"
 local vertices = require "dromozoa.graph.vertices"
 
 local function construct(self)
-  function self:_a(mode)
-    if mode == "v" then
-      return self._vu
-    else
-      return self._uv
-    end
-  end
-
   function self:clone()
     local that = {
       _vp = self._vp:clone();
@@ -86,6 +78,14 @@ local function construct(self)
 
   function self:dfs(visitor, mode)
     dfs(self, visitor, nil, mode)
+  end
+
+  function self:impl_get_adjacencies(mode)
+    if mode == "v" then
+      return self._vu
+    else
+      return self._uv
+    end
   end
 
   return self

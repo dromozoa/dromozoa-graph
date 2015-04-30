@@ -50,11 +50,11 @@ return function (_g, _id)
   end
 
   function self:each_adjacent_vertex(mode)
-    return _g:_a(mode):each_adjacent_vertex(_id)
+    return _g:impl_get_adjacencies(mode):each_adjacent_vertex(_id)
   end
 
   function self:count_degree(mode)
-    return _g:_a(mode):count_degree(_id)
+    return _g:impl_get_adjacencies(mode):count_degree(_id)
   end
 
   function self:bfs(visitor, mode)
