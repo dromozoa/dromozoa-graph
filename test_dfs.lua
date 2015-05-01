@@ -45,6 +45,10 @@ g:dfs(dfs_visitor {
   end;
 })
 
+local result, message = pcall(g.tsort, g)
+assert(not result)
+print(message)
+
 local g = graph()
 
 local v1 = g:create_vertex()
