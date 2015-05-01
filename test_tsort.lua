@@ -33,7 +33,7 @@ g:create_edge(v1, v4)
 g:create_edge(v2, v5)
 g:create_edge(v5, v4)
 
-local result = g:topological_sort("v")
+local result = g:tsort("v")
 for i = 1, #result do
   print(result[i].id)
 end
