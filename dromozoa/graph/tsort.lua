@@ -20,8 +20,8 @@ local dfs_visitor = require "dromozoa.graph.dfs_visitor"
 local function visitor(result)
   local self = {}
 
-  function self:back_edge()
-    return "invalid edge"
+  function self:back_edge(g, e, u, v)
+    error("found back edge " .. e.id)
   end
 
   function self:finish_vertex(g, u)
