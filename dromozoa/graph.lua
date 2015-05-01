@@ -19,6 +19,7 @@ local adjacency_list = require "dromozoa.graph.adjacency_list"
 local dfs = require "dromozoa.graph.dfs"
 local edges = require "dromozoa.graph.edges"
 local properties = require "dromozoa.graph.properties"
+local topological_sort = require "dromozoa.graph.topological_sort"
 local vertices = require "dromozoa.graph.vertices"
 
 local function construct(self)
@@ -86,6 +87,10 @@ local function construct(self)
 
   function self:dfs(visitor, mode)
     dfs(self, visitor, nil, mode)
+  end
+
+  function self:topological_sort(mode)
+    return topological_sort(self, mode)
   end
 
   function self:impl_get_adjacencies(mode)
