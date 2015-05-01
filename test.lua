@@ -87,29 +87,13 @@ for e in g:each_edge("color") do
 end
 assert(count == 2)
 
-v3.accept = true
-v1.start = nil
-local count = 0
-for k in g:each_vertex_property_key() do
-  assert(k == "accept")
-  count = count + 1
-end
-assert(count == 1)
+assert(v1.start == true)
+g:clear_vertex_properties("start")
+assert(v1.start == nil)
 
-local count = 0
-for k in g:each_edge_property_key() do
-  assert(k == "color")
-  count = count + 1
-end
-assert(count == 1)
-
+assert(e1.color == 1)
 g:clear_edge_properties("color")
-
-local count = 0
-for k in g:each_edge_property_key() do
-  count = count + 1
-end
-assert(count == 0)
+assert(e1.color == nil)
 
 local g = graph()
 assert(g:empty())

@@ -15,20 +15,25 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visitor_adapter = require "dromozoa.graph.visitor_adapter"
+local graph = require "dromozoa.graph"
 
-local events = {
-  "initialize_vertex",
-  "discover_vertex",
-  "examine_vertex",
-  "examine_edge",
-  "tree_edge",
-  "non_tree_edge",
-  "gray_target",
-  "black_target",
-  "finish_vertex",
-}
+local g = graph()
 
-return function (visitor)
-  return visitor_adapter(visitor, events)
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+local v4 = g:create_vertex()
+local v5 = g:create_vertex()
+local v6 = g:create_vertex()
+
+g:create_edge(v1, v2)
+g:create_edge(v3, v5)
+g:create_edge(v3, v6)
+g:create_edge(v1, v4)
+g:create_edge(v2, v5)
+g:create_edge(v5, v4)
+
+local result = g:tsort("v")
+for i = 1, #result do
+  print(result[i].id)
 end

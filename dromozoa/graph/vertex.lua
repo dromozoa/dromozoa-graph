@@ -20,41 +20,49 @@ local dfs = require "dromozoa.graph.dfs"
 
 local metatable = {}
 
-function metatable:__index(k)
-  return self._g._vp:get_property(self.id, k)
+function metatable:__index(key)
+  return self:impl_get_property(key)
 end
 
-function metatable:__newindex(k, v)
-  self._g._vp:set_property(self.id, k, v)
+function metatable:__newindex(key, value)
+  self:impl_set_property(key, value)
 end
 
-return function (g, id)
+return function (_g, _id)
+  local _v = _g._v
+  local _p = _g._vp
+
   local self = {
-    _g = g;
-    id = id;
+    id = _id;
   }
 
   function self:remove()
-    local g = self._g
-    local id = self.id
-    g._vp:remove_item(id)
-    g._v:remove_vertex(id)
+    _p:remove_item(_id)
+    _v:remove_vertex(_id)
+  end
+
+  function self:impl_get_property(key)
+    return _p:get_property(_id, key)
+  end
+
+  function self:impl_set_property(key, value)
+    _p:set_property(_id, key, value)
   end
 
   function self:each_adjacent_vertex(mode)
-    return self._g:_a(mode):each_adjacent_vertex(self.id)
+    return _g:impl_get_adjacencies(mode):each_adjacent_vertex(_id)
   end
 
   function self:count_degree(mode)
-    return self._g:_a(mode):count_degree(self.id)
+    return _g:impl_get_adjacencies(mode):count_degree(_id)
   end
 
   function self:bfs(visitor, mode)
-    bfs(self._g, visitor, self, mode)
+    bfs(_g, visitor, self, mode)
   end
 
   function self:dfs(visitor, mode)
-    dfs(self._g, visitor, self, mode)
+    dfs(_g, visitor, self, mode)
   end
 
   return setmetatable(self, metatable)
