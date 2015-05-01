@@ -17,58 +17,75 @@
 
 local metatable = {}
 
-function metatable:__index(k)
-  if k == "u" then
-    local u = self._g._v:get_vertex(self.uid)
-    rawset(self, "u", u)
-    return u
-  elseif k == "v" then
-    local v = self._g._v:get_vertex(self.vid)
-    rawset(self, "v", v)
-    return v
+function metatable:__index(key)
+  if key == "u" then
+    return self:impl_get_u()
+  elseif key == "v" then
+    return self:impl_get_v()
   else
-    return self._g._ep:get_property(self.id, k)
+    return self:impl_get_property(key)
   end
 end
 
-function metatable:__newindex(k, v)
-  return self._g._ep:set_property(self.id, k, v)
+function metatable:__newindex(key, value)
+  self:impl_set_property(key, value)
 end
 
-return function (g, id, uid, vid)
+return function (_g, _id, _uid, _vid)
+  local _v = _g._v
+  local _e = _g._e
+  local _p = _g._ep
+  local _uv = _g._uv
+  local _vu = _g._vu
+
   local self = {
-    _g = g;
-    id = id;
-    uid = uid;
-    vid = vid;
+    id = _id;
+    uid = _uid;
+    vid = _vid;
   }
 
   function self:remove()
-    local g = self._g
-    local id = self.id
-    g._ep:remove_item(id)
-    g._uv:remove_edge(self.uid, id)
-    g._vu:remove_edge(self.vid, id)
-    g._e:remove_edge(id)
+    _uv:remove_edge(_uid, _id)
+    _vu:remove_edge(_vid, _id)
+    _p:remove_item(_id)
+    _e:remove_edge(_id)
   end
 
   function self:collapse()
+    local v = self.v
     local that = {}
-    for v, e in self.v:each_adjacent_vertex() do
+    for _, e in v:each_adjacent_vertex() do
       that[#that + 1] = e
     end
-    local g = self._g
-    local uid = self.uid
-    local uv = g._uv
     for i = 1, #that do
       local e = that[i]
       local id = e.id
-      g._e:reset_edge(id, uid, e.vid)
-      uv:remove_edge(e.uid, id)
-      uv:append_edge(uid, id)
+      _e:reset_edge(id, _uid, e.vid)
+      _uv:remove_edge(e.uid, id)
+      _uv:append_edge(_uid, id)
     end
-    self.v:remove()
+    v:remove()
     self:remove()
+  end
+
+  function self:impl_get_u()
+    local u = _v:get_vertex(_uid)
+    rawset(self, "u", u)
+    return u
+  end
+
+  function self:impl_get_v()
+    local v = _v:get_vertex(_vid)
+    rawset(self, "v", v)
+    return v
+  end
+
+  function self:impl_get_property(key)
+    return _p:get_property(_id, key)
+  end
+
+  function self:impl_set_property(key, value)
+    _p:set_property(_id, key, value)
   end
 
   return setmetatable(self, metatable)

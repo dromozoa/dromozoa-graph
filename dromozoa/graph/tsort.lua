@@ -15,20 +15,24 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visitor_adapter = require "dromozoa.graph.visitor_adapter"
+local dfs_visitor = require "dromozoa.graph.dfs_visitor"
 
-local events = {
-  "initialize_vertex",
-  "discover_vertex",
-  "examine_vertex",
-  "examine_edge",
-  "tree_edge",
-  "non_tree_edge",
-  "gray_target",
-  "black_target",
-  "finish_vertex",
-}
+local function visitor(result)
+  local self = {}
 
-return function (visitor)
-  return visitor_adapter(visitor, events)
+  function self:back_edge()
+    return "invalid edge"
+  end
+
+  function self:finish_vertex(g, u)
+    result[#result + 1] = u
+  end
+
+  return dfs_visitor(self)
+end
+
+return function (g, mode)
+  local result = {}
+  g:dfs(visitor(result), mode)
+  return result
 end

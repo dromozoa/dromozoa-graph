@@ -18,52 +18,50 @@
 local clone = require "dromozoa.graph.clone"
 local edge = require "dromozoa.graph.edge"
 
-local function each_edge(ctx, e)
-  local id, uid = next(ctx._u, e and e.id)
-  if id then
-    return edge(ctx._g, id, uid, ctx._v[id])
-  end
-end
+local function construct(_g, _n, _u, _v)
+  local _p = _g._ep
 
-local function construct(self)
+  local self = {}
+
   function self:clone(g)
-    return construct {
-      _g = g;
-      _n = self._n;
-      _u = clone(self._u);
-      _v = clone(self._v);
-    }
+    return construct(g, _n, clone(_u), clone(_v))
   end
 
   function self:create_edge(uid, vid)
-    local id = self._n + 1
-    self._n = id
-    self._u[id] = uid
-    self._v[id] = vid
-    return edge(self._g, id, uid, vid)
+    local id = _n + 1
+    _n = id
+    _u[id] = uid
+    _v[id] = vid
+    return edge(_g, id, uid, vid)
   end
 
   function self:remove_edge(id)
-    self._u[id] = nil
-    self._v[id] = nil
+    _u[id] = nil
+    _v[id] = nil
   end
 
   function self:reset_edge(id, uid, vid)
-    self._u[id] = uid
-    self._v[id] = vid
+    _u[id] = uid
+    _v[id] = vid
   end
 
   function self:get_edge(id)
     if id then
-      return edge(self._g, id, self._u[id], self._v[id])
+      return edge(_g, id, _u[id], _v[id])
     end
   end
 
-  function self:each_edge(k)
-    if k then
-      return self._g._ep:each_item(k, self, self.get_edge)
+  function self:each_edge(key)
+    if key then
+      return _p:each_item(key, self.get_edge, self)
     else
-      return each_edge, self
+      return function (_, i)
+        if i then
+          return self:get_edge(next(_u, i.id))
+        else
+          return self:get_edge(next(_u))
+        end
+      end
     end
   end
 
@@ -71,10 +69,5 @@ local function construct(self)
 end
 
 return function (g)
-  return construct {
-    _g = g;
-    _n = 0;
-    _u = {};
-    _v = {};
-  }
+  return construct(g, 0, {}, {})
 end

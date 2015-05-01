@@ -17,79 +17,61 @@
 
 local clone = require "dromozoa.graph.clone"
 
-local function each_property_key(ctx, k)
-  return next(ctx._t, k)
-end
-
-local function each_item_table(ctx, i)
-  return ctx.f(ctx.o, next(ctx.c, i and i.id))
-end
-
-local function each_item_empty()
-end
-
-local function construct(self)
+local function construct(self, dataset)
   function self:clone()
-    return construct {
-      _t = clone(self._t);
-    }
+    return construct({}, clone(dataset))
   end
 
-  function self:clear_properties(k)
-    self._t[k] = nil
-  end
-
-  function self:set_property(id, k, v)
-    local t = self._t
-    local c = t[k]
-    if v == nil then
-      if c then
-        c[id] = nil
-        if next(c) == nil then
-          t[k] = nil
-        end
-      end
-    else
-      if not c then
-        c = {}
-        t[k] = c
-      end
-      c[id] = v
-    end
-  end
-
-  function self:get_property(id, k)
-    local t = self._t
-    local c = t[k]
-    if c then
-      return c[id]
-    end
+  function self:clear_properties(key)
+    dataset[key] = nil
   end
 
   function self:remove_item(id)
-    local t = self._t
-    for k, c in pairs(t) do
-      c[id] = nil
-      if next(c) == nil then
-        t[k] = nil
+    for key, data in pairs(dataset) do
+      data[id] = nil
+      if next(data) == nil then
+        dataset[key] = nil
       end
     end
   end
 
-  function self:each_property_key()
-    return each_property_key, self
+  function self:each_item(key, fn, context)
+    local data = dataset[key]
+    if data then
+      return function (_, i)
+        if i then
+          return fn(context, next(data, i.id))
+        else
+          return fn(context, next(data))
+        end
+      end
+    else
+      return function () end
+    end
   end
 
-  function self:each_item(k, o, f)
-    local c = self._t[k]
-    if c then
-      return each_item_table, {
-        c = c;
-        o = o;
-        f = f;
-      }
+  function self:set_property(id, key, value)
+    local data = dataset[key]
+    if data then
+      if value ~= nil then
+        data[id] = value
+      else
+        data[id] = nil
+        if next(data) == nil then
+          dataset[key] = nil
+        end
+      end
     else
-      return each_item_empty
+      if value ~= nil then
+        dataset[key] = { [id] = value }
+      end
+    end
+  end
+
+  function self:get_property(id, key)
+    local data = dataset[key]
+    if data then
+      return data[id]
     end
   end
 
@@ -97,7 +79,5 @@ local function construct(self)
 end
 
 return function ()
-  return construct {
-    _t = {};
-  }
+  return construct({}, {})
 end
