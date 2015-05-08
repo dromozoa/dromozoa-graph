@@ -21,8 +21,6 @@ local events = {
   "graph_attributes",
   "node_attributes",
   "edge_attributes",
-  "each_node_attributes",
-  "each_edge_attributes",
 }
 
 return function (visitor)

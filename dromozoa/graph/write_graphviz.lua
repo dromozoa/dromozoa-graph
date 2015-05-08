@@ -21,12 +21,12 @@ local function writer(_g, _out)
   function self:write_attributes(prolog, epilog, attributes)
     if attributes then
       _out:write(prolog, " [")
-      local i = 1
+      local i = 0
       for k, v in pairs(attributes) do
+        i = i + 1
         if i > 1 then
           _out:write(", ")
         end
-        i = i + 1
         _out:write(k, " = ", v)
       end
       _out:write("]", epilog)
@@ -34,17 +34,21 @@ local function writer(_g, _out)
   end
 
   function self:write(visitor)
-    _out:write("digraph \"graph\" {\n")
-    self:write_attributes("graph", ";\n", visitor:graph_attributes(g))
-    self:write_attributes("node", ";\n", visitor:node_attributes(g))
-    self:write_attributes("edge", ";\n", visitor:edge_attributes(g))
-    for u in _g:each_vertex() do
-      self:write_attributes(u.id, ";\n", visitor:each_node_attributes(g, u))
-    end
-    for e in _g:each_edge() do
-      _out:write(e.uid, " -> ", e.vid)
-      self:write_attributes("", "", visitor:each_edge_attributes(g, e))
-      _out:write(";\n")
+    _out:write("digraph \"g\" {\n")
+    if visitor then
+      self:write_attributes("graph", ";\n", visitor:graph_attributes(g))
+      for u in _g:each_vertex() do
+        self:write_attributes(u.id, ";\n", visitor:node_attributes(g, u))
+      end
+      for e in _g:each_edge() do
+        _out:write(e.uid, " -> ", e.vid)
+        self:write_attributes("", "", visitor:edge_attributes(g, e))
+        _out:write(";\n")
+      end
+    else
+      for e in _g:each_edge() do
+        _out:write(e.uid, " -> ", e.vid, ";\n")
+      end
     end
     _out:write("}\n")
   end

@@ -41,11 +41,11 @@ function attributes:graph_attributes(g)
   return { rankdir = "LR" }
 end
 
-function attributes:each_node_attributes(g, u)
+function attributes:node_attributes(g, u)
   return { label = graphviz.quote_string("node " .. u.id); color = "blue" }
 end
 
-function attributes:each_edge_attributes(g, e)
+function attributes:edge_attributes(g, e)
   return { label = graphviz.quote_string("edge\n" .. e.id) }
 end
 
