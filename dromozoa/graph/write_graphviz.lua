@@ -54,5 +54,5 @@ return function (g, out, visitor)
       out:write(e.uid, " -> ", e.vid, ";\n")
     end
   end
- out:write("}\n")
+ return out:write("}\n")
 end
