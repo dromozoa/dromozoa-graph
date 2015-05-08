@@ -16,6 +16,8 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local graphviz = require "dromozoa.graph.graphviz"
+local graphviz_attributes_adapter = require "dromozoa.graph.graphviz_attributes_adapter"
 
 local g = graph()
 
@@ -33,16 +35,18 @@ g:create_edge(v1, v4)
 g:create_edge(v2, v5)
 g:create_edge(v5, v4)
 
-g:write_graphviz(io.stdout, {
-  graph = function (self, g)
-    return { rankdir = "\"RL\"" }
-  end;
-  vertex = function (self, g, u)
-    if u.id == 1 then
-      return { label = "foo" }
-    end
-  end;
-  edge = function (self, g, e, u, v)
-    return { label = "\"label " .. e.id .. "\"" }
-  end;
-})
+local attributes = {}
+
+function attributes:graph_attributes(g)
+  return { rankdir = "LR" }
+end
+
+function attributes:each_node_attributes(g, u)
+  return { label = graphviz.quote_string("node " .. u.id) }
+end
+
+function attributes:each_edge_attributes(g, e)
+  return { label = graphviz.quote_string("edge\n" .. e.id) }
+end
+
+g:write_graphviz(io.stdout, graphviz_attributes_adapter(attributes))
