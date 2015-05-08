@@ -24,10 +24,13 @@ build = {
     ["dromozoa.graph.dfs_visitor"] = "dromozoa/graph/dfs_visitor.lua";
     ["dromozoa.graph.edge"] = "dromozoa/graph/edge.lua";
     ["dromozoa.graph.edges"] = "dromozoa/graph/edges.lua";
+    ["dromozoa.graph.graphviz"] = "dromozoa/graph/graphviz.lua";
+    ["dromozoa.graph.graphviz_attributes_adapter"] = "dromozoa/graph/graphviz_attributes_adapter.lua";
     ["dromozoa.graph.properties"] = "dromozoa/graph/properties.lua";
     ["dromozoa.graph.tsort"] = "dromozoa/graph/tsort.lua";
     ["dromozoa.graph.vertex"] = "dromozoa/graph/vertex.lua";
     ["dromozoa.graph.vertices"] = "dromozoa/graph/vertices.lua";
     ["dromozoa.graph.visitor_adapter"] = "dromozoa/graph/visitor_adapter.lua";
+    ["dromozoa.graph.write_graphviz"] = "dromozoa/graph/write_graphviz.lua";
   };
 }
