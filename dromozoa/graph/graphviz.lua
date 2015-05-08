@@ -23,29 +23,31 @@ local function write_attributes(out, attributes)
   out:write("]")
 end
 
-return function (g, out, visitor)
-  out:write("digraph \"graph\" {\n")
-  local attributes = visitor:graph(g)
-  if attributes then
-    out:write("  graph")
-    write_attributes(out, attributes)
-    out:write("\n")
-  end
-  for u in g:each_vertex() do
-    local attributes = visitor:vertex(g, u)
+return {
+  write = function (g, out, visitor)
+    out:write("digraph \"graph\" {\n")
+    local attributes = visitor:graph(g)
     if attributes then
-      out:write("  ", u.id)
+      out:write("  graph")
       write_attributes(out, attributes)
       out:write("\n")
     end
-  end
-  for e in g:each_edge() do
-    local attributes = visitor:edge(g, e, u, v)
-    out:write("  ", e.uid, " -> ", e.vid)
-    if attributes then
-      write_attributes(out, attributes)
+    for u in g:each_vertex() do
+      local attributes = visitor:vertex(g, u)
+      if attributes then
+        out:write("  ", u.id)
+        write_attributes(out, attributes)
+        out:write("\n")
+      end
     end
-    out:write("\n")
+    for e in g:each_edge() do
+      local attributes = visitor:edge(g, e, u, v)
+      out:write("  ", e.uid, " -> ", e.vid)
+      if attributes then
+        write_attributes(out, attributes)
+      end
+      out:write("\n")
+    end
+    out:write("}\n")
   end
-  out:write("}\n")
-end
+}
