@@ -17,7 +17,7 @@
 
 local dfs_visitor = require "dromozoa.graph.dfs_visitor"
 
-local function visitor(result)
+local function tsort_visitor(_result)
   local self = {}
 
   function self:back_edge(g, e, u, v)
@@ -25,7 +25,7 @@ local function visitor(result)
   end
 
   function self:finish_vertex(g, u)
-    result[#result + 1] = u
+    _result[#_result + 1] = u
   end
 
   return dfs_visitor(self)
@@ -33,6 +33,6 @@ end
 
 return function (g, mode)
   local result = {}
-  g:dfs(visitor(result), mode)
+  g:dfs(tsort_visitor(result), mode)
   return result
 end

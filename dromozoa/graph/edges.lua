@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.graph.clone"
+local clone = require "dromozoa.commons.clone"
 local edge = require "dromozoa.graph.edge"
 
 local function construct(_g, _n, _u, _v)

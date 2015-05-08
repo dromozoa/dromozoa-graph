@@ -10,6 +10,9 @@ description = {
   homepage = "https://github.com/dromozoa/dromozoa-graph/";
   maintainer = "Tomoyuki Fujimori <moyu@dromozoa.com>";
 }
+dependencies = {
+  "dromozoa-commons";
+}
 build = {
   type = "builtin";
   modules = {
@@ -17,7 +20,6 @@ build = {
     ["dromozoa.graph.adjacency_list"] = "dromozoa/graph/adjacency_list.lua";
     ["dromozoa.graph.bfs"] = "dromozoa/graph/bfs.lua";
     ["dromozoa.graph.bfs_visitor"] = "dromozoa/graph/bfs_visitor.lua";
-    ["dromozoa.graph.clone"] = "dromozoa/graph/clone.lua";
     ["dromozoa.graph.dfs"] = "dromozoa/graph/dfs.lua";
     ["dromozoa.graph.dfs_visitor"] = "dromozoa/graph/dfs_visitor.lua";
     ["dromozoa.graph.edge"] = "dromozoa/graph/edge.lua";
