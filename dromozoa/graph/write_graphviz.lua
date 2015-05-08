@@ -21,8 +21,13 @@ local function writer(_g, _out)
   function self:write_attributes(prolog, epilog, attributes)
     if attributes then
       _out:write(prolog, " [")
+      local i = 1
       for k, v in pairs(attributes) do
-        _out:write(k, " = ", v, ";")
+        if i > 1 then
+          _out:write(", ")
+        end
+        i = i + 1
+        _out:write(k, " = ", v)
       end
       _out:write("]", epilog)
     end

@@ -42,7 +42,7 @@ function attributes:graph_attributes(g)
 end
 
 function attributes:each_node_attributes(g, u)
-  return { label = graphviz.quote_string("node " .. u.id) }
+  return { label = graphviz.quote_string("node " .. u.id); color = "blue" }
 end
 
 function attributes:each_edge_attributes(g, e)
