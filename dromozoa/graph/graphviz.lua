@@ -15,24 +15,25 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs_visitor = require "dromozoa.graph.dfs_visitor"
+local quote_string = {
+  ["\""] = "\\\"";
+  ["\\"] = "\\\\";
+  ["\n"] = "\\n";
+}
 
-local function tsort_visitor(_result)
-  local self = {}
+local escape_html = {
+  ["\""] = "&quot;";
+  ["&"] = "&amp;";
+  ["<"] = "&lt;";
+  [">"] = "&gt;";
+}
 
-  function self:back_edge(g, e, u, v)
-    error("found back edge " .. e.id)
-  end
+return {
+  quote_string = function (value)
+    return "\"" .. value:gsub("[\"\\\n]", quote_string) .. "\""
+  end;
 
-  function self:finish_vertex(g, u)
-    _result[#_result + 1] = u
-  end
-
-  return dfs_visitor(self)
-end
-
-return function (g, mode)
-  local result = {}
-  g:dfs(tsort_visitor(result), mode)
-  return result
-end
+  escape_html = function (value)
+    return (value:gsub("[\"&<>]", escape_html))
+  end;
+}
