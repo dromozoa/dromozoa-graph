@@ -95,7 +95,7 @@ local function construct(self)
   end
 
   function self:write_graphviz(out, visitor)
-    write_graphviz(self, out, visitor)
+    return write_graphviz(self, out, visitor)
   end
 
   function self:impl_get_adjacencies(mode)

@@ -49,5 +49,5 @@ function attributes:edge_attributes(g, e)
   return { label = graphviz.quote_string("edge\n" .. e.id) }
 end
 
--- g:write_graphviz(io.stdout, graphviz_attributes_adapter(attributes))
 g:write_graphviz(io.stdout)
+g:write_graphviz(assert(io.open("test.dot", "w")), graphviz_attributes_adapter(attributes)):close()
