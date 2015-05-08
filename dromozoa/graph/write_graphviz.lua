@@ -15,48 +15,44 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function writer(_g, _out)
-  local self = {}
-
-  function self:write_attributes(prolog, epilog, attributes)
-    if attributes then
-      _out:write(prolog, " [")
-      local i = 0
-      for k, v in pairs(attributes) do
-        i = i + 1
-        if i > 1 then
-          _out:write(", ")
-        end
-        _out:write(k, " = ", v)
+local function write_attributes(out, attributes, prolog, epilog)
+  if attributes then
+    if prolog then
+      out:write(prolog)
+    end
+    out:write(" [")
+    local first = true
+    for k, v in pairs(attributes) do
+      if first then
+        first = false
+      else
+        out:write(", ")
       end
-      _out:write("]", epilog)
+      out:write(k, " = ", v)
+    end
+    out:write("]")
+    if epilog then
+      out:write(epilog)
     end
   end
-
-  function self:write(visitor)
-    _out:write("digraph \"g\" {\n")
-    if visitor then
-      self:write_attributes("graph", ";\n", visitor:graph_attributes(g))
-      for u in _g:each_vertex() do
-        self:write_attributes(u.id, ";\n", visitor:node_attributes(g, u))
-      end
-      for e in _g:each_edge() do
-        _out:write(e.uid, " -> ", e.vid)
-        self:write_attributes("", "", visitor:edge_attributes(g, e))
-        _out:write(";\n")
-      end
-    else
-      for e in _g:each_edge() do
-        _out:write(e.uid, " -> ", e.vid, ";\n")
-      end
-    end
-    _out:write("}\n")
-  end
-
-  return self
 end
 
 return function (g, out, visitor)
-  writer(g, out):write(visitor)
-  return out
+  out:write("digraph g {\n")
+  if visitor then
+    write_attributes(out, visitor:graph_attributes(g), "graph", ";\n")
+    for u in g:each_vertex() do
+      write_attributes(out, visitor:node_attributes(g, u), u.id, ";\n")
+    end
+    for e in g:each_edge() do
+      out:write(e.uid, " -> ", e.vid)
+      write_attributes(out, visitor:edge_attributes(g, e))
+      out:write(";\n")
+    end
+  else
+    for e in g:each_edge() do
+      out:write(e.uid, " -> ", e.vid, ";\n")
+    end
+  end
+ out:write("}\n")
 end
