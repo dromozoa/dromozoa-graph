@@ -21,6 +21,7 @@ local edges = require "dromozoa.graph.edges"
 local properties = require "dromozoa.graph.properties"
 local tsort = require "dromozoa.graph.tsort"
 local vertices = require "dromozoa.graph.vertices"
+local write_graphviz = require "dromozoa.graph.write_graphviz"
 
 local function construct(self)
   local _vp = self._vp
@@ -91,6 +92,10 @@ local function construct(self)
 
   function self:tsort(mode)
     return tsort(self, mode)
+  end
+
+  function self:write_graphviz(out, visitor)
+    return write_graphviz(self, out, visitor)
   end
 
   function self:impl_get_adjacencies(mode)
