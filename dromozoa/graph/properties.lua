@@ -17,26 +17,26 @@
 
 local clone = require "dromozoa.commons.clone"
 
-local function construct(self, dataset)
+local function construct(self, _dataset)
   function self:clone()
-    return construct({}, clone(dataset))
+    return construct({}, clone(_dataset))
   end
 
   function self:clear_properties(key)
-    dataset[key] = nil
+    _dataset[key] = nil
   end
 
   function self:remove_item(id)
-    for key, data in pairs(dataset) do
+    for key, data in pairs(_dataset) do
       data[id] = nil
       if next(data) == nil then
-        dataset[key] = nil
+        _dataset[key] = nil
       end
     end
   end
 
   function self:each_item(key, fn, context)
-    local data = dataset[key]
+    local data = _dataset[key]
     if data then
       return function (_, i)
         if i then
@@ -51,27 +51,38 @@ local function construct(self, dataset)
   end
 
   function self:set_property(id, key, value)
-    local data = dataset[key]
+    local data = _dataset[key]
     if data then
       if value ~= nil then
         data[id] = value
       else
         data[id] = nil
         if next(data) == nil then
-          dataset[key] = nil
+          _dataset[key] = nil
         end
       end
     else
       if value ~= nil then
-        dataset[key] = { [id] = value }
+        _dataset[key] = { [id] = value }
       end
     end
   end
 
   function self:get_property(id, key)
-    local data = dataset[key]
+    local data = _dataset[key]
     if data then
       return data[id]
+    end
+  end
+
+  function self:each_property(id)
+    return function (_, i)
+      for key, data in next, _dataset, i do
+        local value = data[id]
+        if value ~= nil then
+          return key, value
+        end
+      end
     end
   end
 
