@@ -75,6 +75,17 @@ local function construct(self, _dataset)
     end
   end
 
+  function self:each_property(id)
+    return function (_, i)
+      for key, data in next, _dataset, i do
+        local value = data[id]
+        if value ~= nil then
+          return key, value
+        end
+      end
+    end
+  end
+
   return self
 end
 
