@@ -88,5 +88,9 @@ return function (_g, _id, _uid, _vid)
     _p:set_property(_id, key, value)
   end
 
+  function self:each_property()
+    return _p:each_property(_id)
+  end
+
   return setmetatable(self, metatable)
 end

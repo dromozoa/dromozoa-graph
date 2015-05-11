@@ -18,6 +18,7 @@
 local adjacency_list = require "dromozoa.graph.adjacency_list"
 local dfs = require "dromozoa.graph.dfs"
 local edges = require "dromozoa.graph.edges"
+local merge = require "dromozoa.graph.merge"
 local write_graphviz = require "dromozoa.graph.write_graphviz"
 local properties = require "dromozoa.graph.properties"
 local tsort = require "dromozoa.graph.tsort"
@@ -84,6 +85,10 @@ local function construct(self)
 
   function self:clear_edge_properties(key)
     _ep:clear_properties(key)
+  end
+
+  function self:merge(that)
+    merge(self, that)
   end
 
   function self:dfs(visitor, mode)

@@ -49,6 +49,10 @@ return function (_g, _id)
     _p:set_property(_id, key, value)
   end
 
+  function self:each_property()
+    return _p:each_property(_id)
+  end
+
   function self:each_adjacent_vertex(mode)
     return _g:impl_get_adjacencies(mode):each_adjacent_vertex(_id)
   end
