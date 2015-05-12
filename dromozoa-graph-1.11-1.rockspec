@@ -1,8 +1,8 @@
 package = "dromozoa-graph"
-version = "1.10-1"
+version = "1.11-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.10.tar.gz";
-  file = "dromozoa-graph-1.10.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.11.tar.gz";
+  file = "dromozoa-graph-1.11.tar.gz";
 }
 description = {
   summary = "Graph data structures and algorithms";
