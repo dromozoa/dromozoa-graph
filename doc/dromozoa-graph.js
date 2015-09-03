@@ -39,6 +39,8 @@
     return marker;
   };
 
+  console.log(window.innerWidth + "x" + window.innerHeight);
+
   D.make_boxed_text = function (svg, line) {
     var g, rect, text;
 
@@ -71,9 +73,16 @@
   $(function () {
     var svg, defs, arrow;
 
-    svg = d3.select("body").append("svg").attr({
-      width: 640,
-      height: 480
+    svg = d3.select("svg").attr({
+      width: root.innerWidth,
+      height: root.innerHeight
+    });
+
+    $(root).on("resize", function () {
+      svg.attr({
+        width: root.innerWidth,
+        height: root.innerHeight
+      });
     });
 
     defs = svg.append("defs");
@@ -84,7 +93,7 @@
       d: d3.svg.line().interpolate("basis")([
         [ 10, 100 ],
         [ 400, 90 ],
-        [ 530, 400 ]
+        [ 800, 400 ]
       ]),
       fill: "none",
       stroke: "black",
@@ -116,11 +125,10 @@
       opacity: 0.5
     });
 
-    var text = svg.append("text").text("東京").attr({
+    var text = svg.append("text").text("1234567").attr({
       x: 320,
       y: 240,
-      "font-size": 50,
-      "font-weight": 100,
+      // "font-size": 50,
       "text-anchor": "middle",
       fill: "red"
     });
