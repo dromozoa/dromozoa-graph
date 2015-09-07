@@ -1,148 +1,81 @@
+/*jslint this: true, white: true */
+/*global global */
+"use strict";
 (function (root) {
-  var D = root.dromozoa;
+  var module = (function () {
+    if (root.dromozoa === undefined) {
+      root.dromozoa = {};
+    }
+    if (root.dromozoa.graph === undefined) {
+      root.dromozoa.graph = {};
+    }
+    return root.dromozoa.graph;
+  }());
 
-  if (D === undefined) {
-    root.dromozoa = D = {};
+  if (root.console !== undefined && root.console.log !== undefined) {
+    module.log = function () {
+      root.console.log.apply(root.console, arguments);
+    };
+  } else {
+    module.log = root.jQuery.noop;
   }
 
-  D.make_id = function () {
-    var namespace = "dromozoa-", counter = 0;
-    return function () {
-      ++counter;
-      return namespace + counter;
-    };
-  }();
-
-  D.make_arrow = function (defs, width, height, attr) {
-    var marker, path;
-
-    marker = defs.append("marker").attr({
-      id: D.make_id(),
-      refX: 0,
-      refY: height / 2,
-      markerWidth: width,
-      markerHeight: height,
-      orient: "auto"
-    });
-
-    path = marker.append("path").attr("d", d3.svg.line()([
-      [ 0, 0 ],
-      [ width, height / 2 ],
-      [ 0, height ]
-    ]));
-    if (attr !== undefined) {
-      $.each(attr, function (k, v) {
-        path.attr(k, v);
-      });
-    }
-
-    return marker;
-  };
-
-  console.log(window.innerWidth + "x" + window.innerHeight);
-
-  D.make_boxed_text = function (svg, line) {
-    var g, rect, text;
-
-    g = svg.append("g");
-
-    rect = g.append("rect");
-
-    text = g.append("text").text(line).attr({
-      "font-size": 40,
-      x: 100,
-      y: 50,
-      "text-anchor": "start"
-    });
-
-    var b = text.node().getBBox();
-    console.log(b);
-    rect.attr({
-      x: b.x,
-      y: b.y,
-      width: b.width,
-      height: b.height,
-      fill: "red"
-    });
-
-
-
-    return g
-  };
-
-  $(function () {
-    var svg, defs, arrow;
-
-    svg = d3.select("svg").attr({
+  module.main = function (d3) {
+    var a, b, box, svg = d3.select("body").style({
+      margin: 0,
+      "font-family": "Noto Sans Japanese",
+      "font-weight": 100
+    }).append("svg").attr({
       width: root.innerWidth,
       height: root.innerHeight
+    }).style({
+      display: "block"
     });
 
-    $(root).on("resize", function () {
+    d3.select(root).on("resize", function () {
       svg.attr({
         width: root.innerWidth,
         height: root.innerHeight
       });
     });
 
-    defs = svg.append("defs");
-
-    arrow = D.make_arrow(defs, 2 * Math.sqrt(3), 4);
-
-    var path = svg.append("path").attr({
-      d: d3.svg.line().interpolate("basis")([
-        [ 10, 100 ],
-        [ 400, 90 ],
-        [ 800, 400 ]
-      ]),
-      fill: "none",
-      stroke: "black",
-      "stroke-width": 8,
-      "marker-end": "url(#" + arrow.attr("id") + ")"
-    });
-
-    var size = path.node().getTotalLength() * 2;
-    console.log(size);
-
-    path.attr("stroke-dasharray", size + " " + size);
-    path.attr("stroke-dashoffset", size);
-    path.transition().duration(2000).attr("stroke-dashoffset", 0);
-
-    var bbox = svg.append("rect").attr({
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      fill: "green",
-      opacity: 0.5
-    });
-
-    var circle = svg.append("circle").attr({
-      cx: 0,
-      cy: 0,
-      r: 0,
-      fill: "yellow",
-      opacity: 0.5
-    });
-
-    var text = svg.append("text").text("1234567").attr({
-      x: 320,
-      y: 240,
-      // "font-size": 50,
-      "text-anchor": "middle",
+    b = svg.append("rect").attr({
       fill: "red"
     });
-    var b = text.node().getBBox();
-    bbox.attr(b);
 
-    circle.attr({
-      cx: b.x + b.width / 2,
-      cy: b.y + b.height / 2,
-      r: Math.sqrt(b.width * b.width + b.height * b.height) / 2
+    a = svg.append("text").text("レッサーパンダ").attr({
+      x: 100,
+      y: 100,
+      "font-size": 72
     });
+    box = a.node().getBBox();
+    b.attr({
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height
+    });
+  };
 
-    var t2 = D.make_boxed_text(svg, "日本語");
+  module.run = function () {
+    if (module.run.ready && module.run.active) {
+      module.main(root.d3);
+    }
+  };
 
-
+  root.WebFont.load({
+    custom: {
+      families: [ "Noto Sans Japanese:n1" ],
+      urls: [ "https://fonts.googleapis.com/earlyaccess/notosansjapanese.css" ]
+    },
+    active: function () {
+      module.run.active = true;
+      module.run();
+    }
   });
-}(window));
+
+  root.jQuery(function () {
+    module.run.ready = true;
+    module.run();
+  });
+}(this.self || global));
