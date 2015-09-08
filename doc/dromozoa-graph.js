@@ -20,36 +20,126 @@
     };
   }
 
-  module.update_nodes = function () {
-    module.nodes.each(function () {
-      var g = d3.select(this),
-          t = g.select("text"),
-          box = t.node().getBBox(),
+  module.update_nodes = function (type) {
+    module.nodes.each(function (d) {
+      var d3_this = d3.select(this),
+          d3_text = d3_this.select("text"),
+          box = d3_text.node().getBBox(),
+          y = box.y,
           w = box.width,
           h = box.height,
-          w2 = w * 0.5,
-          h2 = h * 0.5,
-          dy = t.attr("dy");
+          hw = w * 0.5,
+          hh = h * 0.5,
+          dy = d3_text.attr("dy");
       if (dy === null) {
         dy = 0;
       }
-      t.attr({
-        dy: dy - (box.y + h2)
+      d3_text.attr({
+        dy: dy - y - hh
       });
-      g.select("rect").attr({
-        x: -w2,
-        y: -h2,
+      d3_this.select("rect").attr({
+        x: -hw,
+        y: -hh,
         width: w,
         height: h
       });
-      g.select("ellipse").attr({
-        rx: w2 * Math.SQRT2,
-        ry: h2 * Math.SQRT2
+      d3_this.select("ellipse").attr({
+        rx: hw * Math.SQRT2,
+        ry: hh * Math.SQRT2
       });
-      g.select("circle").attr({
-        r: Math.sqrt(w2 * w2 + h2 * h2)
+      d3_this.select("circle").attr({
+        r: Math.sqrt(hw * hw + hh * hh)
       });
+      d.type = type;
+      d.width = w;
+      d.height = h;
     });
+  };
+
+  module.intersection = function (a, b) {
+    var fn = module.intersection[a.type];
+    if (fn !== undefined) {
+      return fn(a, b);
+    } else {
+      return a;
+    }
+  };
+
+  module.intersection.rect = function (a, b) {
+    var dx = b.x - a.x,
+        dy = b.y - a.y,
+        hw = a.width * 0.5,
+        hh = a.height * 0.5,
+        c = hh / hw,
+        x, y, d;
+    if (dx === 0) {
+      x = 0;
+      y = hh;
+      if (dy < 0) {
+        y = -y;
+      }
+    } else {
+      d = dy / dx;
+      if (-c < d && d < c) {
+        x = hw;
+        if (dx < 0) {
+          x = -x;
+        }
+        y = x * d;
+      } else {
+        y = hh;
+        if (dy < 0) {
+          y = -y;
+        }
+        x = y / d;
+      }
+    }
+    return {
+      x: a.x + x,
+      y: a.y + y
+    };
+  };
+
+  module.intersection.ellipse = function (a, b) {
+    var dx = b.x - a.x,
+        dy = b.y - a.y,
+        hw = a.width * 0.5,
+        hh = a.height * 0.5,
+        rx = hw * Math.SQRT2,
+        ry = hh * Math.SQRT2,
+        rx2 = rx * rx,
+        ry2 = ry * ry,
+        x, y, d;
+    if (dx === 0) {
+      x = 0;
+      y = ry;
+      if (dy < 0) {
+        y = -y;
+      }
+    } else {
+      d = dy / dx;
+      x = Math.sqrt(rx2 * ry2 / (rx2 * d * d + ry2));
+      if (dx < 0) {
+        x = -x;
+      }
+      y = x * d;
+    }
+    return {
+      x: a.x + x,
+      y: a.y + y
+    };
+  };
+
+  module.intersection.circle = function (a, b) {
+    var dx = b.x - a.x,
+        dy = b.y - a.y,
+        hw = a.width * 0.5,
+        hh = a.height * 0.5,
+        c = Math.sqrt((hw * hw + hh * hh) / (dx * dx + dy * dy));
+    return {
+      x: a.x + dx * c,
+      y: a.y + dy * c
+    };
   };
 
   module.main = function () {
@@ -108,11 +198,13 @@
     });
 
 //    nodes.append("circle").attr({
+//      opacity: 0.5,
 //      fill: "pink",
 //      stroke: "black"
 //    });
 
 //    nodes.append("rect").attr({
+//      opacity: 0.5,
 //      fill: "pink",
 //      stroke: "black"
 //    });
@@ -125,14 +217,22 @@
 
     module.links = links;
     module.nodes = nodes;
-    module.update_nodes();
+    module.update_nodes("ellipse");
 
     module.layout.on("tick", function () {
       links.attr({
-        x1: function (d) { return d.source.x; },
-        y1: function (d) { return d.source.y; },
-        x2: function (d) { return d.target.x; },
-        y2: function (d) { return d.target.y; }
+        x1: function (d) {
+          return module.intersection(d.source, d.target).x;
+        },
+        y1: function (d) {
+          return module.intersection(d.source, d.target).y;
+        },
+        x2: function (d) {
+          return module.intersection(d.target, d.source).x;
+        },
+        y2: function (d) {
+          return module.intersection(d.target, d.source).y;
+        }
       });
 
       nodes.attr({
