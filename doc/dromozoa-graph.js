@@ -131,20 +131,19 @@
   module.offset = function (a, b, offset) {
     var fn = module.offset[a.type];
     if (fn !== undefined) {
-      return module.offset_impl(fn(a, b), b, offset);
+      return fn(a, b, offset);
     } else {
       return module.offset_impl(a, b, offset);
     }
   };
 
-  module.offset.circle = function (a, b) {
+  module.offset.circle = function (a, b, offset) {
     var hw = a.width * 0.5,
-        hh = a.height * 0.5,
-        r = Math.sqrt(hw * hw + hh * hh);
-    return module.offset_impl(a, b, r);
+        hh = a.height * 0.5;
+    return module.offset_impl(a, b, Math.sqrt(hw * hw + hh * hh) + offset);
   };
 
-  module.offset.ellipse = function (a, b) {
+  module.offset.ellipse = function (a, b, offset) {
     var dx = b.x - a.x,
         dy = b.y - a.y,
         hw = a.width * 0.5,
@@ -157,24 +156,15 @@
     if (dx === 0) {
       x = 0;
       y = ry;
-      if (dy < 0) {
-        y = -y;
-      }
     } else {
       d = dy / dx;
       x = Math.sqrt(rx2 * ry2 / (rx2 * d * d + ry2));
-      if (dx < 0) {
-        x = -x;
-      }
       y = x * d;
     }
-    return {
-      x: a.x + x,
-      y: a.y + y
-    };
+    return module.offset_impl(a, b, Math.sqrt(x * x + y * y) + offset);
   };
 
-  module.offset.rect = function (a, b) {
+  module.offset.rect = function (a, b, offset) {
     var dx = b.x - a.x,
         dy = b.y - a.y,
         hw = a.width * 0.5,
@@ -184,29 +174,17 @@
     if (dx === 0) {
       x = 0;
       y = hh;
-      if (dy < 0) {
-        y = -y;
-      }
     } else {
       d = dy / dx;
       if (-c < d && d < c) {
         x = hw;
-        if (dx < 0) {
-          x = -x;
-        }
         y = x * d;
       } else {
         y = hh;
-        if (dy < 0) {
-          y = -y;
-        }
         x = y / d;
       }
     }
-    return {
-      x: a.x + x,
-      y: a.y + y
-    };
+    return module.offset_impl(a, b, Math.sqrt(x * x + y * y) + offset);
   };
 
   module.main = function () {
@@ -248,20 +226,20 @@
         .enter()
         .append("g");
 
-//    nodes.append("ellipse").attr({
-//      opacity: 0.5,
-//      fill: "pink",
-//      stroke: "#000000"
-//    });
-
-    nodes.append("circle").attr({
-      opacity: 0.5,
+    nodes.append("ellipse").attr({
+      // opacity: 0.5,
       fill: "pink",
-      stroke: "black"
+      stroke: "#000000"
     });
 
+//    nodes.append("circle").attr({
+//      // opacity: 0.5,
+//      fill: "pink",
+//      stroke: "black"
+//    });
+
 //    nodes.append("rect").attr({
-//      opacity: 0.5,
+//      // opacity: 0.5,
 //      fill: "pink",
 //      stroke: "black"
 //    });
@@ -276,7 +254,7 @@
     module.nodes = nodes;
 
     module.update_links();
-    module.update_nodes("circle");
+    module.update_nodes("ellipse");
 
     layout = d3.layout.force()
         .nodes(module.data.nodes)
