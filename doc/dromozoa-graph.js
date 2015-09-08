@@ -13,14 +13,12 @@
   }());
 
   if (root.console !== undefined && root.console.log !== undefined) {
-    module.log = function () {
-      root.console.log.apply(root.console, arguments);
-    };
+    module.console = root.console;
   } else {
-    module.log = root.jQuery.noop;
+    module.console = {
+      log: root.jQuery.noop
+    };
   }
-
-  module.make_
 
   module.main = function (d3) {
     module.svg = d3.select("body").style({
@@ -64,9 +62,9 @@
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
-      // { source: 0, target: 4 },
-      // { source: 0, target: 5 },
-      // { source: 0, target: 6 },
+      { source: 0, target: 4 },
+      { source: 0, target: 5 },
+      { source: 0, target: 6 },
       { source: 1, target: 9 },
       { source: 1, target: 11 },
       { source: 1, target: 14 },
@@ -76,15 +74,15 @@
       { source: 3, target: 10 },
       { source: 3, target: 12 },
       { source: 3, target: 15 },
-      // { source: 4, target: 7 },
-      // { source: 4, target: 8 },
-      // { source: 4, target: 9 },
-      // { source: 5, target: 10 },
-      // { source: 5, target: 11 },
-      // { source: 5, target: 12 },
-      // { source: 6, target: 13 },
-      // { source: 6, target: 14 },
-      // { source: 6, target: 15 }
+      { source: 4, target: 7 },
+      { source: 4, target: 8 },
+      { source: 4, target: 9 },
+      { source: 5, target: 10 },
+      { source: 5, target: 11 },
+      { source: 5, target: 12 },
+      { source: 6, target: 13 },
+      { source: 6, target: 14 },
+      { source: 6, target: 15 }
     ];
 
     module.layout = d3.layout.force()
@@ -109,10 +107,10 @@
             .append("line")
             .attr({
               stroke: "black",
-              x1: function (d, i) { return d.source.x; },
-              y1: function (d, i) { return d.source.y; },
-              x2: function (d, i) { return d.target.x; },
-              y2: function (d, i) { return d.target.y; }
+              x1: function (d) { return d.source.x; },
+              y1: function (d) { return d.source.y; },
+              x2: function (d) { return d.target.x; },
+              y2: function (d) { return d.target.y; }
             });
 
     module.group = module.svg.selectAll("g")
@@ -120,7 +118,7 @@
         .enter()
             .append("g")
             .attr({
-              transform: function (d, i) {
+              transform: function (d) {
                 return "translate(" + d.x + "," + d.y + ")";
               }
             });
@@ -138,12 +136,12 @@
         });
 
     module.group.append("text")
-        .text(function (d) { return d.name })
+        .text(function (d) { return d.name; })
         .attr({
             "text-anchor": "middle"
-        }).each(function (d, i) {
+        }).each(function () {
           var bbox = this.getBBox(),
-              rect = d3.select(this.parentNode).select("rect"),
+//              rect = d3.select(this.parentNode).select("rect"),
               c = bbox.y + bbox.height,
               sqrt2 = Math.sqrt(2);
           d3.select(this)
@@ -163,27 +161,35 @@
                 rx: bbox.width / 2 * sqrt2,
                 ry: bbox.height / 2 * sqrt2
               });
-          module.log(c);
         });
 
     module.layout.on("tick", function () {
       module.line.attr({
-        x1: function (d, i) { return d.source.x; },
-        y1: function (d, i) { return d.source.y; },
-        x2: function (d, i) { return d.target.x; },
-        y2: function (d, i) { return d.target.y; }
+        x1: function (d) { return d.source.x; },
+        y1: function (d) { return d.source.y; },
+        x2: function (d) { return d.target.x; },
+        y2: function (d) { return d.target.y; }
       });
 
       module.group.attr({
-        transform: function (d, i) {
+        transform: function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         }
       });
     });
   };
 
-  module.run = function () {
-    if (module.run.ready && module.run.active) {
+  module.run = function (ev) {
+    module.console.log("run " + ev);
+    module.run[ev] = true;
+    if (module.run.start) {
+      return;
+    }
+    if ((module.run.ready && module.run.active) || module.run.timeout) {
+      if (module.run.timer !== undefined) {
+        root.clearTimeout(module.run.timer);
+      }
+      module.run.start = true;
       module.main(root.d3);
     }
   };
@@ -193,14 +199,20 @@
       families: [ "Noto Sans Japanese:n1" ],
       urls: [ "https://fonts.googleapis.com/earlyaccess/notosansjapanese.css" ]
     },
+    timeout: 60000,
     active: function () {
-      module.run.active = true;
-      module.run();
+      module.run("active");
+    },
+    inactive: function () {
+      module.console.log("inactive");
     }
   });
 
   root.jQuery(function () {
-    module.run.ready = true;
-    module.run();
+    module.run("ready");
   });
+
+  module.run.timer = root.setTimeout(function() {
+    module.run("timeout");
+  }, 3000);
 }(this.self || global));
