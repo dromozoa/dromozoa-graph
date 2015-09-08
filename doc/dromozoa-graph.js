@@ -210,7 +210,7 @@
   };
 
   module.main = function () {
-    var svg, defs, marker_start, marker_end, links, nodes;
+    var svg, defs, marker_start, marker_end, links, nodes, layout;
 
     svg = d3.select("body").style({
       margin: 0,
@@ -231,25 +231,8 @@
     });
 
     defs = svg.append("defs");
-
     marker_start = module.make_marker(defs, "start");
     marker_end = module.make_marker(defs, "end");
-
-    module.layout = d3.layout.force()
-        .nodes(module.data.nodes)
-        .links(module.data.links)
-        .size([
-          root.innerWidth,
-          root.innerHeight
-        ])
-        .linkStrength(0.9)
-        .friction(0.9)
-        .linkDistance(100)
-        .charge(-900)
-        .gravity(0.1)
-        .theta(0.8)
-        .alpha(0.1)
-        .start();
 
     links = svg.selectAll("line")
         .data(module.data.links)
@@ -295,7 +278,23 @@
     module.update_links();
     module.update_nodes("ellipse");
 
-    module.layout.on("tick", function () {
+    layout = d3.layout.force()
+        .nodes(module.data.nodes)
+        .links(module.data.links)
+        .size([
+          root.innerWidth,
+          root.innerHeight
+        ])
+        .linkStrength(0.9)
+        .friction(0.9)
+        .linkDistance(100)
+        .charge(-900)
+        .gravity(0.1)
+        .theta(0.8)
+        .alpha(0.1)
+        .start();
+
+    layout.on("tick", function () {
       links.attr({
         x1: function (d) {
           return module.intersection(d.source, d.target, d.marker_start).x;
@@ -320,7 +319,6 @@
   };
 
   module.run = function (ev) {
-    module.console.log("run " + ev);
     module.run[ev] = true;
     if (module.run.start) {
       return;
