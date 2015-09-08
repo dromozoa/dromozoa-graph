@@ -20,34 +20,41 @@
     };
   }
 
+  module.make_id = function () {
+    module.make_id.counter += 1;
+    return module.make_id.namespace + module.make_id.counter;
+  };
+  module.make_id.namespace = "dromozoa-graph-";
+  module.make_id.counter = 0;
+
   module.update_nodes = function (type) {
     module.nodes.each(function (d) {
-      var d3_this = d3.select(this),
-          d3_text = d3_this.select("text"),
-          box = d3_text.node().getBBox(),
+      var g = d3.select(this),
+          text = g.select("text"),
+          box = text.node().getBBox(),
           y = box.y,
           w = box.width,
           h = box.height,
           hw = w * 0.5,
           hh = h * 0.5,
-          dy = d3_text.attr("dy");
+          dy = text.attr("dy");
       if (dy === null) {
         dy = 0;
       }
-      d3_text.attr({
+      text.attr({
         dy: dy - y - hh
       });
-      d3_this.select("rect").attr({
+      g.select("rect").attr({
         x: -hw,
         y: -hh,
         width: w,
         height: h
       });
-      d3_this.select("ellipse").attr({
+      g.select("ellipse").attr({
         rx: hw * Math.SQRT2,
         ry: hh * Math.SQRT2
       });
-      d3_this.select("circle").attr({
+      g.select("circle").attr({
         r: Math.sqrt(hw * hw + hh * hh)
       });
       d.type = type;
@@ -143,7 +150,7 @@
   };
 
   module.main = function () {
-    var svg, links, nodes;
+    var svg, defs, marker_start, marker_end, links, nodes;
 
     svg = d3.select("body").style({
       margin: 0,
@@ -161,6 +168,36 @@
         width: root.innerWidth,
         height: root.innerHeight
       });
+    });
+
+    defs = svg.append("defs");
+
+    marker_start = defs.append("marker").attr({
+      id: module.make_id(),
+      refX: 0,
+      refY: 4,
+      markerWidth: 8,
+      markerHeight: 8,
+      orient: "auto"
+    });
+    marker_start.append("path").attr({
+      d: d3.svg.line()([ [ 8, 0 ], [ 0, 4 ], [ 8, 8 ] ]),
+      fill: "blue",
+      opacity: 0.5
+    });
+
+    marker_end = defs.append("marker").attr({
+      id: module.make_id(),
+      refX: 8,
+      refY: 4,
+      markerWidth: 8,
+      markerHeight: 8,
+      orient: "auto"
+    });
+    marker_end.append("path").attr({
+      d: d3.svg.line()([ [ 0, 0 ], [ 8, 4 ], [ 0, 8 ] ]),
+      fill: "red",
+      opacity: 0.5
     });
 
     module.layout = d3.layout.force()
@@ -183,7 +220,10 @@
         .data(module.data.links)
         .enter()
         .append("line").attr({
-          stroke: "black"
+          stroke: "black",
+          "stroke-width": 4,
+          "marker-start": "url(#" + marker_start.attr("id") + ")",
+          "marker-end": "url(#" + marker_end.attr("id") + ")"
         });
 
     nodes = svg.selectAll("g")
