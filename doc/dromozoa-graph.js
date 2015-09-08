@@ -65,41 +65,6 @@
     }
   };
 
-  module.intersection.rect = function (a, b) {
-    var dx = b.x - a.x,
-        dy = b.y - a.y,
-        hw = a.width * 0.5,
-        hh = a.height * 0.5,
-        c = hh / hw,
-        x, y, d;
-    if (dx === 0) {
-      x = 0;
-      y = hh;
-      if (dy < 0) {
-        y = -y;
-      }
-    } else {
-      d = dy / dx;
-      if (-c < d && d < c) {
-        x = hw;
-        if (dx < 0) {
-          x = -x;
-        }
-        y = x * d;
-      } else {
-        y = hh;
-        if (dy < 0) {
-          y = -y;
-        }
-        x = y / d;
-      }
-    }
-    return {
-      x: a.x + x,
-      y: a.y + y
-    };
-  };
-
   module.intersection.ellipse = function (a, b) {
     var dx = b.x - a.x,
         dy = b.y - a.y,
@@ -142,10 +107,45 @@
     };
   };
 
-  module.main = function () {
-    var nodes, links;
+  module.intersection.rect = function (a, b) {
+    var dx = b.x - a.x,
+        dy = b.y - a.y,
+        hw = a.width * 0.5,
+        hh = a.height * 0.5,
+        c = hh / hw,
+        x, y, d;
+    if (dx === 0) {
+      x = 0;
+      y = hh;
+      if (dy < 0) {
+        y = -y;
+      }
+    } else {
+      d = dy / dx;
+      if (-c < d && d < c) {
+        x = hw;
+        if (dx < 0) {
+          x = -x;
+        }
+        y = x * d;
+      } else {
+        y = hh;
+        if (dy < 0) {
+          y = -y;
+        }
+        x = y / d;
+      }
+    }
+    return {
+      x: a.x + x,
+      y: a.y + y
+    };
+  };
 
-    module.svg = d3.select("body").style({
+  module.main = function () {
+    var svg, links, nodes;
+
+    svg = d3.select("body").style({
       margin: 0,
       "font-family": "Noto Sans Japanese",
       "font-weight": 100
@@ -157,7 +157,7 @@
     });
 
     d3.select(root).on("resize", function () {
-      module.svg.attr({
+      svg.attr({
         width: root.innerWidth,
         height: root.innerHeight
       });
@@ -179,14 +179,14 @@
         .alpha(0.1)
         .start();
 
-    links = module.svg.selectAll("line")
+    links = svg.selectAll("line")
         .data(module.data.links)
         .enter()
         .append("line").attr({
           stroke: "black"
         });
 
-    nodes = module.svg.selectAll("g")
+    nodes = svg.selectAll("g")
         .data(module.data.nodes)
         .enter()
         .append("g");
