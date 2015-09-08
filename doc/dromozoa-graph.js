@@ -27,6 +27,56 @@
   module.make_id.namespace = "dromozoa-graph-";
   module.make_id.counter = 0;
 
+  module.make_marker = function (defs, type) {
+    var w = module.make_marker.width,
+        h = module.make_marker.height,
+        hw = w * 0.5,
+        hh = h * 0.5,
+        marker;
+    marker = defs.append("marker").attr({
+      id: module.make_id(),
+      refX: hw,
+      refY: hh,
+      markerWidth: w,
+      markerHeight: h,
+      orient: "auto"
+    });
+    if (type === "start") {
+      marker.append("path").attr({
+        d: d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ])
+      });
+    } else {
+      marker.append("path").attr({
+        d: d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ])
+      });
+    }
+    return marker;
+  };
+  module.make_marker.width = 8;
+  module.make_marker.height = 8;
+
+  module.update_links = function () {
+    module.links.each(function (d) {
+      var line = d3.select(this),
+          stroke_width = line.attr("stroke-width"),
+          marker;
+      if (stroke_width == null) {
+        stroke_width = 1;
+      }
+      marker = stroke_width * module.make_marker.width * 0.5;
+      if (line.attr("marker-start") !== null) {
+        d.marker_start = marker;
+      } else {
+        d.marker_start = 0;
+      }
+      if (line.attr("marker-end") !== null) {
+        d.marker_end = marker;
+      } else {
+        d.marker_end = 0;
+      }
+    });
+  };
+
   module.update_nodes = function (type) {
     module.nodes.each(function (d) {
       var g = d3.select(this),
@@ -63,12 +113,22 @@
     });
   };
 
-  module.intersection = function (a, b) {
+  module.intersection_impl = function (a, b, marker) {
+    var dx = b.x - a.x,
+        dy = b.y - a.y,
+        c = marker * Math.sqrt(1 / (dx * dx + dy * dy));
+    return {
+      x: a.x + dx * c,
+      y: a.y + dy * c
+    };
+  }
+
+  module.intersection = function (a, b, marker) {
     var fn = module.intersection[a.type];
     if (fn !== undefined) {
-      return fn(a, b);
+      return module.intersection_impl(fn(a, b), b, marker);
     } else {
-      return a;
+      return module.intersection_impl(a, b, marker);
     }
   };
 
@@ -172,33 +232,8 @@
 
     defs = svg.append("defs");
 
-    marker_start = defs.append("marker").attr({
-      id: module.make_id(),
-      refX: 0,
-      refY: 4,
-      markerWidth: 8,
-      markerHeight: 8,
-      orient: "auto"
-    });
-    marker_start.append("path").attr({
-      d: d3.svg.line()([ [ 8, 0 ], [ 0, 4 ], [ 8, 8 ] ]),
-      fill: "blue",
-      opacity: 0.5
-    });
-
-    marker_end = defs.append("marker").attr({
-      id: module.make_id(),
-      refX: 8,
-      refY: 4,
-      markerWidth: 8,
-      markerHeight: 8,
-      orient: "auto"
-    });
-    marker_end.append("path").attr({
-      d: d3.svg.line()([ [ 0, 0 ], [ 8, 4 ], [ 0, 8 ] ]),
-      fill: "red",
-      opacity: 0.5
-    });
+    marker_start = module.make_marker(defs, "start");
+    marker_end = module.make_marker(defs, "end");
 
     module.layout = d3.layout.force()
         .nodes(module.data.nodes)
@@ -221,8 +256,8 @@
         .enter()
         .append("line").attr({
           stroke: "black",
-          "stroke-width": 4,
-          "marker-start": "url(#" + marker_start.attr("id") + ")",
+          // "stroke-width": 2,
+          // "marker-start": "url(#" + marker_start.attr("id") + ")",
           "marker-end": "url(#" + marker_end.attr("id") + ")"
         });
 
@@ -257,21 +292,23 @@
 
     module.links = links;
     module.nodes = nodes;
+
+    module.update_links();
     module.update_nodes("ellipse");
 
     module.layout.on("tick", function () {
       links.attr({
         x1: function (d) {
-          return module.intersection(d.source, d.target).x;
+          return module.intersection(d.source, d.target, d.marker_start).x;
         },
         y1: function (d) {
-          return module.intersection(d.source, d.target).y;
+          return module.intersection(d.source, d.target, d.marker_start).y;
         },
         x2: function (d) {
-          return module.intersection(d.target, d.source).x;
+          return module.intersection(d.target, d.source, d.marker_end).x;
         },
         y2: function (d) {
-          return module.intersection(d.target, d.source).y;
+          return module.intersection(d.target, d.source, d.marker_end).y;
         }
       });
 
