@@ -128,8 +128,8 @@
     };
   };
 
-  module.intersection = function (a, b, offset) {
-    var fn = module.intersection[a.type];
+  module.offset = function (a, b, offset) {
+    var fn = module.offset[a.type];
     if (fn !== undefined) {
       return module.offset_impl(fn(a, b), b, offset);
     } else {
@@ -137,14 +137,14 @@
     }
   };
 
-  module.intersection.circle = function (a, b) {
+  module.offset.circle = function (a, b) {
     var hw = a.width * 0.5,
         hh = a.height * 0.5,
         r = Math.sqrt(hw * hw + hh * hh);
     return module.offset_impl(a, b, r);
   };
 
-  module.intersection.ellipse = function (a, b) {
+  module.offset.ellipse = function (a, b) {
     var dx = b.x - a.x,
         dy = b.y - a.y,
         hw = a.width * 0.5,
@@ -174,7 +174,7 @@
     };
   };
 
-  module.intersection.rect = function (a, b) {
+  module.offset.rect = function (a, b) {
     var dx = b.x - a.x,
         dy = b.y - a.y,
         hw = a.width * 0.5,
@@ -297,16 +297,16 @@
     layout.on("tick", function () {
       links.attr({
         x1: function (d) {
-          return module.intersection(d.source, d.target, d.offset_start).x;
+          return module.offset(d.source, d.target, d.offset_start).x;
         },
         y1: function (d) {
-          return module.intersection(d.source, d.target, d.offset_start).y;
+          return module.offset(d.source, d.target, d.offset_start).y;
         },
         x2: function (d) {
-          return module.intersection(d.target, d.source, d.offset_end).x;
+          return module.offset(d.target, d.source, d.offset_end).x;
         },
         y2: function (d) {
-          return module.intersection(d.target, d.source, d.offset_end).y;
+          return module.offset(d.target, d.source, d.offset_end).y;
         }
       });
 
