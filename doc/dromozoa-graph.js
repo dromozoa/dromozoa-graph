@@ -20,17 +20,21 @@
     };
   }
 
-  module.update_nodes = function (nodes) {
-    var sqrt2 = Math.sqrt(2);
-    nodes.each(function () {
+  module.update_nodes = function () {
+    module.nodes.each(function () {
       var g = d3.select(this),
-          box = this.getBBox(),
+          t = g.select("text"),
+          box = t.node().getBBox(),
           w = box.width,
           h = box.height,
           w2 = w * 0.5,
-          h2 = h * 0.5;
-      g.select("text").attr({
-        dy: -(box.y + h2)
+          h2 = h * 0.5,
+          dy = t.attr("dy");
+      if (dy === null) {
+        dy = 0;
+      }
+      t.attr({
+        dy: dy - (box.y + h2)
       });
       g.select("rect").attr({
         x: -w2,
@@ -39,8 +43,8 @@
         height: h
       });
       g.select("ellipse").attr({
-        rx: w2 * sqrt2,
-        ry: h2 * sqrt2
+        rx: w2 * Math.SQRT2,
+        ry: h2 * Math.SQRT2
       });
       g.select("circle").attr({
         r: Math.sqrt(w2 * w2 + h2 * h2)
@@ -49,6 +53,8 @@
   };
 
   module.main = function () {
+    var nodes, links;
+
     module.svg = d3.select("body").style({
       margin: 0,
       "font-family": "Noto Sans Japanese",
@@ -83,51 +89,53 @@
         .alpha(0.1)
         .start();
 
-    module.links = module.svg.selectAll("line")
+    links = module.svg.selectAll("line")
         .data(module.data.links)
         .enter()
-            .append("line")
-            .attr({
-              stroke: "black"
-            });
+        .append("line").attr({
+          stroke: "black"
+        });
 
-    module.nodes = module.svg.selectAll("g")
+    nodes = module.svg.selectAll("g")
         .data(module.data.nodes)
         .enter()
-            .append("g");
+        .append("g");
 
-//    module.nodes.append("ellipse").attr({
-//      fill: "pink",
-//      stroke: "#000000"
-//    });
+    nodes.append("ellipse").attr({
+      opacity: 0.5,
+      fill: "pink",
+      stroke: "#000000"
+    });
 
-//    module.nodes.append("rect").attr({
+//    nodes.append("circle").attr({
 //      fill: "pink",
 //      stroke: "black"
 //    });
 
-    module.nodes.append("circle").attr({
-      fill: "pink",
-      stroke: "black"
-    });
+//    nodes.append("rect").attr({
+//      fill: "pink",
+//      stroke: "black"
+//    });
 
-    module.nodes.append("text")
-        .text(function (d) { return d.name; })
+    nodes.append("text")
+        .text(function (d) { return d.text; })
         .attr({
             "text-anchor": "middle"
         });
 
-    module.update_nodes(module.nodes);
+    module.links = links;
+    module.nodes = nodes;
+    module.update_nodes();
 
     module.layout.on("tick", function () {
-      module.links.attr({
+      links.attr({
         x1: function (d) { return d.source.x; },
         y1: function (d) { return d.source.y; },
         x2: function (d) { return d.target.x; },
         y2: function (d) { return d.target.y; }
       });
 
-      module.nodes.attr({
+      nodes.attr({
         transform: function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         }
@@ -147,8 +155,9 @@
       }
       module.run.start = true;
       d3.json("dromozoa-graph.json", function (error, data) {
-        if (error) {
+        if (error !== null) {
           module.console.log(error);
+          root.alert("could not load json");
           return;
         }
         module.data = data;
@@ -168,6 +177,7 @@
     },
     inactive: function () {
       module.console.log("inactive");
+      root.alert("could not load font");
     }
   });
 
