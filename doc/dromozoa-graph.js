@@ -60,7 +60,7 @@
       var line = d3.select(this),
           stroke_width = line.attr("stroke-width"),
           marker;
-      if (stroke_width == null) {
+      if (stroke_width === null) {
         stroke_width = 1;
       }
       marker = stroke_width * module.make_marker.width * 0.5;
@@ -121,7 +121,7 @@
       x: a.x + dx * c,
       y: a.y + dy * c
     };
-  }
+  };
 
   module.intersection = function (a, b, marker) {
     var fn = module.intersection[a.type];
@@ -256,8 +256,7 @@
         .enter()
         .append("line").attr({
           stroke: "black",
-          // "stroke-width": 2,
-          // "marker-start": "url(#" + marker_start.attr("id") + ")",
+          "marker-start": "url(#" + marker_start.attr("id") + ")",
           "marker-end": "url(#" + marker_end.attr("id") + ")"
         });
 
