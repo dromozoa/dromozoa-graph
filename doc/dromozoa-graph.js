@@ -2,7 +2,7 @@
 /*global global */
 "use strict";
 (function (root) {
-  var module = (function () {
+  var $ = root.jQuery, d3 = root.d3, module = (function () {
     if (root.dromozoa === undefined) {
       root.dromozoa = {};
     }
@@ -16,11 +16,39 @@
     module.console = root.console;
   } else {
     module.console = {
-      log: root.jQuery.noop
+      log: $.noop
     };
   }
 
-  module.main = function (d3) {
+  module.update_nodes = function (nodes) {
+    var sqrt2 = Math.sqrt(2);
+    nodes.each(function () {
+      var g = d3.select(this),
+          box = this.getBBox(),
+          w = box.width,
+          h = box.height,
+          w2 = w * 0.5,
+          h2 = h * 0.5;
+      g.select("text").attr({
+        dy: -(box.y + h2)
+      });
+      g.select("rect").attr({
+        x: -w2,
+        y: -h2,
+        width: w,
+        height: h
+      });
+      g.select("ellipse").attr({
+        rx: w2 * sqrt2,
+        ry: h2 * sqrt2
+      });
+      g.select("circle").attr({
+        r: Math.sqrt(w2 * w2 + h2 * h2)
+      });
+    });
+  };
+
+  module.main = function () {
     module.svg = d3.select("body").style({
       margin: 0,
       "font-family": "Noto Sans Japanese",
@@ -55,63 +83,51 @@
         .alpha(0.1)
         .start();
 
-    module.line = module.svg.selectAll()
+    module.links = module.svg.selectAll("line")
         .data(module.data.links)
         .enter()
             .append("line")
             .attr({
-              stroke: "black",
-              x1: function (d) { return d.source.x; },
-              y1: function (d) { return d.source.y; },
-              x2: function (d) { return d.target.x; },
-              y2: function (d) { return d.target.y; }
+              stroke: "black"
             });
 
-    module.group = module.svg.selectAll("g")
+    module.nodes = module.svg.selectAll("g")
         .data(module.data.nodes)
         .enter()
-            .append("g")
-            .attr({
-              transform: function (d) {
-                return "translate(" + d.x + "," + d.y + ")";
-              }
-            });
+            .append("g");
 
-    module.group.append("ellipse")
-        .attr({
-            fill: "#ffccff",
-            stroke: "#000000"
-        });
+//    module.nodes.append("ellipse").attr({
+//      fill: "pink",
+//      stroke: "#000000"
+//    });
 
-    module.group.append("text")
+//    module.nodes.append("rect").attr({
+//      fill: "pink",
+//      stroke: "black"
+//    });
+
+    module.nodes.append("circle").attr({
+      fill: "pink",
+      stroke: "black"
+    });
+
+    module.nodes.append("text")
         .text(function (d) { return d.name; })
         .attr({
             "text-anchor": "middle"
-        }).each(function () {
-          var bbox = this.getBBox(),
-              c = bbox.y + bbox.height,
-              sqrt2 = Math.sqrt(2);
-          d3.select(this)
-              .attr({
-                y: c
-              });
-          d3.select(this.parentNode).select("ellipse")
-              .attr({
-                // cy: - c / 2,
-                rx: bbox.width / 2 * sqrt2,
-                ry: bbox.height / 2 * sqrt2
-              });
         });
 
+    module.update_nodes(module.nodes);
+
     module.layout.on("tick", function () {
-      module.line.attr({
+      module.links.attr({
         x1: function (d) { return d.source.x; },
         y1: function (d) { return d.source.y; },
         x2: function (d) { return d.target.x; },
         y2: function (d) { return d.target.y; }
       });
 
-      module.group.attr({
+      module.nodes.attr({
         transform: function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         }
@@ -130,9 +146,13 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      root.d3.json("dromozoa-graph.json", function (data) {
+      d3.json("dromozoa-graph.json", function (error, data) {
+        if (error) {
+          module.console.log(error);
+          return;
+        }
         module.data = data;
-        module.main(root.d3);
+        module.main();
       });
     }
   };
@@ -151,7 +171,7 @@
     }
   });
 
-  root.jQuery(function () {
+  $(function () {
     module.run("ready");
   });
 
