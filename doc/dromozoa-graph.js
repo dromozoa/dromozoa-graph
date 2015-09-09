@@ -42,13 +42,9 @@
       orient: "auto"
     });
     if (type === "start") {
-      marker.append("path").attr({
-        d: d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ])
-      });
+      marker.append("path").attr("d", d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ]));
     } else {
-      marker.append("path").attr({
-        d: d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ])
-      });
+      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ]));
     }
     return marker;
   };
@@ -91,18 +87,14 @@
       if (dy === null) {
         dy = 0;
       }
-      text.attr({
-        dy: dy - (y + hh)
-      });
+      text.attr("dy", dy - (y + hh));
       group.select("rect").attr({
         x: -hw,
         y: -hh,
         width: w,
         height: h
       });
-      group.select("circle").attr({
-        r: Math.sqrt(hw * hw + hh * hh)
-      });
+      group.select("circle").attr("r", Math.sqrt(hw * hw + hh * hh));
       group.select("ellipse").attr({
         rx: hw * Math.SQRT2,
         ry: hh * Math.SQRT2
@@ -197,42 +189,52 @@
         g = view_g.append("g"),
         links = g.selectAll("line").data(data.links).enter().append("line"),
         nodes = g.selectAll("g").data(data.nodes).enter().append("g"),
-        force = d3.layout.force();
+        force = d3.layout.force(),
+        opacity = 0.8,
+        marker = { start: true },
+        type = "ellipse";
 
-    view_rect.attr({
-      fill: "white"
-    });
+    view_rect.attr("fill", "white");
 
     links.attr({
-      opacity: 0.8,
-      stroke: "black",
-      "marker-start": "url(#" + marker_start.attr("id") + ")",
-      "marker-end": "url(#" + marker_end.attr("id") + ")"
-    });
-
-    nodes.append("ellipse").attr({
-      opacity: 0.8,
-      fill: "white",
+      opacity: opacity,
       stroke: "black"
     });
-    // nodes.append("circle").attr({
-    //   opacity: 0.5,
-    //   fill: "pink",
-    //   stroke: "black"
-    // });
-    // nodes.append("rect").attr({
-    //   opacity: 0.5,
-    //   fill: "pink",
-    //   stroke: "black"
-    // });
+    if (marker.start) {
+      links.attr("marker-start", "url(#" + marker_start.attr("id") + ")");
+    }
+    if (marker.end) {
+      links.attr("marker-end", "url(#" + marker_end.attr("id") + ")");
+    }
+
+    if (type === "ellipse") {
+      nodes.append("ellipse").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+    if (type === "circle") {
+      nodes.append("circle").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+    if (type === "rect") {
+      nodes.append("rect").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+
     nodes.append("text").text(function (d) {
       return d.text;
-    }).attr({
-      "text-anchor": "middle"
-    });
+    }).attr("text-anchor", "middle");
 
     module.update_links(links);
-    module.update_nodes(nodes, "ellipse");
+    module.update_nodes(nodes, type);
 
     force.nodes(data.nodes).links(data.links)
         .linkStrength(0.9)
@@ -259,10 +261,8 @@
         }
       });
 
-      nodes.attr({
-        transform: function (d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        }
+      nodes.attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
       });
     });
 
@@ -271,9 +271,7 @@
     }));
 
     view_g.call(d3.behavior.zoom().on("zoom", function () {
-      g.attr({
-        transform: "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")"
-      });
+      g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
     }));
 
     that.resize = function (w, h) {
