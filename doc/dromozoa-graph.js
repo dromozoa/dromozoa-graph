@@ -55,8 +55,8 @@
   module.make_marker.width = 8;
   module.make_marker.height = 8;
 
-  module.update_links = function () {
-    module.links.each(function (d) {
+  module.update_links = function (links) {
+    links.each(function (d) {
       var line = d3.select(this),
           stroke_width = line.attr("stroke-width"),
           offset;
@@ -77,8 +77,8 @@
     });
   };
 
-  module.update_nodes = function (type) {
-    module.nodes.each(function (d) {
+  module.update_nodes = function (nodes, type) {
+    nodes.each(function (d) {
       var group = d3.select(this),
           text = group.select("text"),
           box = text.node().getBBox(),
@@ -187,78 +187,48 @@
     return module.offset_impl(a, b, Math.sqrt(x * x + y * y) + offset);
   };
 
-  module.main = function () {
-    var svg, defs, marker_start, marker_end, links, nodes, force;
+  module.construct = function (svg, data) {
+    var that = {};
 
-    svg = d3.select("body").style({
-      margin: 0,
-      "font-family": "Noto Sans Japanese",
-      "font-weight": 100
-    }).append("svg").attr({
-      width: root.innerWidth,
-      height: root.innerHeight
-    }).style({
-      display: "block"
+    that.defs = svg.append("defs");
+    that.marker_start = module.make_marker(that.defs, "start");
+    that.marker_end = module.make_marker(that.defs, "end");
+
+    that.links = svg.selectAll("line").data(data.links).enter().append("line")
+    that.links.attr({
+      stroke: "black",
+      "marker-start": "url(#" + that.marker_start.attr("id") + ")",
+      "marker-end": "url(#" + that.marker_end.attr("id") + ")"
     });
 
-    d3.select(root).on("resize", function () {
-      svg.attr({
-        width: root.innerWidth,
-        height: root.innerHeight
-      });
-    });
-
-    defs = svg.append("defs");
-    marker_start = module.make_marker(defs, "start");
-    marker_end = module.make_marker(defs, "end");
-
-    links = svg.selectAll("line")
-        .data(module.data.links)
-        .enter()
-        .append("line").attr({
-          stroke: "black",
-          // "marker-start": "url(#" + marker_start.attr("id") + ")",
-          "marker-end": "url(#" + marker_end.attr("id") + ")"
-        });
-
-    nodes = svg.selectAll("g")
-        .data(module.data.nodes)
-        .enter()
-        .append("g");
-
-    nodes.append("ellipse").attr({
-      // opacity: 0.5,
+    that.nodes = svg.selectAll("g").data(data.nodes).enter().append("g");
+    that.nodes.append("ellipse").attr({
+      opacity: 0.5,
       fill: "pink",
-      stroke: "#000000"
+      stroke: "black"
+    });
+    that.nodes.append("circle").attr({
+      opacity: 0.5,
+      fill: "pink",
+      stroke: "black"
+    });
+    that.nodes.append("rect").attr({
+      opacity: 0.5,
+      fill: "pink",
+      stroke: "black"
+    });
+    that.nodes.append("text").text(function (d) {
+      return d.text;
+    }).attr({
+      "text-anchor": "middle"
     });
 
-//    nodes.append("circle").attr({
-//      // opacity: 0.5,
-//      fill: "pink",
-//      stroke: "black"
-//    });
+    module.update_links(that.links);
+    module.update_nodes(that.nodes, "ellipse");
 
-//    nodes.append("rect").attr({
-//      // opacity: 0.5,
-//      fill: "pink",
-//      stroke: "black"
-//    });
-
-    nodes.append("text")
-        .text(function (d) { return d.text; })
-        .attr({
-            "text-anchor": "middle"
-        });
-
-    module.links = links;
-    module.nodes = nodes;
-
-    module.update_links();
-    module.update_nodes("ellipse");
-
-    force = d3.layout.force()
-        .nodes(module.data.nodes)
-        .links(module.data.links)
+    that.force = d3.layout.force()
+        .nodes(data.nodes)
+        .links(data.links)
         .size([
           root.innerWidth,
           root.innerHeight
@@ -269,13 +239,12 @@
         .charge(-900)
         .gravity(0.1)
         .theta(0.8)
-        .alpha(0.1)
-        .start();
+        .alpha(0.1);
 
-    nodes.call(force.drag);
+    that.nodes.call(that.force.drag);
 
-    force.on("tick", function () {
-      links.attr({
+    that.force.on("tick", function () {
+      that.links.attr({
         x1: function (d) {
           return module.offset(d.source, d.target, d.offset_start).x;
         },
@@ -290,11 +259,48 @@
         }
       });
 
-      nodes.attr({
+      that.nodes.attr({
         transform: function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         }
       });
+    });
+
+    that.start = function () {
+      that.force.start();
+    };
+
+    that.resize = function (w, h) {
+      svg.attr({
+        width: w,
+        height: h
+      });
+      that.force.size([ w, h ]);
+    };
+
+    return that;
+  };
+
+  module.main = function () {
+    var svg, that;
+
+    svg = d3.select("body").style({
+      margin: 0,
+      "font-family": "Noto Sans Japanese",
+      "font-weight": 100
+    }).append("svg").attr({
+      width: root.innerWidth,
+      height: root.innerHeight
+    }).style({
+      display: "block"
+    });
+
+    that = module.construct(svg, module.data);
+    that.start();
+
+    d3.select(root).on("resize", function () {
+      that.resize(root.innerWidth, root.innerHeight);
+      that.start();
     });
   };
 
