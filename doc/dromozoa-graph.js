@@ -192,9 +192,17 @@
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
         marker_end = module.make_marker(defs, "end"),
-        links, nodes, force;
+        view_g = svg.append("g"),
+        view_rect = view_g.append("rect"),
+        g = view_g.append("g"),
+        links = g.selectAll("line").data(data.links).enter().append("line"),
+        nodes = g.selectAll("g").data(data.nodes).enter().append("g"),
+        force = d3.layout.force();
 
-    links = svg.selectAll("line").data(data.links).enter().append("line")
+    view_rect.attr({
+      fill: "white"
+    });
+
     links.attr({
       opacity: 0.8,
       stroke: "black",
@@ -202,7 +210,6 @@
       "marker-end": "url(#" + marker_end.attr("id") + ")"
     });
 
-    nodes = svg.selectAll("g").data(data.nodes).enter().append("g");
     nodes.append("ellipse").attr({
       opacity: 0.8,
       fill: "white",
@@ -227,22 +234,14 @@
     module.update_links(links);
     module.update_nodes(nodes, "ellipse");
 
-    force = d3.layout.force()
-        .nodes(data.nodes)
-        .links(data.links)
-        .size([
-          root.innerWidth,
-          root.innerHeight
-        ])
+    force.nodes(data.nodes).links(data.links)
         .linkStrength(0.9)
         .friction(0.9)
-        .linkDistance(100)
-        .charge(-900)
+        .linkDistance(200)
+        .charge(-2000)
         .gravity(0.1)
         .theta(0.8)
         .alpha(0.1);
-
-    nodes.call(force.drag);
 
     force.on("tick", function () {
       links.attr({
@@ -267,16 +266,26 @@
       });
     });
 
+    nodes.call(force.drag().on("dragstart", function () {
+      d3.event.sourceEvent.stopPropagation();
+    }));
+
+    view_g.call(d3.behavior.zoom().on("zoom", function () {
+      g.attr({
+        transform: "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")"
+      });
+    }));
+
     that.resize = function (w, h) {
       svg.attr({
         width: w,
         height: h
       });
-      force.size([ w, h ]);
-    };
-
-    that.start = function () {
-      force.start();
+      force.size([ w, h ]).start();
+      view_rect.attr({
+        width: w,
+        height: h
+      });
     };
 
     return that;
@@ -289,19 +298,15 @@
       margin: 0,
       "font-family": "Noto Sans Japanese",
       "font-weight": 100
-    }).append("svg").attr({
-      width: root.innerWidth,
-      height: root.innerHeight
-    }).style({
+    }).append("svg").style({
       display: "block"
     });
 
     that = module.construct(svg, module.data);
-    that.start();
+    that.resize(root.innerWidth, root.innerHeight);
 
     d3.select(root).on("resize", function () {
       that.resize(root.innerWidth, root.innerHeight);
-      that.start();
     });
   };
 
