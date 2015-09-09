@@ -289,7 +289,7 @@
     return that;
   };
 
-  module.main = function () {
+  module.main = function (data) {
     var svg, that;
 
     svg = d3.select("body").style({
@@ -300,7 +300,7 @@
       display: "block"
     });
 
-    that = module.construct(svg, module.data);
+    that = module.construct(svg, data);
     that.resize(root.innerWidth, root.innerHeight);
 
     d3.select(root).on("resize", function () {
@@ -324,8 +324,7 @@
           root.alert("could not load json");
           return;
         }
-        module.data = data;
-        module.main();
+        module.main(data);
       });
     }
   };
