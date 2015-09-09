@@ -199,8 +199,6 @@
       height: root.innerHeight
     }).style({
       display: "block"
-    }).on("click", function () {
-      module.console.log("svg.click");
     });
 
     d3.select(root).on("resize", function () {
