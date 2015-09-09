@@ -318,7 +318,7 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph.json", function (error, data) {
+      d3.json("dromozoa-graph-tree.json", function (error, data) {
         if (error !== null) {
           module.console.log(error);
           root.alert("could not load json");
