@@ -188,7 +188,7 @@
   };
 
   module.main = function () {
-    var svg, defs, marker_start, marker_end, links, nodes, layout;
+    var svg, defs, marker_start, marker_end, links, nodes, force;
 
     svg = d3.select("body").style({
       margin: 0,
@@ -199,6 +199,8 @@
       height: root.innerHeight
     }).style({
       display: "block"
+    }).on("click", function () {
+      module.console.log("svg.click");
     });
 
     d3.select(root).on("resize", function () {
@@ -217,7 +219,7 @@
         .enter()
         .append("line").attr({
           stroke: "black",
-          "marker-start": "url(#" + marker_start.attr("id") + ")",
+          // "marker-start": "url(#" + marker_start.attr("id") + ")",
           "marker-end": "url(#" + marker_end.attr("id") + ")"
         });
 
@@ -256,7 +258,7 @@
     module.update_links();
     module.update_nodes("ellipse");
 
-    layout = d3.layout.force()
+    force = d3.layout.force()
         .nodes(module.data.nodes)
         .links(module.data.links)
         .size([
@@ -272,7 +274,9 @@
         .alpha(0.1)
         .start();
 
-    layout.on("tick", function () {
+    nodes.call(force.drag);
+
+    force.on("tick", function () {
       links.attr({
         x1: function (d) {
           return module.offset(d.source, d.target, d.offset_start).x;
