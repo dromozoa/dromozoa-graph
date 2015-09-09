@@ -188,45 +188,46 @@
   };
 
   module.construct = function (svg, data) {
-    var that = {};
+    var that = {},
+        defs = svg.append("defs"),
+        marker_start = module.make_marker(defs, "start"),
+        marker_end = module.make_marker(defs, "end"),
+        links, nodes, force;
 
-    that.defs = svg.append("defs");
-    that.marker_start = module.make_marker(that.defs, "start");
-    that.marker_end = module.make_marker(that.defs, "end");
-
-    that.links = svg.selectAll("line").data(data.links).enter().append("line")
-    that.links.attr({
+    links = svg.selectAll("line").data(data.links).enter().append("line")
+    links.attr({
+      opacity: 0.8,
       stroke: "black",
-      "marker-start": "url(#" + that.marker_start.attr("id") + ")",
-      "marker-end": "url(#" + that.marker_end.attr("id") + ")"
+      "marker-start": "url(#" + marker_start.attr("id") + ")",
+      "marker-end": "url(#" + marker_end.attr("id") + ")"
     });
 
-    that.nodes = svg.selectAll("g").data(data.nodes).enter().append("g");
-    that.nodes.append("ellipse").attr({
-      opacity: 0.5,
-      fill: "pink",
+    nodes = svg.selectAll("g").data(data.nodes).enter().append("g");
+    nodes.append("ellipse").attr({
+      opacity: 0.8,
+      fill: "white",
       stroke: "black"
     });
-    that.nodes.append("circle").attr({
-      opacity: 0.5,
-      fill: "pink",
-      stroke: "black"
-    });
-    that.nodes.append("rect").attr({
-      opacity: 0.5,
-      fill: "pink",
-      stroke: "black"
-    });
-    that.nodes.append("text").text(function (d) {
+    // nodes.append("circle").attr({
+    //   opacity: 0.5,
+    //   fill: "pink",
+    //   stroke: "black"
+    // });
+    // nodes.append("rect").attr({
+    //   opacity: 0.5,
+    //   fill: "pink",
+    //   stroke: "black"
+    // });
+    nodes.append("text").text(function (d) {
       return d.text;
     }).attr({
       "text-anchor": "middle"
     });
 
-    module.update_links(that.links);
-    module.update_nodes(that.nodes, "ellipse");
+    module.update_links(links);
+    module.update_nodes(nodes, "ellipse");
 
-    that.force = d3.layout.force()
+    force = d3.layout.force()
         .nodes(data.nodes)
         .links(data.links)
         .size([
@@ -241,10 +242,10 @@
         .theta(0.8)
         .alpha(0.1);
 
-    that.nodes.call(that.force.drag);
+    nodes.call(force.drag);
 
-    that.force.on("tick", function () {
-      that.links.attr({
+    force.on("tick", function () {
+      links.attr({
         x1: function (d) {
           return module.offset(d.source, d.target, d.offset_start).x;
         },
@@ -259,23 +260,23 @@
         }
       });
 
-      that.nodes.attr({
+      nodes.attr({
         transform: function (d) {
           return "translate(" + d.x + "," + d.y + ")";
         }
       });
     });
 
-    that.start = function () {
-      that.force.start();
-    };
-
     that.resize = function (w, h) {
       svg.attr({
         width: w,
         height: h
       });
-      that.force.size([ w, h ]);
+      force.size([ w, h ]);
+    };
+
+    that.start = function () {
+      force.start();
     };
 
     return that;
