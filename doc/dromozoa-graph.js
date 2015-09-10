@@ -20,36 +20,82 @@
     };
   }
 
-  module.make_id = function () {
-    module.make_id.counter += 1;
-    return module.make_id.namespace + module.make_id.counter;
-  };
-  module.make_id.namespace = "dromozoa-graph-";
-  module.make_id.counter = 0;
+  module.tuple2 = function (x, y) {
+    var that = { x: x, y: y };
 
-  module.make_marker = function (defs, type) {
-    var w = module.make_marker.width,
-        h = module.make_marker.height,
-        hw = w * 0.5,
-        hh = h * 0.5,
-        marker;
-    marker = defs.append("marker").attr({
-      id: module.make_id(),
-      refX: hw,
-      refY: hh,
-      markerWidth: w,
-      markerHeight: h,
-      orient: "auto"
-    });
-    if (type === "start") {
-      marker.append("path").attr("d", d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ]));
-    } else {
-      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ]));
-    }
-    return marker;
+    that.add = function (t1) {
+      that.x += t1.x;
+      that.y += t1.y;
+      return that;
+    };
+
+    that.sub = function (t1) {
+      that.x -= t1.x;
+      that.y -= t1.y;
+      return that;
+    };
+
+    that.scale = function (s) {
+      that.x *= s;
+      that.y *= s;
+      return that;
+    };
+
+    that.interpolate = function (t1, alpha) {
+      var beta = 1 - alpha;
+      that.x = that.x * beta + t1.x * alpha;
+      that.y = that.y * beta + t1.y * alpha;
+      return that;
+    };
+
+    that.clone = function () {
+      return module.tuple2(that.x, that.y);
+    };
+
+    that.toString = function () {
+      return "[" + that.x + "," + that.y + "]";
+    };
+
+    return that;
   };
-  module.make_marker.width = 8;
-  module.make_marker.height = 8;
+
+  module.vector2 = function (x, y) {
+    var that = module.tuple2(x, y);
+
+    that.dot = function (v1) {
+      return that.x * v1.x + that.y * v1.y;
+    };
+
+    that.angle = function (v1) {
+      return Math.abs(Math.atan2(that.x * v1.y - that.y * v1.x, that.dot(v1)));
+    };
+
+    that.length = function () {
+      var x = that.x,
+          y = that.y;
+      return Math.sqrt(x * x + y * y);
+    };
+
+    that.length_squared = function () {
+      var x = that.x,
+          y = that.y;
+      return x * x + y * y;
+    };
+
+    that.normalize = function () {
+      var d = that.length(),
+          s = 1 / d;
+      that.x *= s;
+      that.y *= s;
+      return that;
+    };
+
+    that.clone = function () {
+      return module.vector2(that.x, that.y);
+    };
+
+    return that;
+  };
 
   module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
     var that = {};
@@ -211,6 +257,37 @@
 
     return that;
   };
+
+  module.make_id = function () {
+    module.make_id.counter += 1;
+    return module.make_id.namespace + module.make_id.counter;
+  };
+  module.make_id.namespace = "dromozoa-graph-";
+  module.make_id.counter = 0;
+
+  module.make_marker = function (defs, type) {
+    var w = module.make_marker.width,
+        h = module.make_marker.height,
+        hw = w * 0.5,
+        hh = h * 0.5,
+        marker;
+    marker = defs.append("marker").attr({
+      id: module.make_id(),
+      refX: hw,
+      refY: hh,
+      markerWidth: w,
+      markerHeight: h,
+      orient: "auto"
+    });
+    if (type === "start") {
+      marker.append("path").attr("d", d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ]));
+    } else {
+      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ]));
+    }
+    return marker;
+  };
+  module.make_marker.width = 8;
+  module.make_marker.height = 8;
 
   module.update_links = function (links) {
     links.each(function (d) {
