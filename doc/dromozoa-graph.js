@@ -184,12 +184,12 @@
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
         marker_end = module.make_marker(defs, "end"),
+        force = d3.layout.force(),
         view_g = svg.append("g"),
         view_rect = view_g.append("rect"),
         g = view_g.append("g"),
         links = g.selectAll("line").data(data.links).enter().append("line"),
         nodes = g.selectAll("g").data(data.nodes).enter().append("g"),
-        force = d3.layout.force(),
         opacity = 0.8,
         marker = { start: true },
         type = "ellipse";
@@ -279,11 +279,143 @@
         width: w,
         height: h
       });
-      force.size([ w, h ]).start();
       view_rect.attr({
         width: w,
         height: h
       });
+      force.size([ w, h ]).start();
+    };
+
+    return that;
+  };
+
+  module.construct_tree = function (svg, data) {
+    var that = {},
+        defs = svg.append("defs"),
+        marker_start = module.make_marker(defs, "start"),
+        marker_end = module.make_marker(defs, "end"),
+        tree = d3.layout.tree(),
+        data_nodes = tree.nodes(data),
+        data_links = tree.links(data_nodes),
+        view_g = svg.append("g"),
+        view_rect = view_g.append("rect"),
+        g = view_g.append("g"),
+        links = g.selectAll("line").data(data_links).enter().append("line"),
+        nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
+        opacity = 0.8,
+        marker = { start: true },
+        type = "ellipse";
+
+    view_rect.attr("fill", "white");
+
+    links.attr({
+      opacity: opacity,
+      stroke: "black"
+    });
+    if (marker.start) {
+      links.attr("marker-start", "url(#" + marker_start.attr("id") + ")");
+    }
+    if (marker.end) {
+      links.attr("marker-end", "url(#" + marker_end.attr("id") + ")");
+    }
+
+    if (type === "ellipse") {
+      nodes.append("ellipse").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+    if (type === "circle") {
+      nodes.append("circle").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+    if (type === "rect") {
+      nodes.append("rect").attr({
+        opacity: opacity,
+        fill: "white",
+        stroke: "black"
+      });
+    }
+
+    nodes.append("text").text(function (d) {
+      return d.text;
+    }).attr("text-anchor", "middle");
+
+    module.update_links(links);
+    module.update_nodes(nodes, type);
+
+    that.update = function (w, h) {
+      var px = Math.min(w, h) * 0.2,
+          py = px,
+          pw = w - px * 2,
+          ph = h - py * 2;
+
+      links.attr({
+        x1: function (d) {
+          var sx = d.source.x * pw + px,
+              sy = d.source.y * ph + py,
+              tx = d.target.x * pw + px,
+              ty = d.target.y * ph + py,
+              t = d.source.type,
+              dw = d.source.width,
+              dh = d.source.height;
+          return module.offset({ x: sx, y: sy, type: t, width: dw, height: dh }, { x: tx, y: ty }, d.offset_start).x;
+        },
+        y1: function (d) {
+          var sx = d.source.x * pw + px,
+              sy = d.source.y * ph + py,
+              tx = d.target.x * pw + px,
+              ty = d.target.y * ph + py,
+              t = d.source.type,
+              dw = d.source.width,
+              dh = d.source.height;
+          return module.offset({ x: sx, y: sy, type: t, width: dw, height: dh }, { x: tx, y: ty }, d.offset_start).y;
+        },
+        x2: function (d) {
+          var sx = d.source.x * pw + px,
+              sy = d.source.y * ph + py,
+              tx = d.target.x * pw + px,
+              ty = d.target.y * ph + py,
+              t = d.target.type,
+              dw = d.target.width,
+              dh = d.target.height;
+          return module.offset({ x: tx, y: ty, type: t, width: dw, height: dh }, { x: sx, y: sy }, d.offset_end).x;
+        },
+        y2: function (d) {
+          var sx = d.source.x * pw + px,
+              sy = d.source.y * ph + py,
+              tx = d.target.x * pw + px,
+              ty = d.target.y * ph + py,
+              t = d.target.type,
+              dw = d.target.width,
+              dh = d.target.height;
+          return module.offset({ x: tx, y: ty, type: t, width: dw, height: dh }, { x: sx, y: sy }, d.offset_end).y;
+        }
+      });
+
+      nodes.attr("transform", function (d) {
+        return "translate(" + (d.x * pw + px) + "," + (d.y * ph + py) + ")";
+      });
+    };
+
+    view_g.call(d3.behavior.zoom().on("zoom", function () {
+      g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+    }));
+
+    that.resize = function (w, h) {
+      svg.attr({
+        width: w,
+        height: h
+      });
+      view_rect.attr({
+        width: w,
+        height: h
+      });
+      that.update(w, h);
     };
 
     return that;
@@ -300,7 +432,7 @@
       display: "block"
     });
 
-    that = module.construct(svg, data);
+    that = module.construct_tree(svg, data);
     that.resize(root.innerWidth, root.innerHeight);
 
     d3.select(root).on("resize", function () {
