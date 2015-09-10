@@ -51,6 +51,167 @@
   module.make_marker.width = 8;
   module.make_marker.height = 8;
 
+  module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
+    var that = {};
+
+    that.set_zero = function () {
+      m00 = 0; m01 = 0; m02 = 0;
+      m10 = 0; m11 = 0; m12 = 0;
+      m20 = 0; m21 = 0; m22 = 0;
+      return that;
+    };
+
+    that.set_identity = function () {
+      m00 = 1; m01 = 0; m02 = 0;
+      m10 = 0; m11 = 1; m12 = 0;
+      m20 = 0; m21 = 0; m22 = 1;
+      return that;
+    };
+
+    that.set_row = function (row, x, y, z) {
+      switch (row) {
+        case 0:
+          m00 = x;
+          m01 = y;
+          if (z !== undefined) {
+            m02 = z;
+          }
+          break;
+        case 1:
+          m10 = x;
+          m11 = y;
+          if (z !== undefined) {
+            m12 = z;
+          }
+          break;
+        case 2:
+          m20 = x;
+          m21 = y;
+          if (z !== undefined) {
+            m22 = z;
+          }
+          break;
+      }
+      return that;
+    };
+
+    that.set_col = function (col, x, y, z) {
+      switch (col) {
+        case 0:
+          m00 = x;
+          m10 = y;
+          if (z !== undefined) {
+            m20 = z;
+          }
+          break;
+        case 1:
+          m01 = x;
+          m11 = y;
+          if (z !== undefined) {
+            m21 = z;
+          }
+          break;
+        case 2:
+          m02 = x;
+          m12 = y;
+          if (z !== undefined) {
+            m22 = z;
+          }
+          break;
+      }
+      return that;
+    };
+
+    that.rot_x = function (angle) {
+      var c = Math.cos(angle),
+          s = Math.sin(angle);
+      m00 = 1; m01 = 0; m02 =  0;
+      m10 = 0; m11 = c; m12 = -s;
+      m20 = 0; m21 = s; m22 =  c;
+      return that;
+    };
+
+    that.rot_y = function (angle) {
+      var c = Math.cos(angle),
+          s = Math.sin(angle);
+      m00 =  c; m01 = 0; m02 = s;
+      m10 =  0; m11 = 1; m12 = 0;
+      m20 = -s; m21 = 0; m22 = c;
+      return that;
+    };
+
+    that.rot_z = function (angle) {
+      var c = Math.cos(angle),
+          s = Math.sin(angle);
+      m00 = c; m01 = -s; m02 = 0;
+      m10 = s; m11 =  c; m12 = 0;
+      m20 = 0; m21 =  0; m22 = 1;
+      return that;
+    };
+
+    that.transpose = function () {
+      var tmp = m01; m01 = m10; m10 = tmp;
+      tmp = m02; m02 = m20; m20 = tmp;
+      tmp = m12; m12 = m21; m21 = tmp;
+      return that;
+    };
+
+    that.determinant = function () {
+      return m00 * (m11 * m22 - m21 * m12)
+          - m01 * (m10 * m22 - m20 * m12)
+          + m02 * (m10 * m21 - m20 * m11);
+    };
+
+    that.invert = function () {
+      var d = that.determinant(),
+          n00 = m11 * m22 - m12 * m21,
+          n01 = m02 * m21 - m01 * m22,
+          n02 = m01 * m12 - m02 * m11,
+          n10 = m12 * m20 - m10 * m22,
+          n11 = m00 * m22 - m02 * m20,
+          n12 = m02 * m10 - m00 * m12,
+          n20 = m10 * m21 - m11 * m20,
+          n21 = m01 * m20 - m00 * m21,
+          n22 = m00 * m11 - m01 * m10,
+          s;
+      if (d !== 0) {
+        s = 1 / d;
+        m00 = n00 * s; m01 = n01 * s; m02 = n02 * s;
+        m10 = n10 * s; m11 = n11 * s; m12 = n12 * s;
+        m20 = n20 * s; m21 = n21 * s; m22 = n22 * s;
+      }
+      return that;
+    };
+
+    that.transform = function (t, result) {
+      var x = t.x, y = t.y, z = t.z;
+      if (result === undefined) {
+        result = t;
+      }
+      if (z === undefined) {
+        result.x = m00 * x + m01 * y + m02;
+        result.y = m10 * x + m11 * y + m12;
+      } else {
+        result.x = m00 * x + m01 * y + m02 * z;
+        result.y = m10 * x + m11 * y + m12 * z;
+        result.z = m20 * x + m21 * y + m22 * z;
+      }
+      return result;
+    };
+
+    that.clone = function () {
+      return module.matrix3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+    };
+
+    that.toString = function () {
+      return "[[" + m00 + "," + m01 + "," + m02
+          + "],[" + m10 + "," + m11 + "," + m12
+          + "],[" + m20 + "," + m21 + "," + m22 + "]";
+    };
+
+    return that;
+  };
+
   module.update_links = function (links) {
     links.each(function (d) {
       var line = d3.select(this),
@@ -483,4 +644,5 @@
   module.run.timer = root.setTimeout(function() {
     module.run("timeout");
   }, 3000);
+
 }(this.self || global));
