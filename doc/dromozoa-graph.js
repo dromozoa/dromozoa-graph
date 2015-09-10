@@ -504,7 +504,7 @@
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
         marker_end = module.make_marker(defs, "end"),
-        tree = d3.layout.tree(),
+        tree = d3.layout.tree().nodeSize([ 200, 200 ]),
         data_nodes = tree.nodes(data),
         data_links = tree.links(data_nodes),
         view_g = svg.append("g"),
@@ -514,7 +514,7 @@
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
         marker = { start: true },
-        type = "rect";
+        type = "ellipse";
 
     view_rect.attr("fill", "white");
 
@@ -559,56 +559,23 @@
     module.update_nodes(nodes, type);
 
     that.update = function (w, h) {
-      var px = Math.min(w, h) * 0.2,
-          py = px,
-          pw = w - px * 2,
-          ph = h - py * 2;
-
       links.attr({
         x1: function (d) {
-          var sx = d.source.x * pw + px,
-              sy = d.source.y * ph + py,
-              tx = d.target.x * pw + px,
-              ty = d.target.y * ph + py,
-              t = d.source.type,
-              dw = d.source.width,
-              dh = d.source.height;
-          return module.offset({ x: sx, y: sy, type: t, width: dw, height: dh }, { x: tx, y: ty }, d.offset_start).x;
+          return module.offset(d.source, d.target, d.offset_start).x;
         },
         y1: function (d) {
-          var sx = d.source.x * pw + px,
-              sy = d.source.y * ph + py,
-              tx = d.target.x * pw + px,
-              ty = d.target.y * ph + py,
-              t = d.source.type,
-              dw = d.source.width,
-              dh = d.source.height;
-          return module.offset({ x: sx, y: sy, type: t, width: dw, height: dh }, { x: tx, y: ty }, d.offset_start).y;
+          return module.offset(d.source, d.target, d.offset_start).y;
         },
         x2: function (d) {
-          var sx = d.source.x * pw + px,
-              sy = d.source.y * ph + py,
-              tx = d.target.x * pw + px,
-              ty = d.target.y * ph + py,
-              t = d.target.type,
-              dw = d.target.width,
-              dh = d.target.height;
-          return module.offset({ x: tx, y: ty, type: t, width: dw, height: dh }, { x: sx, y: sy }, d.offset_end).x;
+          return module.offset(d.target, d.source, d.offset_end).x;
         },
         y2: function (d) {
-          var sx = d.source.x * pw + px,
-              sy = d.source.y * ph + py,
-              tx = d.target.x * pw + px,
-              ty = d.target.y * ph + py,
-              t = d.target.type,
-              dw = d.target.width,
-              dh = d.target.height;
-          return module.offset({ x: tx, y: ty, type: t, width: dw, height: dh }, { x: sx, y: sy }, d.offset_end).y;
+          return module.offset(d.target, d.source, d.offset_end).y;
         }
       });
 
       nodes.attr("transform", function (d) {
-        return "translate(" + (d.x * pw + px) + "," + (d.y * ph + py) + ")";
+        return "translate(" + d.x + "," + d.y + ")";
       });
     };
 
