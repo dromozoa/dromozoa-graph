@@ -344,18 +344,7 @@
   };
 
   module.offset_impl = function (a, b, offset) {
-    var dx = b.x - a.x,
-        dy = b.y - a.y,
-        c;
-    if (dx === 0 && dy === 0) {
-      c = 0;
-    } else {
-      c = offset * Math.sqrt(1 / (dx * dx + dy * dy));
-    }
-    return {
-      x: a.x + dx * c,
-      y: a.y + dy * c
-    };
+    return module.vector2(b.x, b.y).sub(a).normalize().scale(offset).add(a);
   };
 
   module.offset = function (a, b, offset) {
@@ -368,9 +357,7 @@
   };
 
   module.offset.circle = function (a, b, offset) {
-    var hw = a.width * 0.5,
-        hh = a.height * 0.5;
-    return module.offset_impl(a, b, Math.sqrt(hw * hw + hh * hh) + offset);
+    return module.offset_impl(a, b, module.vector2(a.width, a.height).scale(0.5).length() + offset);
   };
 
   module.offset.ellipse = function (a, b, offset) {
