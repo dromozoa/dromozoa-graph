@@ -35,6 +35,14 @@
       return that;
     };
 
+    that.absolute = function () {
+      var x_ = that.x,
+          y_ = that.y;
+      if (x_ < 0) { that.x = -x_; }
+      if (y_ < 0) { that.y = -y_; }
+      return that;
+    };
+
     that.scale = function (s) {
       that.x *= s;
       that.y *= s;
@@ -71,15 +79,15 @@
     };
 
     that.length = function () {
-      var x = that.x,
-          y = that.y;
-      return Math.sqrt(x * x + y * y);
+      var x_ = that.x,
+          y_ = that.y;
+      return Math.sqrt(x_ * x_ + y_ * y_);
     };
 
     that.length_squared = function () {
-      var x = that.x,
-          y = that.y;
-      return x * x + y * y;
+      var x_ = that.x,
+          y_ = that.y;
+      return x_ * x_ + y_ * y_;
     };
 
     that.normalize = function () {
@@ -96,6 +104,10 @@
 
     return that;
   };
+  module.vector2.x0y0 = module.vector2(0, 0);
+  module.vector2.x0y1 = module.vector2(0, 1);
+  module.vector2.x1y0 = module.vector2(1, 0);
+  module.vector2.x1y1 = module.vector2(1, 1);
 
   module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
     var that = {};
@@ -146,23 +158,17 @@
         case 0:
           m00 = x;
           m10 = y;
-          if (z !== undefined) {
-            m20 = z;
-          }
+          if (z !== undefined) { m20 = z; }
           break;
         case 1:
           m01 = x;
           m11 = y;
-          if (z !== undefined) {
-            m21 = z;
-          }
+          if (z !== undefined) { m21 = z; }
           break;
         case 2:
           m02 = x;
           m12 = y;
-          if (z !== undefined) {
-            m22 = z;
-          }
+          if (z !== undefined) { m22 = z; }
           break;
       }
       return that;
@@ -343,65 +349,44 @@
     });
   };
 
-  module.offset_impl = function (a, b, offset) {
-    return module.vector2(b.x, b.y).sub(a).normalize().scale(offset).add(a);
+  module.offset_impl = function (a, b, length) {
+    return module.vector2(b.x, b.y).sub(a).normalize().scale(length).add(a);
   };
 
-  module.offset = function (a, b, offset) {
+  module.offset = function (a, b, length) {
     var fn = module.offset[a.type];
     if (fn !== undefined) {
-      return fn(a, b, offset);
+      return fn(a, b, length);
     } else {
-      return module.offset_impl(a, b, offset);
+      return module.offset_impl(a, b, length);
     }
   };
 
-  module.offset.circle = function (a, b, offset) {
-    return module.offset_impl(a, b, module.vector2(a.width, a.height).scale(0.5).length() + offset);
+  module.offset.circle = function (a, b, length) {
+    length += module.vector2(a.width, a.height).scale(0.5).length();
+    return module.offset_impl(a, b, length);
   };
 
-  module.offset.ellipse = function (a, b, offset) {
-    var dx = b.x - a.x,
-        dy = b.y - a.y,
-        hw = a.width * 0.5,
-        hh = a.height * 0.5,
-        rx = hw * Math.SQRT2,
-        ry = hh * Math.SQRT2,
-        rx2 = rx * rx,
-        ry2 = ry * ry,
-        x, y, d;
-    if (dx === 0) {
-      x = 0;
-      y = ry;
-    } else {
-      d = dy / dx;
-      x = Math.sqrt(rx2 * ry2 / (rx2 * d * d + ry2));
-      y = x * d;
-    }
-    return module.offset_impl(a, b, Math.sqrt(x * x + y * y) + offset);
+  module.offset.ellipse = function (a, b, length) {
+    var angle = module.vector2(b.x, b.y).sub(a).angle(module.vector2.x1y0),
+        cos = Math.cos(angle),
+        cos2 = cos * cos,
+        r = module.vector2(a.width, a.height).scale(0.5 * Math.SQRT2),
+        _1_rx2 = 1 / (r.x * r.x),
+        _1_ry2 = 1 / (r.y * r.y);
+    length += 1 / Math.sqrt(cos2 * (_1_rx2 - _1_ry2) + _1_ry2);
+    return module.offset_impl(a, b, length);
   };
 
-  module.offset.rect = function (a, b, offset) {
-    var dx = b.x - a.x,
-        dy = b.y - a.y,
-        hw = a.width * 0.5,
-        hh = a.height * 0.5,
-        c = hh / hw,
-        x, y, d;
-    if (dx === 0) {
-      x = 0;
-      y = hh;
+  module.offset.rect = function (a, b, length) {
+    var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0),
+        r = module.vector2(a.width, a.height).scale(0.5);
+    if (angle < r.angle(module.vector2.x1y0)) {
+      length += r.x / Math.cos(angle);
     } else {
-      d = dy / dx;
-      if (-c < d && d < c) {
-        x = hw;
-        y = x * d;
-      } else {
-        y = hh;
-        x = y / d;
-      }
+      length += r.y / Math.sin(angle);
     }
-    return module.offset_impl(a, b, Math.sqrt(x * x + y * y) + offset);
+    return module.offset_impl(a, b, length);
   };
 
   module.construct = function (svg, data) {
@@ -529,7 +514,7 @@
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
         marker = { start: true },
-        type = "ellipse";
+        type = "rect";
 
     view_rect.attr("fill", "white");
 
