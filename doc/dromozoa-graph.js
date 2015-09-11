@@ -245,6 +245,8 @@
 
     return that;
   };
+  module.matrix3.zero = module.matrix3().set_zero();
+  module.matrix3.identity = module.matrix3().set_identity();
 
   module.make_id = function () {
     module.make_id.counter += 1;
@@ -296,12 +298,11 @@
     };
 
     that.offset = function (a, b) {
-      var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0),
-          hbox = a[module.name].hbox;
-      if (angle < hbox.angle(module.vector2.x1y0)) {
-        return hbox.x / Math.cos(angle);
+      var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0);
+      if (angle < a.hbox.angle(module.vector2.x1y0)) {
+        return a.hbox.x / Math.cos(angle);
       } else {
-        return hbox.y / Math.sin(angle);
+        return a.hbox.y / Math.sin(angle);
       }
     };
 
@@ -325,8 +326,7 @@
     };
 
     that.offset = function (a) {
-      var hbox = a[module.name].hbox;
-      return hbox.length();
+      return a.hbox.length();
     };
 
     return that;
@@ -356,7 +356,7 @@
       var angle = module.vector2(b.x, b.y).sub(a).angle(module.vector2.x1y0),
           cos = Math.cos(angle),
           cos2 = cos * cos,
-          r = a[module.name].hbox.clone().scale(Math.SQRT2),
+          r = a.hbox.clone().scale(Math.SQRT2),
           _1_rx2 = 1 / (r.x * r.x),
           _1_ry2 = 1 / (r.y * r.y);
       return 1 / Math.sqrt(cos2 * (_1_rx2 - _1_ry2) + _1_ry2);
@@ -380,14 +380,14 @@
       }
       offset = stroke_width * module.marker.hbox.x;
       if (line.attr("marker-start") !== null) {
-        data.offset_start = offset;
+        data.start_offset = offset;
       } else {
-        data.offset_start = 0;
+        data.start_offset = 0;
       }
       if (line.attr("marker-end") !== null) {
-        data.offset_end = offset;
+        data.end_offset = offset;
       } else {
-        data.offset_end = 0;
+        data.end_offset = 0;
       }
     });
   };
@@ -419,7 +419,7 @@
   };
 
   module.offset = function (a, b, length) {
-    return module.vector2(b.x, b.y).sub(a).normalize().scale(length + a[module.name].shape.offset(a, b)).add(a);
+    return module.vector2(b.x, b.y).sub(a).normalize().scale(length + a.shape.offset(a, b)).add(a);
   };
 
   module.construct = function (svg, data_nodes, data_links) {
@@ -471,24 +471,38 @@
     that.links = links;
     that.node_bbox = node_bbox;
 
-    that.update = function () {
-      links.attr({
-        x1: function (d) {
-          return module.offset(d.source, d.target, d[module.name].offset_start).x;
-        },
-        y1: function (d) {
-          return module.offset(d.source, d.target, d[module.name].offset_start).y;
-        },
-        x2: function (d) {
-          return module.offset(d.target, d.source, d[module.name].offset_end).x;
-        },
-        y2: function (d) {
-          return module.offset(d.target, d.source, d[module.name].offset_end).y;
-        }
+    that.update = function (matrix) {
+      nodes.each(function (d) {
+        var data = d[module.name];
+        matrix.transform(d, data);
+      });
+
+      links.each(function (d) {
+        var data = d[module.name],
+            source = d.source[module.name],
+            target = d.target[module.name];
+        data.start = module.offset(source, target, data.start_offset);
+        data.end = module.offset(target, source, data.end_offset);
       });
 
       nodes.attr("transform", function (d) {
-        return "translate(" + d.x + "," + d.y + ")";
+        var data = d[module.name];
+        return "translate(" + data.x + "," + data.y + ")";
+      });
+
+      links.attr({
+        x1: function (d) {
+          return d[module.name].start.x;
+        },
+        y1: function (d) {
+          return d[module.name].start.y;
+        },
+        x2: function (d) {
+          return d[module.name].end.x;
+        },
+        y2: function (d) {
+          return d[module.name].end.y;
+        }
       });
     };
 
@@ -507,8 +521,8 @@
   };
 
   module.construct_force = function (svg, data) {
-    var that = module.construct(svg, data.nodes, data.links),
-        force = d3.layout.force();
+    var force = d3.layout.force(),
+        that = module.construct(svg, data.nodes, data.links);
 
     force.nodes(data.nodes).links(data.links)
         .linkStrength(0.9)
@@ -520,7 +534,7 @@
         .alpha(0.1);
 
     force.on("tick", function () {
-      that.update();
+      that.update(module.matrix3.identity);
     });
 
     that.nodes.call(force.drag().on("dragstart", function () {
@@ -540,16 +554,26 @@
         data_nodes = tree.nodes(data),
         data_links = tree.links(data_nodes),
         that = module.construct(svg, data_nodes, data_links),
-        node_size;
+        mode = "lr", // tb bt lr rl
+        rotation = module.matrix3().set_identity(),
+        node_size = that.node_bbox.clone();
+    if (mode === "rl") {
+      rotation.rot_z(Math.PI * 0.5);
+    } else if (mode === "bt") {
+      rotation.rot_z(Math.PI);
+    } else if (mode === "lr") {
+      rotation.rot_z(Math.PI * 1.5);
+    }
+    rotation.transform(node_size.add(module.vector2(node_size.y, node_size.y))).absolute();
 
-    node_size = that.node_bbox.clone().add(module.vector2(0, 32));
     tree = d3.layout.tree().nodeSize([ node_size.x, node_size.y ]);
     data_nodes = tree.nodes(data);
     data_links = tree.links(data_nodes);
 
     that.resize = function (w, h) {
+      var matrix = rotation.clone().set_col(2, w * 0.5, h * 0.5);
       that.resize_impl(w, h);
-      that.update();
+      that.update(matrix);
     };
 
     return that;
