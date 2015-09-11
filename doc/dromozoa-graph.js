@@ -556,7 +556,8 @@
         that = module.construct(svg, data_nodes, data_links),
         mode = "lr", // tb bt lr rl
         rotation = module.matrix3().set_identity(),
-        node_size = that.node_bbox.clone();
+        node_bbox = that.node_bbox,
+        node_size = node_bbox.clone();
     if (mode === "rl") {
       rotation.rot_z(Math.PI * 0.5);
     } else if (mode === "bt") {
@@ -564,16 +565,25 @@
     } else if (mode === "lr") {
       rotation.rot_z(Math.PI * 1.5);
     }
-    rotation.transform(node_size.add(module.vector2(node_size.y, node_size.y))).absolute();
+    rotation.transform(node_size.add(module.vector2(node_bbox.y, node_bbox.y))).absolute();
 
     tree = d3.layout.tree().nodeSize([ node_size.x, node_size.y ]);
     data_nodes = tree.nodes(data);
     data_links = tree.links(data_nodes);
 
     that.resize = function (w, h) {
-      var matrix = rotation.clone().set_col(2, w * 0.5, h * 0.5);
+      var translation = module.vector2(w * 0.5, that.node_bbox.y * 1.5);
+      if (mode === "rl") {
+        translation.x = w - (that.node_bbox.x * 0.5 + that.node_bbox.y);
+        translation.y = h * 0.5;
+      } else if (mode === "bt") {
+        translation.y = h - translation.y;
+      } else if (mode === "lr") {
+        translation.x = that.node_bbox.x * 0.5 + that.node_bbox.y;
+        translation.y = h * 0.5;
+      }
       that.resize_impl(w, h);
-      that.update(matrix);
+      that.update(rotation.clone().set_col(2, translation.x, translation.y));
     };
 
     return that;
