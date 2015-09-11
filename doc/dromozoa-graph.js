@@ -330,25 +330,34 @@
           h = box.height,
           hw = w * 0.5,
           hh = h * 0.5,
-          dy = text.attr("dy");
+          dy = text.attr("dy"),
+          data;
+      if (d[module.name] === undefined) {
+        d[module.name] = {};
+      }
+      data = d[module.name];
+
       if (dy === null) {
         dy = 0;
       }
       text.attr("dy", dy - (y + hh));
-      group.select("rect").attr({
-        x: -hw,
-        y: -hh,
-        width: w,
-        height: h
-      });
-      group.select("circle").attr("r", Math.sqrt(hw * hw + hh * hh));
-      group.select("ellipse").attr({
-        rx: hw * Math.SQRT2,
-        ry: hh * Math.SQRT2
-      });
-      d.type = type;
-      d.width = w;
-      d.height = h;
+      if (type === "circle") {
+        group.select("circle").attr("r", Math.sqrt(hw * hw + hh * hh));
+      } else if (type === "ellipse") {
+        group.select("ellipse").attr({
+          rx: hw * Math.SQRT2,
+          ry: hh * Math.SQRT2
+        });
+      } else if (type === "rect") {
+        group.select("rect").attr({
+          x: -hw,
+          y: -hh,
+          width: w,
+          height: h
+        });
+      }
+      data.type = data.type;
+      data.rect = module.vector2(w, h);
       if (max_size.x < w) {
         max_size.x = w;
       }
@@ -365,7 +374,7 @@
   };
 
   module.offset = function (a, b, length) {
-    var fn = module.offset[a.type];
+    var fn = module.offset[a[module.name].type];
     if (fn !== undefined) {
       return fn(a, b, length);
     } else {
@@ -374,7 +383,7 @@
   };
 
   module.offset.circle = function (a, b, length) {
-    length += module.vector2(a.width, a.height).scale(0.5).length();
+    length += a[module.name].rect.length() * 0.5;
     return module.offset_impl(a, b, length);
   };
 
@@ -382,7 +391,7 @@
     var angle = module.vector2(b.x, b.y).sub(a).angle(module.vector2.x1y0),
         cos = Math.cos(angle),
         cos2 = cos * cos,
-        r = module.vector2(a.width, a.height).scale(0.5 * Math.SQRT2),
+        r = a[module.name].rect.clone().scale(0.5 * Math.SQRT2),
         _1_rx2 = 1 / (r.x * r.x),
         _1_ry2 = 1 / (r.y * r.y);
     length += 1 / Math.sqrt(cos2 * (_1_rx2 - _1_ry2) + _1_ry2);
@@ -391,7 +400,7 @@
 
   module.offset.rect = function (a, b, length) {
     var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0),
-        r = module.vector2(a.width, a.height).scale(0.5);
+        r = a[module.name].rect.clone().scale(0.5);
     if (angle < r.angle(module.vector2.x1y0)) {
       length += r.x / Math.cos(angle);
     } else {
@@ -412,7 +421,7 @@
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
         marker = { end: true },
-        type = "ellipse",
+        type = "circle",
         max_node_size;
 
     view_rect.attr("fill", "white");
@@ -434,15 +443,13 @@
         fill: "white",
         stroke: "black"
       });
-    }
-    if (type === "circle") {
+    } else if (type === "circle") {
       nodes.append("circle").attr({
         opacity: opacity,
         fill: "white",
         stroke: "black"
       });
-    }
-    if (type === "rect") {
+    } else if (type === "rect") {
       nodes.append("rect").attr({
         opacity: opacity,
         fill: "white",
