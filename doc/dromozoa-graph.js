@@ -7,7 +7,7 @@
       root.dromozoa = {};
     }
     if (root.dromozoa.graph === undefined) {
-      root.dromozoa.graph = {};
+      root.dromozoa.graph = { name: "dromozoa-graph" };
     }
     return root.dromozoa.graph;
   }());
@@ -19,8 +19,6 @@
       log: $.noop
     };
   }
-
-  module.name = "dromozoa-graph";
 
   module.tuple2 = function (x, y) {
     var that = { x: x, y: y };
@@ -277,6 +275,96 @@
   module.marker.bbox = module.vector2(8, 8);
   module.marker.hbox = module.vector2(4, 4);
 
+  module.rect = function () {
+    var that = {};
+
+    that.append = function (g) {
+      return g.append("rect");
+    };
+
+    that.update = function (g, d) {
+      var data = d[module.name],
+          hbox = data.hbox,
+          bbox = hbox.clone().scale(2);
+      data.bbox = bbox;
+      return g.select("rect").attr({
+        x: -hbox.x,
+        y: -hbox.y,
+        width: bbox.x,
+        height: bbox.y
+      });
+    };
+
+    that.offset = function (a, b) {
+      var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0),
+          hbox = a[module.name].hbox;
+      if (angle < hbox.angle(module.vector2.x1y0)) {
+        return hbox.x / Math.cos(angle);
+      } else {
+        return hbox.y / Math.sin(angle);
+      }
+    };
+
+    return that;
+  };
+
+  module.circle = function () {
+    var that = {};
+
+    that.append = function (g) {
+      return g.append("circle");
+    };
+
+    that.update = function (g, d) {
+      var data = d[module.name],
+          hbox = data.hbox,
+          r = hbox.length(),
+          bbox = module.vector2(r, r).scale(2);
+      data.bbox = bbox;
+      return g.select("circle").attr("r", r);
+    };
+
+    that.offset = function (a) {
+      var hbox = a[module.name].hbox;
+      return hbox.length();
+    };
+
+    return that;
+  };
+
+  module.ellipse = function () {
+    var that = {};
+
+    that.append = function (g) {
+      return g.append("ellipse");
+    };
+
+    that.update = function (g, d) {
+      var data = d[module.name],
+          hbox = data.hbox,
+          rx = hbox.x * Math.SQRT2,
+          ry = hbox.y * Math.SQRT2,
+          bbox = module.vector2(rx, ry).scale(2);
+      data.bbox = bbox;
+      return g.select("ellipse").attr({
+        rx: rx,
+        ry: ry
+      });
+    };
+
+    that.offset = function (a, b) {
+      var angle = module.vector2(b.x, b.y).sub(a).angle(module.vector2.x1y0),
+          cos = Math.cos(angle),
+          cos2 = cos * cos,
+          r = a[module.name].hbox.clone().scale(Math.SQRT2),
+          _1_rx2 = 1 / (r.x * r.x),
+          _1_ry2 = 1 / (r.y * r.y);
+      return 1 / Math.sqrt(cos2 * (_1_rx2 - _1_ry2) + _1_ry2);
+    };
+
+    return that;
+  };
+
   module.update_links = function (links) {
     links.each(function (d) {
       var data = d[module.name],
@@ -304,93 +392,34 @@
     });
   };
 
-  module.update_nodes = function (nodes, type) {
-    var max_size = module.vector2(0, 0);
-
+  module.update_nodes = function (nodes, shape) {
+    var bbox = module.vector2(0, 0);
     nodes.each(function (d) {
       var data = d[module.name],
           g = d3.select(this),
           text = g.select("text"),
           text_dy = text.attr("dy"),
-          box = text.node().getBBox(),
-          y = box.y,
-          w = box.width,
-          h = box.height,
-          hbox = module.vector2(w, h).scale(0.5);
+          text_bbox = text.node().getBBox(),
+          hbox = module.vector2(text_bbox.width, text_bbox.height).scale(0.5);
       if (data === undefined) {
         data = {};
         d[module.name] = data;
       }
+      data.shape = shape;
+      data.hbox = hbox;
       if (text_dy === null) {
         text_dy = 0;
       }
-      text.attr("dy", text_dy - (y + hbox.y));
-      if (type === "circle") {
-        g.select("circle").attr("r", Math.sqrt(hbox.x * hbox.x + hbox.y * hbox.y));
-      } else if (type === "ellipse") {
-        g.select("ellipse").attr({
-          rx: hbox.x * Math.SQRT2,
-          ry: hbox.y * Math.SQRT2
-        });
-      } else if (type === "rect") {
-        g.select("rect").attr({
-          x: -hbox.x,
-          y: -hbox.y,
-          width: w,
-          height: h
-        });
-      }
-      data.type = type;
-      data.hbox = hbox;
-      if (max_size.x < w) {
-        max_size.x = w;
-      }
-      if (max_size.y < h) {
-        max_size.y = h;
-      }
+      text.attr("dy", text_dy - (text_bbox.y + hbox.y));
+      shape.update(g, d);
+      if (bbox.x < data.bbox.x) { bbox.x = data.bbox.x; }
+      if (bbox.y < data.bbox.y) { bbox.y = data.bbox.y; }
     });
-
-    return max_size;
-  };
-
-  module.offset_impl = function (a, b, length) {
-    return module.vector2(b.x, b.y).sub(a).normalize().scale(length).add(a);
+    return bbox;
   };
 
   module.offset = function (a, b, length) {
-    var fn = module.offset[a[module.name].type];
-    if (fn !== undefined) {
-      return fn(a, b, length);
-    } else {
-      return module.offset_impl(a, b, length);
-    }
-  };
-
-  module.offset.circle = function (a, b, length) {
-    length += a[module.name].hbox.length();
-    return module.offset_impl(a, b, length);
-  };
-
-  module.offset.ellipse = function (a, b, length) {
-    var angle = module.vector2(b.x, b.y).sub(a).angle(module.vector2.x1y0),
-        cos = Math.cos(angle),
-        cos2 = cos * cos,
-        r = a[module.name].hbox.clone().scale(Math.SQRT2),
-        _1_rx2 = 1 / (r.x * r.x),
-        _1_ry2 = 1 / (r.y * r.y);
-    length += 1 / Math.sqrt(cos2 * (_1_rx2 - _1_ry2) + _1_ry2);
-    return module.offset_impl(a, b, length);
-  };
-
-  module.offset.rect = function (a, b, length) {
-    var angle = module.vector2(b.x, b.y).sub(a).absolute().angle(module.vector2.x1y0),
-        r = a[module.name].hbox;
-    if (angle < r.angle(module.vector2.x1y0)) {
-      length += r.x / Math.cos(angle);
-    } else {
-      length += r.y / Math.sin(angle);
-    }
-    return module.offset_impl(a, b, length);
+    return module.vector2(b.x, b.y).sub(a).normalize().scale(length + a[module.name].shape.offset(a, b)).add(a);
   };
 
   module.construct = function (svg, data_nodes, data_links) {
@@ -405,8 +434,8 @@
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
         marker = { start: true, end: true },
-        type = "ellipse",
-        max_node_size;
+        shape = module.ellipse(),
+        node_bbox;
 
     view_rect.attr("fill", "white");
 
@@ -421,32 +450,18 @@
       links.attr("marker-end", "url(#" + marker_end.attr("id") + ")");
     }
 
-    if (type === "ellipse") {
-      nodes.append("ellipse").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    } else if (type === "circle") {
-      nodes.append("circle").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    } else if (type === "rect") {
-      nodes.append("rect").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    }
+    shape.append(nodes).attr({
+      opacity: opacity,
+      fill: "white",
+      stroke: "black"
+    });
 
     nodes.append("text").text(function (d) {
       return d.text;
     }).attr("text-anchor", "middle");
 
     module.update_links(links);
-    max_node_size = module.update_nodes(nodes, type);
+    node_bbox = module.update_nodes(nodes, shape);
 
     view_g.call(d3.behavior.zoom().on("zoom", function () {
       g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
@@ -454,7 +469,7 @@
 
     that.nodes = nodes;
     that.links = links;
-    that.max_node_size = max_node_size;
+    that.node_bbox = node_bbox;
 
     that.update = function () {
       links.attr({
@@ -525,10 +540,10 @@
         data_nodes = tree.nodes(data),
         data_links = tree.links(data_nodes),
         that = module.construct(svg, data_nodes, data_links),
-        max_node_size;
+        node_size;
 
-    max_node_size = that.max_node_size.clone().scale(2);
-    tree = d3.layout.tree().nodeSize([ max_node_size.x, max_node_size.y ]);
+    node_size = that.node_bbox.clone().add(module.vector2(0, 32));
+    tree = d3.layout.tree().nodeSize([ node_size.x, node_size.y ]);
     data_nodes = tree.nodes(data);
     data_links = tree.links(data_nodes);
 
@@ -573,7 +588,7 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph.json", function (error, data) {
+      d3.json("dromozoa-graph-tree.json", function (error, data) {
         if (error !== null) {
           module.console.log(error);
           root.alert("could not load json");
