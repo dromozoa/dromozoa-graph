@@ -254,9 +254,9 @@
   };
   module.make_id.counter = 0;
 
-  module.make_marker = function (defs, type) {
-    var bbox = module.make_marker.bbox,
-        hbox = module.make_marker.hbox,
+  module.marker = function (defs, type) {
+    var bbox = module.marker.bbox,
+        hbox = module.marker.hbox,
         marker = defs.append("marker"),
         path = marker.append("path");
     marker.attr({
@@ -274,8 +274,8 @@
     }
     return marker;
   };
-  module.make_marker.bbox = module.vector2(8, 8);
-  module.make_marker.hbox = module.vector2(4, 4);
+  module.marker.bbox = module.vector2(8, 8);
+  module.marker.hbox = module.vector2(4, 4);
 
   module.update_links = function (links) {
     links.each(function (d) {
@@ -290,7 +290,7 @@
       if (stroke_width === null) {
         stroke_width = 1;
       }
-      offset = stroke_width * module.make_marker.hbox.x;
+      offset = stroke_width * module.marker.hbox.x;
       if (line.attr("marker-start") !== null) {
         data.offset_start = offset;
       } else {
@@ -396,16 +396,16 @@
   module.construct = function (svg, data_nodes, data_links) {
     var that = {},
         defs = svg.append("defs"),
-        marker_start = module.make_marker(defs, "start"),
-        marker_end = module.make_marker(defs, "end"),
+        marker_start = module.marker(defs, "start"),
+        marker_end = module.marker(defs, "end"),
         view_g = svg.append("g"),
         view_rect = view_g.append("rect"),
         g = view_g.append("g"),
         links = g.selectAll("line").data(data_links).enter().append("line"),
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
-        marker = { end: true },
-        type = "rect",
+        marker = { start: true, end: true },
+        type = "ellipse",
         max_node_size;
 
     view_rect.attr("fill", "white");
