@@ -23,18 +23,6 @@
   module.tuple2 = function (x, y) {
     var that = { x: x, y: y };
 
-    that.add = function (t1) {
-      that.x += t1.x;
-      that.y += t1.y;
-      return that;
-    };
-
-    that.sub = function (t1) {
-      that.x -= t1.x;
-      that.y -= t1.y;
-      return that;
-    };
-
     that.absolute = function () {
       var x_ = that.x,
           y_ = that.y;
@@ -46,6 +34,18 @@
     that.scale = function (s) {
       that.x *= s;
       that.y *= s;
+      return that;
+    };
+
+    that.add = function (t1) {
+      that.x += t1.x;
+      that.y += t1.y;
+      return that;
+    };
+
+    that.sub = function (t1) {
+      that.x -= t1.x;
+      that.y -= t1.y;
       return that;
     };
 
@@ -70,14 +70,6 @@
   module.vector2 = function (x, y) {
     var that = module.tuple2(x, y);
 
-    that.dot = function (v1) {
-      return that.x * v1.x + that.y * v1.y;
-    };
-
-    that.angle = function (v1) {
-      return Math.abs(Math.atan2(that.x * v1.y - that.y * v1.x, that.dot(v1)));
-    };
-
     that.length = function () {
       var x_ = that.x,
           y_ = that.y;
@@ -88,6 +80,14 @@
       var x_ = that.x,
           y_ = that.y;
       return x_ * x_ + y_ * y_;
+    };
+
+    that.dot = function (v1) {
+      return that.x * v1.x + that.y * v1.y;
+    };
+
+    that.angle = function (v1) {
+      return Math.abs(Math.atan2(that.x * v1.y - that.y * v1.x, that.dot(v1)));
     };
 
     that.normalize = function () {
@@ -111,6 +111,12 @@
 
   module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
     var that = {};
+
+    that.determinant = function () {
+      return m00 * (m11 * m22 - m21 * m12)
+          - m01 * (m10 * m22 - m20 * m12)
+          + m02 * (m10 * m21 - m20 * m11);
+    };
 
     that.set_zero = function () {
       m00 = 0; m01 = 0; m02 = 0;
@@ -174,6 +180,34 @@
       return that;
     };
 
+    that.transpose = function () {
+      var tmp = m01; m01 = m10; m10 = tmp;
+      tmp = m02; m02 = m20; m20 = tmp;
+      tmp = m12; m12 = m21; m21 = tmp;
+      return that;
+    };
+
+    that.invert = function () {
+      var d = that.determinant(),
+          n00 = m11 * m22 - m12 * m21,
+          n01 = m02 * m21 - m01 * m22,
+          n02 = m01 * m12 - m02 * m11,
+          n10 = m12 * m20 - m10 * m22,
+          n11 = m00 * m22 - m02 * m20,
+          n12 = m02 * m10 - m00 * m12,
+          n20 = m10 * m21 - m11 * m20,
+          n21 = m01 * m20 - m00 * m21,
+          n22 = m00 * m11 - m01 * m10,
+          s;
+      if (d !== 0) {
+        s = 1 / d;
+        m00 = n00 * s; m01 = n01 * s; m02 = n02 * s;
+        m10 = n10 * s; m11 = n11 * s; m12 = n12 * s;
+        m20 = n20 * s; m21 = n21 * s; m22 = n22 * s;
+      }
+      return that;
+    };
+
     that.rot_x = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
@@ -198,40 +232,6 @@
       m00 = c; m01 = -s; m02 = 0;
       m10 = s; m11 =  c; m12 = 0;
       m20 = 0; m21 =  0; m22 = 1;
-      return that;
-    };
-
-    that.transpose = function () {
-      var tmp = m01; m01 = m10; m10 = tmp;
-      tmp = m02; m02 = m20; m20 = tmp;
-      tmp = m12; m12 = m21; m21 = tmp;
-      return that;
-    };
-
-    that.determinant = function () {
-      return m00 * (m11 * m22 - m21 * m12)
-          - m01 * (m10 * m22 - m20 * m12)
-          + m02 * (m10 * m21 - m20 * m11);
-    };
-
-    that.invert = function () {
-      var d = that.determinant(),
-          n00 = m11 * m22 - m12 * m21,
-          n01 = m02 * m21 - m01 * m22,
-          n02 = m01 * m12 - m02 * m11,
-          n10 = m12 * m20 - m10 * m22,
-          n11 = m00 * m22 - m02 * m20,
-          n12 = m02 * m10 - m00 * m12,
-          n20 = m10 * m21 - m11 * m20,
-          n21 = m01 * m20 - m00 * m21,
-          n22 = m00 * m11 - m01 * m10,
-          s;
-      if (d !== 0) {
-        s = 1 / d;
-        m00 = n00 * s; m01 = n01 * s; m02 = n02 * s;
-        m10 = n10 * s; m11 = n11 * s; m12 = n12 * s;
-        m20 = n20 * s; m21 = n21 * s; m22 = n22 * s;
-      }
       return that;
     };
 
