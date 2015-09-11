@@ -400,124 +400,11 @@
     return module.offset_impl(a, b, length);
   };
 
-  module.construct_force = function (svg, data) {
+  module.construct = function (svg, data_nodes, data_links) {
     var that = {},
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
         marker_end = module.make_marker(defs, "end"),
-        force = d3.layout.force(),
-        view_g = svg.append("g"),
-        view_rect = view_g.append("rect"),
-        g = view_g.append("g"),
-        links = g.selectAll("line").data(data.links).enter().append("line"),
-        nodes = g.selectAll("g").data(data.nodes).enter().append("g"),
-        opacity = 0.8,
-        marker = { end: true },
-        type = "ellipse";
-
-    view_rect.attr("fill", "white");
-
-    links.attr({
-      opacity: opacity,
-      stroke: "black"
-    });
-    if (marker.start) {
-      links.attr("marker-start", "url(#" + marker_start.attr("id") + ")");
-    }
-    if (marker.end) {
-      links.attr("marker-end", "url(#" + marker_end.attr("id") + ")");
-    }
-
-    if (type === "ellipse") {
-      nodes.append("ellipse").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    }
-    if (type === "circle") {
-      nodes.append("circle").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    }
-    if (type === "rect") {
-      nodes.append("rect").attr({
-        opacity: opacity,
-        fill: "white",
-        stroke: "black"
-      });
-    }
-
-    nodes.append("text").text(function (d) {
-      return d.text;
-    }).attr("text-anchor", "middle");
-
-    module.update_links(links);
-    module.update_nodes(nodes, type);
-
-    force.nodes(data.nodes).links(data.links)
-        .linkStrength(0.9)
-        .friction(0.9)
-        .linkDistance(200)
-        .charge(-2000)
-        .gravity(0.1)
-        .theta(0.8)
-        .alpha(0.1);
-
-    force.on("tick", function () {
-      links.attr({
-        x1: function (d) {
-          return module.offset(d.source, d.target, d.offset_start).x;
-        },
-        y1: function (d) {
-          return module.offset(d.source, d.target, d.offset_start).y;
-        },
-        x2: function (d) {
-          return module.offset(d.target, d.source, d.offset_end).x;
-        },
-        y2: function (d) {
-          return module.offset(d.target, d.source, d.offset_end).y;
-        }
-      });
-
-      nodes.attr("transform", function (d) {
-        return "translate(" + d.x + "," + d.y + ")";
-      });
-    });
-
-    nodes.call(force.drag().on("dragstart", function () {
-      d3.event.sourceEvent.stopPropagation();
-    }));
-
-    view_g.call(d3.behavior.zoom().on("zoom", function () {
-      g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
-    }));
-
-    that.resize = function (w, h) {
-      svg.attr({
-        width: w,
-        height: h
-      });
-      view_rect.attr({
-        width: w,
-        height: h
-      });
-      force.size([ w, h ]).start();
-    };
-
-    return that;
-  };
-
-  module.construct_tree = function (svg, data) {
-    var that = {},
-        defs = svg.append("defs"),
-        marker_start = module.make_marker(defs, "start"),
-        marker_end = module.make_marker(defs, "end"),
-        tree = d3.layout.tree(),
-        data_nodes = tree.nodes(data),
-        data_links = tree.links(data_nodes),
         view_g = svg.append("g"),
         view_rect = view_g.append("rect"),
         g = view_g.append("g"),
@@ -568,13 +455,17 @@
     }).attr("text-anchor", "middle");
 
     module.update_links(links);
-    max_node_size = module.update_nodes(nodes, type).scale(2);
+    max_node_size = module.update_nodes(nodes, type);
 
-    tree = d3.layout.tree().nodeSize([ max_node_size.x, max_node_size.y ]);
-    data_nodes = tree.nodes(data);
-    data_links = tree.links(data_nodes);
+    view_g.call(d3.behavior.zoom().on("zoom", function () {
+      g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+    }));
 
-    that.update = function (w, h) {
+    that.nodes = nodes;
+    that.links = links;
+    that.max_node_size = max_node_size;
+
+    that.update = function () {
       links.attr({
         x1: function (d) {
           return module.offset(d.source, d.target, d.offset_start).x;
@@ -595,11 +486,7 @@
       });
     };
 
-    view_g.call(d3.behavior.zoom().on("zoom", function () {
-      g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
-    }));
-
-    that.resize = function (w, h) {
+    that.resize_impl = function (w, h) {
       svg.attr({
         width: w,
         height: h
@@ -608,7 +495,55 @@
         width: w,
         height: h
       });
-      that.update(w, h);
+    };
+
+    return that;
+  };
+
+  module.construct_force = function (svg, data) {
+    var that = module.construct(svg, data.nodes, data.links),
+        force = d3.layout.force();
+
+    force.nodes(data.nodes).links(data.links)
+        .linkStrength(0.9)
+        .friction(0.9)
+        .linkDistance(200)
+        .charge(-2000)
+        .gravity(0.1)
+        .theta(0.8)
+        .alpha(0.1);
+
+    force.on("tick", function () {
+      that.update();
+    });
+
+    that.nodes.call(force.drag().on("dragstart", function () {
+      d3.event.sourceEvent.stopPropagation();
+    }));
+
+    that.resize = function (w, h) {
+      that.resize_impl(w, h);
+      force.size([ w, h ]).start();
+    };
+
+    return that;
+  };
+
+  module.construct_tree = function (svg, data) {
+    var tree = d3.layout.tree(),
+        data_nodes = tree.nodes(data),
+        data_links = tree.links(data_nodes),
+        that = module.construct(svg, data_nodes, data_links),
+        max_node_size;
+
+    max_node_size = that.max_node_size.clone().scale(2);
+    tree = d3.layout.tree().nodeSize([ max_node_size.x, max_node_size.y ]);
+    data_nodes = tree.nodes(data);
+    data_links = tree.links(data_nodes);
+
+    that.resize = function (w, h) {
+      that.resize_impl(w, h);
+      that.update();
     };
 
     return that;
@@ -625,7 +560,11 @@
       display: "block"
     });
 
-    that = module.construct_tree(svg, data);
+    if (data.nodes !== undefined) {
+      that = module.construct_force(svg, data);
+    } else {
+      that = module.construct_tree(svg, data);
+    }
     that.resize(root.innerWidth, root.innerHeight);
 
     d3.select(root).on("resize", function () {
@@ -643,7 +582,7 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph-tree.json", function (error, data) {
+      d3.json("dromozoa-graph.json", function (error, data) {
         if (error !== null) {
           module.console.log(error);
           root.alert("could not load json");
