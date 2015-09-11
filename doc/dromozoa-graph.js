@@ -137,25 +137,13 @@
     that.set_row = function (row, x, y, z) {
       switch (row) {
         case 0:
-          m00 = x;
-          m01 = y;
-          if (z !== undefined) {
-            m02 = z;
-          }
+          m00 = x; m01 = y; if (z !== undefined) { m02 = z; }
           break;
         case 1:
-          m10 = x;
-          m11 = y;
-          if (z !== undefined) {
-            m12 = z;
-          }
+          m10 = x; m11 = y; if (z !== undefined) { m12 = z; }
           break;
         case 2:
-          m20 = x;
-          m21 = y;
-          if (z !== undefined) {
-            m22 = z;
-          }
+          m20 = x; m21 = y; if (z !== undefined) { m22 = z; }
           break;
       }
       return that;
@@ -164,19 +152,13 @@
     that.set_col = function (col, x, y, z) {
       switch (col) {
         case 0:
-          m00 = x;
-          m10 = y;
-          if (z !== undefined) { m20 = z; }
+          m00 = x; m10 = y; if (z !== undefined) { m20 = z; }
           break;
         case 1:
-          m01 = x;
-          m11 = y;
-          if (z !== undefined) { m21 = z; }
+          m01 = x; m11 = y; if (z !== undefined) { m21 = z; }
           break;
         case 2:
-          m02 = x;
-          m12 = y;
-          if (z !== undefined) { m22 = z; }
+          m02 = x; m12 = y; if (z !== undefined) { m22 = z; }
           break;
       }
       return that;
@@ -273,47 +255,50 @@
   module.make_id.counter = 0;
 
   module.make_marker = function (defs, type) {
-    var w = module.make_marker.width,
-        h = module.make_marker.height,
-        hw = w * 0.5,
-        hh = h * 0.5,
-        marker;
-    marker = defs.append("marker").attr({
+    var bbox = module.make_marker.bbox,
+        hbox = module.make_marker.hbox,
+        marker = defs.append("marker");
+    marker.attr({
       id: module.make_id(),
-      refX: hw,
-      refY: hh,
-      markerWidth: w,
-      markerHeight: h,
+      refX: hbox.x,
+      refY: hbox.y,
+      markerWidth: bbox.x,
+      markerHeight: bbox.y,
       orient: "auto"
     });
     if (type === "start") {
-      marker.append("path").attr("d", d3.svg.line()([ [ w, 0 ], [ 0, hh ], [ w, h ] ]));
+      marker.append("path").attr("d", d3.svg.line()([ [ bbox.x, 0 ], [ 0, hbox.y ], [ bbox.x, bbox.y ] ]));
     } else {
-      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ w, hh ], [ 0, h ] ]));
+      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ bbox.x, hbox.y ], [ 0, bbox.y ] ]));
     }
     return marker;
   };
-  module.make_marker.width = 8;
-  module.make_marker.height = 8;
+  module.make_marker.bbox = module.vector2(8, 8);
+  module.make_marker.hbox = module.vector2(4, 4);
 
   module.update_links = function (links) {
     links.each(function (d) {
       var line = d3.select(this),
           stroke_width = line.attr("stroke-width"),
-          offset;
+          offset,
+          data;
+      if (d[module.name] === undefined) {
+        d[module.name] = {};
+      }
+      data = d[module.name];
       if (stroke_width === null) {
         stroke_width = 1;
       }
-      offset = stroke_width * module.make_marker.width * 0.5;
+      offset = stroke_width * module.make_marker.hbox.x;
       if (line.attr("marker-start") !== null) {
-        d.offset_start = offset;
+        data.offset_start = offset;
       } else {
-        d.offset_start = 0;
+        data.offset_start = 0;
       }
       if (line.attr("marker-end") !== null) {
-        d.offset_end = offset;
+        data.offset_end = offset;
       } else {
-        d.offset_end = 0;
+        data.offset_end = 0;
       }
     });
   };
@@ -356,7 +341,7 @@
           height: h
         });
       }
-      data.type = data.type;
+      data.type = type;
       data.rect = module.vector2(w, h);
       if (max_size.x < w) {
         max_size.x = w;
@@ -475,16 +460,16 @@
     that.update = function () {
       links.attr({
         x1: function (d) {
-          return module.offset(d.source, d.target, d.offset_start).x;
+          return module.offset(d.source, d.target, d[module.name].offset_start).x;
         },
         y1: function (d) {
-          return module.offset(d.source, d.target, d.offset_start).y;
+          return module.offset(d.source, d.target, d[module.name].offset_start).y;
         },
         x2: function (d) {
-          return module.offset(d.target, d.source, d.offset_end).x;
+          return module.offset(d.target, d.source, d[module.name].offset_end).x;
         },
         y2: function (d) {
-          return module.offset(d.target, d.source, d.offset_end).y;
+          return module.offset(d.target, d.source, d[module.name].offset_end).y;
         }
       });
 
