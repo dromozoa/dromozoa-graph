@@ -318,6 +318,8 @@
   };
 
   module.update_nodes = function (nodes, type) {
+    var max_size = module.vector2(0, 0);
+
     nodes.each(function (d) {
       var group = d3.select(this),
           text = group.select("text"),
@@ -346,7 +348,15 @@
       d.type = type;
       d.width = w;
       d.height = h;
+      if (max_size.x < w) {
+        max_size.x = w;
+      }
+      if (max_size.y < h) {
+        max_size.y = h;
+      }
     });
+
+    return max_size;
   };
 
   module.offset_impl = function (a, b, length) {
@@ -514,7 +524,8 @@
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
         marker = { start: true },
-        type = "ellipse";
+        type = "ellipse",
+        max_node_size;
 
     view_rect.attr("fill", "white");
 
@@ -556,7 +567,11 @@
     }).attr("text-anchor", "middle");
 
     module.update_links(links);
-    module.update_nodes(nodes, type);
+    max_node_size = module.update_nodes(nodes, type).scale(2);
+
+    tree = d3.layout.tree().nodeSize([ max_node_size.x, max_node_size.y ]);
+    data_nodes = tree.nodes(data);
+    data_links = tree.links(data_nodes);
 
     that.update = function (w, h) {
       links.attr({
