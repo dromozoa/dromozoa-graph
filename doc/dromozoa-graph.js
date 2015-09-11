@@ -20,6 +20,8 @@
     };
   }
 
+  module.name = "dromozoa-graph";
+
   module.tuple2 = function (x, y) {
     var that = { x: x, y: y };
 
@@ -266,9 +268,8 @@
 
   module.make_id = function () {
     module.make_id.counter += 1;
-    return module.make_id.namespace + module.make_id.counter;
+    return module.name + "-" + module.make_id.counter;
   };
-  module.make_id.namespace = "dromozoa-graph-";
   module.make_id.counter = 0;
 
   module.make_marker = function (defs, type) {
@@ -399,7 +400,7 @@
     return module.offset_impl(a, b, length);
   };
 
-  module.construct = function (svg, data) {
+  module.construct_force = function (svg, data) {
     var that = {},
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
@@ -411,7 +412,7 @@
         links = g.selectAll("line").data(data.links).enter().append("line"),
         nodes = g.selectAll("g").data(data.nodes).enter().append("g"),
         opacity = 0.8,
-        marker = { start: true },
+        marker = { end: true },
         type = "ellipse";
 
     view_rect.attr("fill", "white");
@@ -514,7 +515,7 @@
         defs = svg.append("defs"),
         marker_start = module.make_marker(defs, "start"),
         marker_end = module.make_marker(defs, "end"),
-        tree = d3.layout.tree().nodeSize([ 200, 200 ]),
+        tree = d3.layout.tree(),
         data_nodes = tree.nodes(data),
         data_links = tree.links(data_nodes),
         view_g = svg.append("g"),
@@ -523,7 +524,7 @@
         links = g.selectAll("line").data(data_links).enter().append("line"),
         nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
-        marker = { start: true },
+        marker = { end: true },
         type = "ellipse",
         max_node_size;
 
