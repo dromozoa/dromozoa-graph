@@ -257,7 +257,8 @@
   module.make_marker = function (defs, type) {
     var bbox = module.make_marker.bbox,
         hbox = module.make_marker.hbox,
-        marker = defs.append("marker");
+        marker = defs.append("marker"),
+        path = marker.append("path");
     marker.attr({
       id: module.make_id(),
       refX: hbox.x,
@@ -267,9 +268,9 @@
       orient: "auto"
     });
     if (type === "start") {
-      marker.append("path").attr("d", d3.svg.line()([ [ bbox.x, 0 ], [ 0, hbox.y ], [ bbox.x, bbox.y ] ]));
+      path.attr("d", d3.svg.line()([ [ bbox.x, 0 ], [ 0, hbox.y ], [ bbox.x, bbox.y ] ]));
     } else {
-      marker.append("path").attr("d", d3.svg.line()([ [ 0, 0 ], [ bbox.x, hbox.y ], [ 0, bbox.y ] ]));
+      path.attr("d", d3.svg.line()([ [ 0, 0 ], [ bbox.x, hbox.y ], [ 0, bbox.y ] ]));
     }
     return marker;
   };
@@ -278,14 +279,14 @@
 
   module.update_links = function (links) {
     links.each(function (d) {
-      var line = d3.select(this),
+      var data = d[module.name],
+          line = d3.select(this),
           stroke_width = line.attr("stroke-width"),
-          offset,
-          data;
-      if (d[module.name] === undefined) {
-        d[module.name] = {};
+          offset;
+      if (data === undefined) {
+        data = {};
+        d[module.name] = data;
       }
-      data = d[module.name];
       if (stroke_width === null) {
         stroke_width = 1;
       }
