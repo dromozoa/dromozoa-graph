@@ -18,12 +18,12 @@
     { "text": "東條希" }
   ],
   "links": [
-    { "source": 0, "target": 1 },
-    { "source": 0, "target": 2 },
-    { "source": 0, "target": 3 },
-    { "source": 0, "target": 4 },
-    { "source": 0, "target": 5 },
-    { "source": 0, "target": 6 },
+    { "source": 0, "target": 1, "text": "学年" },
+    { "source": 0, "target": 2, "text": "学年" },
+    { "source": 0, "target": 3, "text": "学年" },
+    { "source": 0, "target": 4, "text": "ユニット" },
+    { "source": 0, "target": 5, "text": "ユニット"  },
+    { "source": 0, "target": 6, "text": "ユニット"  },
     { "source": 1, "target": 9 },
     { "source": 1, "target": 11 },
     { "source": 1, "target": 14 },

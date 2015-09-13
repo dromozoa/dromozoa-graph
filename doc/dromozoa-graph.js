@@ -368,7 +368,8 @@
   module.update_links = function (links) {
     links.each(function (d) {
       var data = d[module.name],
-          line = d3.select(this),
+          g = d3.select(this),
+          line = g.select("line"),
           stroke_width = line.attr("stroke-width"),
           offset;
       if (data === undefined) {
@@ -430,25 +431,32 @@
         view_g = svg.append("g"),
         view_rect = view_g.append("rect"),
         g = view_g.append("g"),
-        links = g.selectAll("line").data(data_links).enter().append("line"),
-        nodes = g.selectAll("g").data(data_nodes).enter().append("g"),
+        links = g.append("g").selectAll("g").data(data_links).enter().append("g"),
+        nodes = g.append("g").selectAll("g").data(data_nodes).enter().append("g"),
         opacity = 0.8,
-        marker = { start: true, end: true },
+        marker = { end: true },
         shape = module.ellipse(),
         node_bbox;
 
     view_rect.attr("fill", "white");
 
-    links.attr({
+    links.append("line").attr({
       opacity: opacity,
       stroke: "black"
     });
     if (marker.start) {
-      links.attr("marker-start", "url(#" + marker_start.attr("id") + ")");
+      links.select("line").attr("marker-start", "url(#" + marker_start.attr("id") + ")");
     }
     if (marker.end) {
-      links.attr("marker-end", "url(#" + marker_end.attr("id") + ")");
+      links.select("line").attr("marker-end", "url(#" + marker_end.attr("id") + ")");
     }
+    links.append("text").text(function (d) {
+      if (d.text === undefined) {
+        return "";
+      } else {
+        return d.text;
+      }
+    }).attr("text-anchor", "middle");
 
     shape.append(nodes).attr({
       opacity: opacity,
@@ -483,6 +491,7 @@
             target = d.target[module.name];
         data.start = module.offset(source, target, data.start_offset);
         data.end = module.offset(target, source, data.end_offset);
+        data.middle = data.start.clone().add(data.end).scale(0.5);
       });
 
       nodes.attr("transform", function (d) {
@@ -490,7 +499,16 @@
         return "translate(" + data.x + "," + data.y + ")";
       });
 
-      links.attr({
+      links.select("text").attr({
+        dx: function (d) {
+          return d[module.name].middle.x;
+        },
+        dy: function (d) {
+          return d[module.name].middle.y;
+        }
+      });
+
+      links.select("line").attr({
         x1: function (d) {
           return d[module.name].start.x;
         },
@@ -525,13 +543,8 @@
         that = module.construct(svg, data.nodes, data.links);
 
     force.nodes(data.nodes).links(data.links)
-        .linkStrength(0.9)
-        .friction(0.9)
-        .linkDistance(200)
-        .charge(-2000)
-        .gravity(0.1)
-        .theta(0.8)
-        .alpha(0.1);
+        .linkDistance(that.node_bbox.length())
+        .charge(-1000);
 
     force.on("tick", function () {
       that.update(module.matrix3.identity);
@@ -622,7 +635,7 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph-tree.json", function (error, data) {
+      d3.json("dromozoa-graph.json", function (error, data) {
         if (error !== null) {
           module.console.log(error);
           root.alert("could not load json");
