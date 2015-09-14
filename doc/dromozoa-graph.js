@@ -488,10 +488,25 @@
       links.each(function (d) {
         var data = d[module.name],
             source = d.source[module.name],
-            target = d.target[module.name];
-        data.start = module.offset(source, target, data.start_offset);
-        data.end = module.offset(target, source, data.end_offset);
-        data.middle = data.start.clone().add(data.end).scale(0.5);
+            target = d.target[module.name],
+            start = module.offset(source, target, data.start_offset),
+            end = module.offset(target, source, data.end_offset),
+            middle = start.clone().add(end).scale(0.5),
+            vector = end.clone().sub(start),
+            angle = module.vector2.x1y0.angle(vector) / Math.PI * 180;
+        data.start = start;
+        data.end = end;
+        data.middle = middle;
+        if (vector.x < 0) {
+          data.angle = 180;
+        } else {
+          data.angle = 0;
+        }
+        if (vector.y < 0) {
+          data.angle -= angle;
+        } else {
+          data.angle += angle;
+        }
       });
 
       nodes.attr("transform", function (d) {
@@ -505,6 +520,10 @@
         },
         dy: function (d) {
           return d[module.name].middle.y;
+        },
+        transform: function (d) {
+          var data = d[module.name];
+          return "rotate(" + data.angle + " " + data.middle.x + " " + data.middle.y + ")";
         }
       });
 
