@@ -17,7 +17,6 @@
 
 local graph = require "dromozoa.graph"
 local graphviz = require "dromozoa.graph.graphviz"
-local graphviz_attributes_adapter = require "dromozoa.graph.graphviz_attributes_adapter"
 
 local g = graph()
 
@@ -50,4 +49,4 @@ function attributes:edge_attributes(g, e)
 end
 
 g:write_graphviz(io.stdout)
-g:write_graphviz(assert(io.open("test.dot", "w")), graphviz_attributes_adapter(attributes)):close()
+g:write_graphviz(assert(io.open("test.dot", "w")), attributes):close()

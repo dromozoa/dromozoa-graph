@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local dfs_visitor = require "dromozoa.graph.dfs_visitor"
 
 local g = graph()
 
@@ -33,7 +32,7 @@ g:create_edge(v3, v2)
 g:create_edge(v1, v4)
 g:create_edge(v5, v4)
 
-g:dfs(dfs_visitor {
+g:dfs({
   tree_edge = function (ctx, g, e, u, v)
     print("tree_edge", u.id, v.id)
   end;
@@ -63,7 +62,7 @@ g:create_edge(v2, v4)
 g:create_edge(v3, v5)
 
 local result = {}
-v1:dfs(dfs_visitor {
+v1:dfs({
   discover_vertex = function (ctx, g, u)
     result[#result + 1] = u.id
   end;
@@ -75,7 +74,7 @@ assert(result[4] == 3)
 assert(result[5] == 5)
 
 local result = {}
-v1:dfs(dfs_visitor {
+v1:dfs({
   examine_edge = function (ctx, g, e, u, v)
     return e.id ~= 1
   end;

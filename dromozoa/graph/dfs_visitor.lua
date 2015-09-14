@@ -15,20 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visitor_adapter = require "dromozoa.graph.visitor_adapter"
-
-local events = {
-  "initialize_vertex",
-  "start_vertex",
-  "discover_vertex",
-  "examine_edge",
-  "tree_edge",
-  "back_edge",
-  "forward_or_cross_edge",
-  "finish_edge",
-  "finish_vertex",
-}
+io.stderr:write("[deprecated] dromozoa.graph.dfs_visitor\n")
 
 return function (visitor)
-  return visitor_adapter(visitor, events)
+  return visitor
 end
