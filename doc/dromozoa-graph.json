@@ -15,7 +15,8 @@
     { "text": "矢澤にこ" },
     { "text": "園田海未" },
     { "text": "星空凛" },
-    { "text": "東條希" }
+    { "text": "東條希" },
+    { "text": "0" }
   ],
   "links": [
     { "source": 0, "target": 1, "text": "学年" },
@@ -41,6 +42,7 @@
     { "source": 5, "target": 12 },
     { "source": 6, "target": 13 },
     { "source": 6, "target": 14 },
-    { "source": 6, "target": 15 }
+    { "source": 6, "target": 15 },
+    { "source": 0, "target": 16 }
   ]
 }

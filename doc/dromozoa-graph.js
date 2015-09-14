@@ -419,6 +419,9 @@
         data = {};
         d[module.namespace] = data;
       }
+      if (hbox.x < hbox.y) {
+        hbox.x = hbox.y;
+      }
       data.shape = shape;
       data.hbox = hbox;
       if (text_dy === null) {
