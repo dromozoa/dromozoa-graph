@@ -134,67 +134,66 @@
   module.vector2.x1y1 = module.vector2(1, 1);
 
   module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
-    var that = {};
+    var that = [
+      m00, m01, m02, // 0, 1, 2
+      m10, m11, m12, // 3, 4, 5
+      m20, m21, m22  // 6, 7, 8
+    ];
 
     that.determinant = function () {
+      var m00 = that[0], m01 = that[1], m02 = that[2],
+          m10 = that[3], m11 = that[4], m12 = that[5],
+          m20 = that[6], m21 = that[7], m22 = that[8];
       return m00 * (m11 * m22 - m21 * m12)
           - m01 * (m10 * m22 - m20 * m12)
           + m02 * (m10 * m21 - m20 * m11);
     };
 
     that.set_zero = function () {
-      m00 = 0; m01 = 0; m02 = 0;
-      m10 = 0; m11 = 0; m12 = 0;
-      m20 = 0; m21 = 0; m22 = 0;
+      that[0] = 0; that[1] = 0; that[2] = 0;
+      that[3] = 0; that[4] = 0; that[5] = 0;
+      that[6] = 0; that[7] = 0; that[8] = 0;
       return that;
     };
 
     that.set_identity = function () {
-      m00 = 1; m01 = 0; m02 = 0;
-      m10 = 0; m11 = 1; m12 = 0;
-      m20 = 0; m21 = 0; m22 = 1;
+      that[0] = 1; that[1] = 0; that[2] = 0;
+      that[3] = 0; that[4] = 1; that[5] = 0;
+      that[6] = 0; that[7] = 0; that[8] = 1;
       return that;
     };
 
     that.set_row = function (row, x, y, z) {
-      switch (row) {
-        case 0:
-          m00 = x; m01 = y; if (z !== undefined) { m02 = z; }
-          break;
-        case 1:
-          m10 = x; m11 = y; if (z !== undefined) { m12 = z; }
-          break;
-        case 2:
-          m20 = x; m21 = y; if (z !== undefined) { m22 = z; }
-          break;
+      row *= 3;
+      that[row] = x;
+      that[row + 1] = y;
+      if (z !== undefined) {
+        that[row + 2] = z;
       }
       return that;
     };
 
     that.set_col = function (col, x, y, z) {
-      switch (col) {
-        case 0:
-          m00 = x; m10 = y; if (z !== undefined) { m20 = z; }
-          break;
-        case 1:
-          m01 = x; m11 = y; if (z !== undefined) { m21 = z; }
-          break;
-        case 2:
-          m02 = x; m12 = y; if (z !== undefined) { m22 = z; }
-          break;
+      that[col] = x;
+      that[col + 3] = y;
+      if (z !== undefined) {
+        that[col + 6] = z;
       }
       return that;
     };
 
     that.transpose = function () {
-      var tmp = m01; m01 = m10; m10 = tmp;
-      tmp = m02; m02 = m20; m20 = tmp;
-      tmp = m12; m12 = m21; m21 = tmp;
+      var tmp = that[1]; that[1] = that[3]; that[3] = tmp;
+      tmp = that[2]; that[2] = that[6]; that[6] = tmp;
+      tmp = that[5]; that[5] = that[7]; that[7] = tmp;
       return that;
     };
 
     that.invert = function () {
       var d = that.determinant(),
+          m00 = that[0], m01 = that[1], m02 = that[2],
+          m10 = that[3], m11 = that[4], m12 = that[5],
+          m20 = that[6], m21 = that[7], m22 = that[8],
           n00 = m11 * m22 - m12 * m21,
           n01 = m02 * m21 - m01 * m22,
           n02 = m01 * m12 - m02 * m11,
@@ -207,9 +206,9 @@
           s;
       if (d !== 0) {
         s = 1 / d;
-        m00 = n00 * s; m01 = n01 * s; m02 = n02 * s;
-        m10 = n10 * s; m11 = n11 * s; m12 = n12 * s;
-        m20 = n20 * s; m21 = n21 * s; m22 = n22 * s;
+        that[0] = n00 * s; that[1] = n01 * s; that[2] = n02 * s;
+        that[3] = n10 * s; that[4] = n11 * s; that[5] = n12 * s;
+        that[6] = n20 * s; that[7] = n21 * s; that[8] = n22 * s;
       }
       return that;
     };
@@ -217,27 +216,27 @@
     that.rot_x = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 = 1; m01 = 0; m02 =  0;
-      m10 = 0; m11 = c; m12 = -s;
-      m20 = 0; m21 = s; m22 =  c;
+      that[0] = 1; that[1] = 0; that[2] =  0;
+      that[3] = 0; that[4] = c; that[5] = -s;
+      that[6] = 0; that[7] = s; that[8] =  c;
       return that;
     };
 
     that.rot_y = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 =  c; m01 = 0; m02 = s;
-      m10 =  0; m11 = 1; m12 = 0;
-      m20 = -s; m21 = 0; m22 = c;
+      that[0] =  c; that[1] = 0; that[2] = s;
+      that[3] =  0; that[4] = 1; that[5] = 0;
+      that[6] = -s; that[7] = 0; that[8] = c;
       return that;
     };
 
     that.rot_z = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 = c; m01 = -s; m02 = 0;
-      m10 = s; m11 =  c; m12 = 0;
-      m20 = 0; m21 =  0; m22 = 1;
+      that[0] = c; that[1] = -s; that[2] = 0;
+      that[3] = s; that[4] =  c; that[5] = 0;
+      that[6] = 0; that[7] =  0; that[8] = 1;
       return that;
     };
 
@@ -247,24 +246,24 @@
         result = t;
       }
       if (z === undefined) {
-        result.x = m00 * x + m01 * y + m02;
-        result.y = m10 * x + m11 * y + m12;
+        result.x = that[0] * x + that[1] * y + that[2];
+        result.y = that[3] * x + that[4] * y + that[5];
       } else {
-        result.x = m00 * x + m01 * y + m02 * z;
-        result.y = m10 * x + m11 * y + m12 * z;
-        result.z = m20 * x + m21 * y + m22 * z;
+        result.x = that[0] * x + that[1] * y + that[2] * z;
+        result.y = that[3] * x + that[4] * y + that[5] * z;
+        result.z = that[6] * x + that[7] * y + that[8] * z;
       }
       return result;
     };
 
     that.clone = function () {
-      return module.matrix3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+      return module.matrix3(that[0], that[1], that[2], that[3], that[4], that[5], that[6], that[7], that[8]);
     };
 
     that.toString = function () {
-      return "[[" + m00 + "," + m01 + "," + m02
-          + "],[" + m10 + "," + m11 + "," + m12
-          + "],[" + m20 + "," + m21 + "," + m22 + "]]";
+      return "[[" + that[0] + "," + that[1] + "," + that[2]
+          + "],[" + that[3] + "," + that[4] + "," + that[5]
+          + "],[" + that[6] + "," + that[7] + "," + that[8] + "]]";
     };
 
     return that;
