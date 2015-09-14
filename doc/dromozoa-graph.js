@@ -581,17 +581,14 @@
 
     that.resize = function (w, h) {
       var scale = that.node_bbox.length(),
-          hbox = module.vector2(w, h).scale(0.5),
-          rotation = module.matrix3(),
-          n = data.nodes.length,
-          i, position;
+          hbox = module.vector2(w, h).scale(0.5);
       that.resize_impl(w, h);
-      for (i = 0; i < n; i += 1) {
-        rotation.rot_z(Math.PI * 2 * i / n);
-        position = rotation.transform(module.vector2.x1y0.clone()).scale(scale).add(hbox);
-        data.nodes[i].x = position.x;
-        data.nodes[i].y = position.y;
-      }
+      $.each(data.nodes, function (i, v) {
+        var rotation = module.matrix3().rot_z(Math.PI * 2 * i / data.nodes.length),
+            position = rotation.transform(module.vector2.x1y0.clone()).scale(scale).add(hbox);
+        v.x = position.x;
+        v.y = position.y;
+      });
       force.size([ w, h ]).start();
     };
 
