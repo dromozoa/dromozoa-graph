@@ -606,8 +606,8 @@
     }));
 
     that.resize = function (w, h) {
-      var scale = that.node_bbox.length(),
-          hbox = module.vector2(w, h).scale(0.5);
+      var hbox = module.vector2(w, h).scale(0.5),
+          scale = Math.min(hbox.x, hbox.y);
       that.resize_impl(w, h);
       $.each(data.nodes, function (i, v) {
         var rotation = module.matrix3().rot_z(Math.PI * 2 * i / data.nodes.length),
