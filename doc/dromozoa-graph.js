@@ -567,7 +567,6 @@
   module.construct_force = function (svg, data) {
     var force = d3.layout.force(),
         that = module.construct(svg, data.nodes, data.links);
-
     force.nodes(data.nodes).links(data.links)
         .linkDistance(that.node_bbox.length())
         .charge(-1000);
@@ -581,7 +580,18 @@
     }));
 
     that.resize = function (w, h) {
+      var scale = that.node_bbox.length(),
+          hbox = module.vector2(w, h).scale(0.5),
+          rotation = module.matrix3(),
+          n = data.nodes.length,
+          i, position;
       that.resize_impl(w, h);
+      for (i = 0; i < n; i += 1) {
+        rotation.rot_z(Math.PI * 2 * i / n);
+        position = rotation.transform(module.vector2.x1y0.clone()).scale(scale).add(hbox);
+        data.nodes[i].x = position.x;
+        data.nodes[i].y = position.y;
+      }
       force.size([ w, h ]).start();
     };
 
