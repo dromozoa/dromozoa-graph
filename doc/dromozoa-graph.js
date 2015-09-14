@@ -755,5 +755,5 @@
     module.console.assert(Math.abs(vector.x) < 0.000001);
     module.console.assert(Math.abs(vector.y - 1) < 0.000001);
   };
-  module.test();
+  // module.test();
 }(this.self || global));
