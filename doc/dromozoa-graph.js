@@ -3,11 +3,17 @@
 "use strict";
 (function (root) {
   var $ = root.jQuery, d3 = root.d3, module = (function () {
+    var that;
     if (root.dromozoa === undefined) {
       root.dromozoa = {};
     }
     if (root.dromozoa.graph === undefined) {
-      root.dromozoa.graph = { name: "dromozoa-graph" };
+      that = function (data) {
+        that.data = data;
+      };
+      that.namespace = "dromozoa-graph";
+      that.data = "dromozoa-graph.json";
+      root.dromozoa.graph = that;
     }
     return root.dromozoa.graph;
   }());
@@ -250,7 +256,7 @@
 
   module.make_id = function () {
     module.make_id.counter += 1;
-    return module.name + "-" + module.make_id.counter;
+    return module.namespace + "-" + module.make_id.counter;
   };
   module.make_id.counter = 0;
 
@@ -285,7 +291,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           bbox = hbox.clone().scale(2);
       data.bbox = bbox;
@@ -317,7 +323,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           r = hbox.length(),
           bbox = module.vector2(r, r).scale(2);
@@ -340,7 +346,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           rx = hbox.x * Math.SQRT2,
           ry = hbox.y * Math.SQRT2,
@@ -367,7 +373,7 @@
 
   module.update_links = function (links) {
     links.each(function (d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           g = d3.select(this),
           text = g.select("text"),
           text_dy = text.attr("dy"),
@@ -377,7 +383,7 @@
           offset;
       if (data === undefined) {
         data = {};
-        d[module.name] = data;
+        d[module.namespace] = data;
       }
       if (text_dy === null) {
         text_dy = 0;
@@ -403,7 +409,7 @@
   module.update_nodes = function (nodes, shape) {
     var bbox = module.vector2(0, 0);
     nodes.each(function (d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           g = d3.select(this),
           text = g.select("text"),
           text_dy = text.attr("dy"),
@@ -411,7 +417,7 @@
           hbox = module.vector2(text_bbox.width, text_bbox.height).scale(0.5);
       if (data === undefined) {
         data = {};
-        d[module.name] = data;
+        d[module.namespace] = data;
       }
       data.shape = shape;
       data.hbox = hbox;
@@ -488,14 +494,14 @@
 
     that.update = function (matrix) {
       nodes.each(function (d) {
-        var data = d[module.name];
+        var data = d[module.namespace];
         matrix.transform(d, data);
       });
 
       links.each(function (d) {
-        var data = d[module.name],
-            source = d.source[module.name],
-            target = d.target[module.name],
+        var data = d[module.namespace],
+            source = d.source[module.namespace],
+            target = d.target[module.namespace],
             start = module.offset(source, target, data.start_offset),
             end = module.offset(target, source, data.end_offset),
             middle = start.clone().add(end).scale(0.5),
@@ -517,35 +523,35 @@
       });
 
       nodes.attr("transform", function (d) {
-        var data = d[module.name];
+        var data = d[module.namespace];
         return "translate(" + data.x + "," + data.y + ")";
       });
 
       links.select("text").attr({
         x: function (d) {
-          return d[module.name].middle.x;
+          return d[module.namespace].middle.x;
         },
         y: function (d) {
-          return d[module.name].middle.y;
+          return d[module.namespace].middle.y;
         },
         transform: function (d) {
-          var data = d[module.name];
+          var data = d[module.namespace];
           return "rotate(" + data.angle + " " + data.middle.x + " " + data.middle.y + ")";
         }
       });
 
       links.select("line").attr({
         x1: function (d) {
-          return d[module.name].start.x;
+          return d[module.namespace].start.x;
         },
         y1: function (d) {
-          return d[module.name].start.y;
+          return d[module.namespace].start.y;
         },
         x2: function (d) {
-          return d[module.name].end.x;
+          return d[module.namespace].end.x;
         },
         y2: function (d) {
-          return d[module.name].end.y;
+          return d[module.namespace].end.y;
         }
       });
     };
@@ -668,14 +674,21 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph.json", function (error, data) {
-        if (error !== null) {
-          module.console.log(error);
-          root.alert("could not load json");
-          return;
-        }
-        module.main(data);
-      });
+      if (module.data === undefined) {
+        module.data = "dromozoa-graph.json";
+      }
+      if (typeof module.data === "string") {
+        d3.json(module.data, function (error, data) {
+          if (error !== null) {
+            module.console.log(error);
+            root.alert("could not load json");
+            return;
+          }
+          module.main(data);
+        });
+      } else {
+        module.main(module.data);
+      }
     }
   };
 
