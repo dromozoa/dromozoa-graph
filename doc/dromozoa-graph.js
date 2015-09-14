@@ -1,3 +1,20 @@
+// Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+//
+// This file is part of dromozoa-graph.
+//
+// dromozoa-graph is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// dromozoa-graph is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
+
 /*jslint this: true, white: true */
 /*global global */
 "use strict";
@@ -22,6 +39,7 @@
     module.console = root.console;
   } else {
     module.console = {
+      assert: $.noop,
       log: $.noop
     };
   }
@@ -246,7 +264,7 @@
     that.toString = function () {
       return "[[" + m00 + "," + m01 + "," + m02
           + "],[" + m10 + "," + m11 + "," + m12
-          + "],[" + m20 + "," + m21 + "," + m22 + "]";
+          + "],[" + m20 + "," + m21 + "," + m22 + "]]";
     };
 
     return that;
@@ -718,4 +736,25 @@
     module.run("timeout");
   }, 3000);
 
+  module.test = function () {
+    var matrix, vector;
+    matrix = module.matrix3().set_zero();
+    module.console.assert(matrix.toString() === "[[0,0,0],[0,0,0],[0,0,0]]");
+    matrix = module.matrix3().set_identity();
+    module.console.assert(matrix.toString() === "[[1,0,0],[0,1,0],[0,0,1]]");
+    matrix = module.matrix3().set_identity().set_col(2, 17, 23);
+    module.console.assert(matrix.toString() === "[[1,0,17],[0,1,23],[0,0,1]]");
+    matrix = module.matrix3(1, 2, 3, 4, 5, 6, 7, 8, 9).transpose();
+    module.console.assert(matrix.toString() === "[[1,4,7],[2,5,8],[3,6,9]]");
+    matrix = module.matrix3(1, 2, 1, 2, 1, 0, 1, 1, 2).invert();
+    vector = matrix.transform({ x: 1, y: 0, z: 0 });
+    module.console.assert(Math.abs(vector.x + 0.4) < 0.000001);
+    module.console.assert(Math.abs(vector.y - 0.8) < 0.000001);
+    module.console.assert(Math.abs(vector.z + 0.2) < 0.000001);
+    matrix = module.matrix3().rot_z(Math.PI * 0.5);
+    vector = matrix.transform(module.vector2.x1y0.clone());
+    module.console.assert(Math.abs(vector.x) < 0.000001);
+    module.console.assert(Math.abs(vector.y - 1) < 0.000001);
+  };
+  module.test();
 }(this.self || global));
