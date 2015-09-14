@@ -369,17 +369,24 @@
     links.each(function (d) {
       var data = d[module.name],
           g = d3.select(this),
+          text = g.select("text"),
+          text_dy = text.attr("dy"),
+          text_bbox = text.node().getBBox(),
           line = g.select("line"),
-          stroke_width = line.attr("stroke-width"),
+          line_stroke_width = line.attr("stroke-width"),
           offset;
       if (data === undefined) {
         data = {};
         d[module.name] = data;
       }
-      if (stroke_width === null) {
-        stroke_width = 1;
+      if (text_dy === null) {
+        text_dy = 0;
       }
-      offset = stroke_width * module.marker.hbox.x;
+      text.attr("dy", text_dy - (text_bbox.y + text_bbox.height));
+      if (line_stroke_width === null) {
+        line_stroke_width = 1;
+      }
+      offset = line_stroke_width * module.marker.hbox.x;
       if (line.attr("marker-start") !== null) {
         data.start_offset = offset;
       } else {
@@ -515,10 +522,10 @@
       });
 
       links.select("text").attr({
-        dx: function (d) {
+        x: function (d) {
           return d[module.name].middle.x;
         },
-        dy: function (d) {
+        y: function (d) {
           return d[module.name].middle.y;
         },
         transform: function (d) {
