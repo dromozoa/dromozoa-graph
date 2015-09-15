@@ -18,6 +18,72 @@
 local clone = require "dromozoa.commons.clone"
 local edge = require "dromozoa.graph.edge"
 
+local class = {}
+
+function class.new(g)
+  return {
+    g = function () return g end;
+    n = 0;
+    u = {};
+    v = {};
+  }
+end
+
+function class:clone(g)
+  local that = clone(self)
+  that.g = function () return g end
+  return that
+end
+
+function class:create_edge(uid, vid)
+  local id = self.n + 1
+  self.n = id
+  self.u[id] = uid
+  self.v[id] = vid
+  return edge(self.g(), id, uid, vid)
+end
+
+function class:remove_edge(id)
+  self.u[id] = nil
+  self.v[id] = nil
+end
+
+function class:reset_edge(id, uid, vid)
+  self.u[id] = uid
+  self.v[id] = vid
+end
+
+function class:get_edge(id)
+  if id then
+    return edge(self.g(), id, self.u[id], self.v[id])
+  end
+end
+
+function class:each_edge(key)
+  if key then
+    return self.g()._ep:each_item(key, class.get_edge, self)
+  else
+    return function (_, i)
+      if i then
+        return self:get_edge(next(self.u, i.id))
+      else
+        return self:get_edge(next(self.u))
+      end
+    end
+  end
+end
+
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function (_, g)
+    return setmetatable(class.new(g), metatable)
+  end;
+})
+
+--[[
 local function construct(_g, _n, _u, _v)
   local _p = _g._ep
 
@@ -71,3 +137,4 @@ end
 return function (g)
   return construct(g, 0, {}, {})
 end
+]]

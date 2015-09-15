@@ -28,8 +28,10 @@ function class.new(g)
   }
 end
 
-function class:clone()
-  return clone(self)
+function class:clone(g)
+  local that = clone(self)
+  that.g = function () return g end
+  return that
 end
 
 function class:empty()
