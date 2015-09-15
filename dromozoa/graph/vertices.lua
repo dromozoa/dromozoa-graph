@@ -20,29 +20,26 @@ local vertex = require "dromozoa.graph.vertex"
 
 local class = {}
 
-function class.new(g)
+function class.new()
   return {
-    g = function () return g end;
     n = 0;
     data = {};
   }
 end
 
-function class:clone(g)
-  local that = clone(self)
-  that.g = function () return g end
-  return that
+function class:clone()
+  return clone(self)
 end
 
 function class:empty()
   return not next(self.data)
 end
 
-function class:create_vertex()
+function class:create_vertex(g)
   local id = self.n + 1
   self.n = id
   self.data[id] = true
-  return vertex(self.g(), id)
+  return vertex(g, id)
 end
 
 function class:remove_vertex(id)
@@ -76,7 +73,7 @@ local metatable = {
 }
 
 return setmetatable(class, {
-  __call = function (_, g)
-    return setmetatable(class.new(g), metatable)
+  __call = function ()
+    return setmetatable(class.new(), metatable)
   end;
 })

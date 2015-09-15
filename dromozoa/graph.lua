@@ -49,7 +49,7 @@ local function construct(self)
   end
 
   function self:create_vertex()
-    return self.vertices:create_vertex()
+    return self.vertices:create_vertex(self)
   end
 
   function self:get_vertex(id)
