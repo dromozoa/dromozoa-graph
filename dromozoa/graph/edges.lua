@@ -61,7 +61,11 @@ end
 
 function class:each_edge(key)
   if key then
-    return self.g()._ep:each_item(key, class.get_edge, self)
+    return coroutine.wrap(function ()
+      for id in self.g()._ep:each_item2(key) do
+        coroutine.yield(edge(self.g(), id, self.u[id], self.v[id]))
+      end
+    end)
   else
     return coroutine.wrap(function ()
       for id, uid in pairs(self.u) do

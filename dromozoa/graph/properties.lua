@@ -51,6 +51,19 @@ function class:each_item(key, fn, context)
   end
 end
 
+function class:each_item2(key)
+  local data = self[key]
+  if data then
+    return coroutine.wrap(function ()
+      for id in pairs(data) do
+        coroutine.yield(id)
+      end
+    end)
+  else
+    return nil
+  end
+end
+
 function class:set_property(id, key, value)
   local data = self[key]
   if data then
