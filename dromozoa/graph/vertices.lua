@@ -18,53 +18,61 @@
 local clone = require "dromozoa.commons.clone"
 local vertex = require "dromozoa.graph.vertex"
 
-local function construct(_g, _n, _data)
-  local _p = _g._vp
+local class = {}
 
-  local self = {}
+function class.new(g)
+  return {
+    g = function () return g end;
+    n = 0;
+    data = {};
+  }
+end
 
-  function self:clone(g)
-    return construct(g, _n, clone(_data))
+function class:clone()
+  return clone(self)
+end
+
+function class:empty()
+  return not next(self.data)
+end
+
+function class:create_vertex()
+  local id = self.n + 1
+  self.n = id
+  self.data[id] = true
+  return vertex(self.g(), id)
+end
+
+function class:remove_vertex(id)
+  self.data[id] = nil
+end
+
+function class:get_vertex(id)
+  if id then
+    return vertex(self.g(), id)
   end
+end
 
-  function self:empty()
-    return not next(_data)
-  end
-
-  function self:create_vertex()
-    local id = _n + 1
-    _n = id
-    _data[id] = true
-    return vertex(_g, id)
-  end
-
-  function self:remove_vertex(id)
-    _data[id] = nil
-  end
-
-  function self:get_vertex(id)
-    if id then
-      return vertex(_g, id)
-    end
-  end
-
-  function self:each_vertex(key)
-    if key then
-      return _p:each_item(key, self.get_vertex, self)
-    else
-      return function (_, i)
-        if i then
-          return self:get_vertex(next(_data, i.id))
-        else
-          return self:get_vertex(next(_data))
-        end
+function class:each_vertex(key)
+  if key then
+    return self.g()._vp:each_item(key, class.get_vertex, self)
+  else
+    return function (_, i)
+      if i then
+        return self:get_vertex(next(self.data, i.id))
+      else
+        return self:get_vertex(next(self.data))
       end
     end
   end
-
-  return self
 end
 
-return function (g)
-  return construct(g, 0, {})
-end
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function (_, g)
+    return setmetatable(class.new(g), metatable)
+  end;
+})
