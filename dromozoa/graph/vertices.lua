@@ -49,23 +49,23 @@ function class:remove_vertex(id)
   self.data[id] = nil
 end
 
-function class:get_vertex(id)
+function class:get_vertex(g, id)
   if id then
-    return vertex(self.g(), id)
+    return vertex(g, id)
   end
 end
 
-function class:each_vertex(key)
+function class:each_vertex(g, key)
   if key then
     return coroutine.wrap(function ()
-      for id in self.g()._vp:each_item(key) do
-        coroutine.yield(vertex(self.g(), id))
+      for id in g._vp:each_item(key) do
+        coroutine.yield(vertex(g, id))
       end
     end)
   else
     return coroutine.wrap(function ()
       for id in pairs(self.data) do
-        coroutine.yield(vertex(self.g(), id))
+        coroutine.yield(vertex(g, id))
       end
     end)
   end

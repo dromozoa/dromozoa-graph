@@ -53,11 +53,11 @@ local function construct(self)
   end
 
   function self:get_vertex(id)
-    return self.vertices:get_vertex(id)
+    return self.vertices:get_vertex(self, id)
   end
 
   function self:each_vertex(key)
-    return self.vertices:each_vertex(key)
+    return self.vertices:each_vertex(self, key)
   end
 
   function self:clear_vertex_properties(key)
