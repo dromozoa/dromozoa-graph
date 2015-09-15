@@ -57,15 +57,18 @@ end
 
 function class:each_vertex(key)
   if key then
-    return self.g()._vp:each_item(key, class.get_vertex, self)
-  else
-    return function (_, i)
-      if i then
-        return self:get_vertex(next(self.data, i.id))
-      else
-        return self:get_vertex(next(self.data))
+    return coroutine.wrap(function ()
+      for id in self.g()._vp:each_item2(key) do
+        coroutine.yield(vertex(self.g(), id))
       end
-    end
+    end)
+    -- return self.g()._vp:each_item(key, class.get_vertex, self)
+  else
+    return coroutine.wrap(function ()
+      for id in pairs(self.data) do
+        coroutine.yield(vertex(self.g(), id))
+      end
+    end)
   end
 end
 
