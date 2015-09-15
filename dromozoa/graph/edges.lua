@@ -19,7 +19,7 @@ local edge = require "dromozoa.graph.edge"
 
 local class = {}
 
-function class.new(g)
+function class.new()
   return {
     n = 0;
     u = {};

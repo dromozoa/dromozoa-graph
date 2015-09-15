@@ -15,22 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
-
 local class = {}
 
-function class.new(g, mode)
+function class.new(mode)
   return {
-    g = function () return g end;
     mode = mode;
     dataset = {};
   }
-end
-
-function class:clone(g)
-  local that = clone(self)
-  that.g = function () return g end
-  return that
 end
 
 function class:append_edge(uid, eid)
@@ -67,26 +58,21 @@ function class:remove_edge(uid, eid)
   error("could not remove edge " .. eid)
 end
 
-function class:each_adjacent_vertex(uid)
+function class:each_adjacent_vertex(g, uid)
   local data = self.dataset[uid]
   if data then
     if type(data) == "table" then
-      local index = 0
-      return function ()
-        local i = index + 1
-        index = i
-        local e = self.g():get_edge(data[i])
-        if e then
-          return e[self.mode], e
+      return coroutine.wrap(function ()
+        for i in ipairs(data) do
+          local e = g:get_edge(data[i])
+          coroutine.yield(e[self.mode], e)
         end
-      end
+      end)
     else
-      return function (_, i)
-        if not i then
-          local e = self.g():get_edge(data)
-          return e[self.mode], e
-        end
-      end
+      return coroutine.wrap(function ()
+        local e = g:get_edge(data)
+        coroutine.yield(e[self.mode], e)
+      end)
     end
   else
     return function () end
@@ -111,7 +97,7 @@ local metatable = {
 }
 
 return setmetatable(class, {
-  __call = function (_, g, mode)
-    return setmetatable(class.new(g, mode), metatable)
+  __call = function (_, mode)
+    return setmetatable(class.new(mode), metatable)
   end;
 })

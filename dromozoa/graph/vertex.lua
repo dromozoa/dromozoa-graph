@@ -46,7 +46,7 @@ function class:each_property()
 end
 
 function class:each_adjacent_vertex(mode)
-  return self.g():impl_get_adjacencies(mode):each_adjacent_vertex(self.id)
+  return self.g():impl_get_adjacencies(mode):each_adjacent_vertex(self.g(), self.id)
 end
 
 function class:count_degree(mode)
