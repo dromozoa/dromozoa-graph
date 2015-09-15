@@ -53,13 +53,13 @@ function class:collapse()
 end
 
 function class:impl_get_u()
-  local u = self.g()._v:get_vertex(self.uid)
+  local u = self.g().vertices:get_vertex(self.uid)
   rawset(self, "u", u)
   return u
 end
 
 function class:impl_get_v()
-  local v = self.g()._v:get_vertex(self.vid)
+  local v = self.g().vertices:get_vertex(self.vid)
   rawset(self, "v", v)
   return v
 end

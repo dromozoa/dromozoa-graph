@@ -30,7 +30,7 @@ end
 function class:remove()
   local id = self.id
   self.g()._vp:remove_item(id)
-  self.g()._v:remove_vertex(id)
+  self.g().vertices:remove_vertex(id)
 end
 
 function class:impl_get_property(key)

@@ -28,7 +28,6 @@ local vertices = require "dromozoa.graph.vertices"
 local function construct(self)
   local _vp = self._vp
   local _ep = self._ep
-  local _v = self._v
   local edges = self.edges
   local _uv = self._uv
   local _vu = self._vu
@@ -38,7 +37,7 @@ local function construct(self)
       _vp = clone(_vp);
       _ep = clone(_ep);
     }
-    that._v = _v:clone(that)
+    that.vertices = self.vertices:clone(that)
     that.edges = self.edges:clone(that)
     that._uv = _uv:clone(that)
     that._vu = _vu:clone(that)
@@ -46,19 +45,19 @@ local function construct(self)
   end
 
   function self:empty()
-    return _v:empty()
+    return self.vertices:empty()
   end
 
   function self:create_vertex()
-    return _v:create_vertex()
+    return self.vertices:create_vertex()
   end
 
   function self:get_vertex(id)
-    return _v:get_vertex(id)
+    return self.vertices:get_vertex(id)
   end
 
   function self:each_vertex(key)
-    return _v:each_vertex(key)
+    return self.vertices:each_vertex(key)
   end
 
   function self:clear_vertex_properties(key)
@@ -120,7 +119,7 @@ return function ()
     _vp = properties();
     _ep = properties();
   }
-  self._v = vertices(self)
+  self.vertices = vertices(self)
   self.edges = edges(self)
   self._uv = adjacency_list(self, "v")
   self._vu = adjacency_list(self, "u")
