@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.commons.clone"
 local adjacency_list = require "dromozoa.graph.adjacency_list"
 local dfs = require "dromozoa.graph.dfs"
 local edges = require "dromozoa.graph.edges"
@@ -34,8 +35,8 @@ local function construct(self)
 
   function self:clone()
     local that = {
-      _vp = _vp:clone();
-      _ep = _ep:clone();
+      _vp = clone(_vp);
+      _ep = clone(_ep);
     }
     that._v = _v:clone(that)
     that._e = _e:clone(that)

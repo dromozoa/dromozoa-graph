@@ -15,17 +15,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
 local pairs = require "dromozoa.commons.pairs"
 
 local class = {}
 
 function class.new()
   return {}
-end
-
-function class:clone()
-  return clone(self)
 end
 
 function class:clear_properties(key)
