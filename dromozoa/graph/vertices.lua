@@ -15,7 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
 local vertex = require "dromozoa.graph.vertex"
 
 local class = {}
@@ -25,10 +24,6 @@ function class.new()
     n = 0;
     data = {};
   }
-end
-
-function class:clone()
-  return clone(self)
 end
 
 function class:empty()

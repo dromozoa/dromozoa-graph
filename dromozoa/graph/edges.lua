@@ -15,32 +15,24 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
 local edge = require "dromozoa.graph.edge"
 
 local class = {}
 
 function class.new(g)
   return {
-    g = function () return g end;
     n = 0;
     u = {};
     v = {};
   }
 end
 
-function class:clone(g)
-  local that = clone(self)
-  that.g = function () return g end
-  return that
-end
-
-function class:create_edge(uid, vid)
+function class:create_edge(g, uid, vid)
   local id = self.n + 1
   self.n = id
   self.u[id] = uid
   self.v[id] = vid
-  return edge(self.g(), id, uid, vid)
+  return edge(g, id, uid, vid)
 end
 
 function class:remove_edge(id)
@@ -53,23 +45,23 @@ function class:reset_edge(id, uid, vid)
   self.v[id] = vid
 end
 
-function class:get_edge(id)
+function class:get_edge(g, id)
   if id then
-    return edge(self.g(), id, self.u[id], self.v[id])
+    return edge(g, id, self.u[id], self.v[id])
   end
 end
 
-function class:each_edge(key)
+function class:each_edge(g, key)
   if key then
     return coroutine.wrap(function ()
-      for id in self.g()._ep:each_item(key) do
-        coroutine.yield(edge(self.g(), id, self.u[id], self.v[id]))
+      for id in g._ep:each_item(key) do
+        coroutine.yield(edge(g, id, self.u[id], self.v[id]))
       end
     end)
   else
     return coroutine.wrap(function ()
       for id, uid in pairs(self.u) do
-        coroutine.yield(edge(self.g(), id, uid, self.v[id]))
+        coroutine.yield(edge(g, id, uid, self.v[id]))
       end
     end)
   end
@@ -80,7 +72,7 @@ local metatable = {
 }
 
 return setmetatable(class, {
-  __call = function (_, g)
-    return setmetatable(class.new(g), metatable)
+  __call = function ()
+    return setmetatable(class.new(), metatable)
   end;
 })
