@@ -16,79 +16,88 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local clone = require "dromozoa.commons.clone"
+local pairs = require "dromozoa.commons.pairs"
 
-local function construct(self, _dataset)
-  function self:clone()
-    return construct({}, clone(_dataset))
+local class = {}
+
+function class.new()
+  return {}
+end
+
+function class:clone()
+  return clone(self)
+end
+
+function class:clear_properties(key)
+  self[key] = nil
+end
+
+function class:remove_item(id)
+  for key, data in pairs(self) do
+    data[id] = nil
+    if next(data) == nil then
+      self[key] = nil
+    end
   end
+end
 
-  function self:clear_properties(key)
-    _dataset[key] = nil
+function class:each_item(key, fn, context)
+  local data = self[key]
+  if data then
+    return function (_, i)
+      if i then
+        return fn(context, next(data, i.id))
+      else
+        return fn(context, next(data))
+      end
+    end
+  else
+    return function () end
   end
+end
 
-  function self:remove_item(id)
-    for key, data in pairs(_dataset) do
+function class:set_property(id, key, value)
+  local data = self[key]
+  if data then
+    if value ~= nil then
+      data[id] = value
+    else
       data[id] = nil
       if next(data) == nil then
-        _dataset[key] = nil
+        self[key] = nil
       end
     end
-  end
-
-  function self:each_item(key, fn, context)
-    local data = _dataset[key]
-    if data then
-      return function (_, i)
-        if i then
-          return fn(context, next(data, i.id))
-        else
-          return fn(context, next(data))
-        end
-      end
-    else
-      return function () end
+  else
+    if value ~= nil then
+      self[key] = { [id] = value }
     end
   end
-
-  function self:set_property(id, key, value)
-    local data = _dataset[key]
-    if data then
-      if value ~= nil then
-        data[id] = value
-      else
-        data[id] = nil
-        if next(data) == nil then
-          _dataset[key] = nil
-        end
-      end
-    else
-      if value ~= nil then
-        _dataset[key] = { [id] = value }
-      end
-    end
-  end
-
-  function self:get_property(id, key)
-    local data = _dataset[key]
-    if data then
-      return data[id]
-    end
-  end
-
-  function self:each_property(id)
-    return function (_, i)
-      for key, data in next, _dataset, i do
-        local value = data[id]
-        if value ~= nil then
-          return key, value
-        end
-      end
-    end
-  end
-
-  return self
 end
 
-return function ()
-  return construct({}, {})
+function class:get_property(id, key)
+  local data = self[key]
+  if data then
+    return data[id]
+  end
 end
+
+function class:each_property(id)
+  return function (_, i)
+    for key, data in next, self, i do
+      local value = data[id]
+      if value ~= nil then
+        return key, value
+      end
+    end
+  end
+end
+
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function ()
+    return setmetatable(class.new(), metatable)
+  end;
+})
