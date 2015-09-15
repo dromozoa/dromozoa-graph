@@ -15,41 +15,43 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local visit = require "dromozoa.graph.visit"
+
 local function dfs(g, visitor, u, mode, color)
   local uid = u.id
-  visitor:discover_vertex(g, u)
+  visit(visitor, "discover_vertex", g, u)
   color[uid] = 2
   for v, e in u:each_adjacent_vertex(mode) do
-    if visitor:examine_edge(g, e, u, v) ~= false then
+    if visit(visitor, "examine_edge", g, e, u, v) ~= false then
       local c = color[v.id]
       if c == 1 then
-        visitor:tree_edge(g, e, u, v)
+        visit(visitor, "tree_edge", g, e, u, v)
         dfs(g, visitor, v, mode, color)
       elseif c == 2 then
-        visitor:back_edge(g, e, u, v)
+        visit(visitor, "back_edge", g, e, u, v)
       else
-        visitor:forward_or_cross_edge(g, e, u, v)
+        visit(visitor, "forward_or_cross_edge", g, e, u, v)
       end
-      visitor:finish_edge(g, e, u, v)
+      visit(visitor, "finish_edge", g, e, u, v)
     end
   end
-  visitor:finish_vertex(g, u)
+  visit(visitor, "finish_vertex", g, u)
   color[uid] = 3
 end
 
 return function (g, visitor, s, mode)
   local color = {}
   for u in g:each_vertex() do
-    visitor:initialize_vertex(g, u)
+    visit(visitor, "initialize_vertex", g, u)
     color[u.id] = 1
   end
   if s then
-    visitor:start_vertex(g, s)
+    visit(visitor, "start_vertex", g, s)
     dfs(g, visitor, s, mode, color)
   else
     for u in g:each_vertex() do
       if color[u.id] == 1 then
-        visitor:start_vertex(g, u)
+        visit(visitor, "start_vertex", g, u)
         dfs(g, visitor, u, mode, color)
       end
     end

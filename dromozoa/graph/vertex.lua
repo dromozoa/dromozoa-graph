@@ -18,56 +18,66 @@
 local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
 
+local class = {}
+
+function class.new(g, id)
+  return {
+    g = function () return g end;
+    id = id;
+  }
+end
+
+function class:remove()
+  local id = self.id
+  self.g()._vp:remove_item(id)
+  self.g()._v:remove_vertex(id)
+end
+
+function class:impl_get_property(key)
+  return self.g()._vp:get_property(self.id, key)
+end
+
+function class:impl_set_property(key, value)
+  self.g()._vp:set_property(self.id, key, value)
+end
+
+function class:each_property()
+  return self.g()._vp:each_property(self.id)
+end
+
+function class:each_adjacent_vertex(mode)
+  return self.g():impl_get_adjacencies(mode):each_adjacent_vertex(self.id)
+end
+
+function class:count_degree(mode)
+  return self.g():impl_get_adjacencies(mode):count_degree(self.id)
+end
+
+function class:bfs(visitor, mode)
+  bfs(self.g(), visitor, self, mode)
+end
+
+function class:dfs(visitor, mode)
+  dfs(self.g(), visitor, self, mode)
+end
+
 local metatable = {}
 
 function metatable:__index(key)
-  return self:impl_get_property(key)
+  local fn = class[key]
+  if fn == nil then
+    return self:impl_get_property(key)
+  else
+    return fn
+  end
 end
 
 function metatable:__newindex(key, value)
   self:impl_set_property(key, value)
 end
 
-return function (_g, _id)
-  local _v = _g._v
-  local _p = _g._vp
-
-  local self = {
-    id = _id;
-  }
-
-  function self:remove()
-    _p:remove_item(_id)
-    _v:remove_vertex(_id)
-  end
-
-  function self:impl_get_property(key)
-    return _p:get_property(_id, key)
-  end
-
-  function self:impl_set_property(key, value)
-    _p:set_property(_id, key, value)
-  end
-
-  function self:each_property()
-    return _p:each_property(_id)
-  end
-
-  function self:each_adjacent_vertex(mode)
-    return _g:impl_get_adjacencies(mode):each_adjacent_vertex(_id)
-  end
-
-  function self:count_degree(mode)
-    return _g:impl_get_adjacencies(mode):count_degree(_id)
-  end
-
-  function self:bfs(visitor, mode)
-    bfs(_g, visitor, self, mode)
-  end
-
-  function self:dfs(visitor, mode)
-    dfs(_g, visitor, self, mode)
-  end
-
-  return setmetatable(self, metatable)
-end
+return setmetatable(class, {
+  __call = function (_, g, id)
+    return setmetatable(class.new(g, id), metatable)
+  end;
+})

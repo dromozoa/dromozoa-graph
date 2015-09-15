@@ -1,13 +1,36 @@
+// Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+//
+// This file is part of dromozoa-graph.
+//
+// dromozoa-graph is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// dromozoa-graph is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
+
 /*jslint this: true, white: true */
 /*global global */
 "use strict";
 (function (root) {
   var $ = root.jQuery, d3 = root.d3, module = (function () {
+    var that;
     if (root.dromozoa === undefined) {
       root.dromozoa = {};
     }
     if (root.dromozoa.graph === undefined) {
-      root.dromozoa.graph = { name: "dromozoa-graph" };
+      that = function (data) {
+        that.data = data;
+      };
+      that.namespace = "dromozoa-graph";
+      that.data = "dromozoa-graph.json";
+      root.dromozoa.graph = that;
     }
     return root.dromozoa.graph;
   }());
@@ -16,6 +39,7 @@
     module.console = root.console;
   } else {
     module.console = {
+      assert: $.noop,
       log: $.noop
     };
   }
@@ -110,67 +134,66 @@
   module.vector2.x1y1 = module.vector2(1, 1);
 
   module.matrix3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
-    var that = {};
+    var that = [
+      m00, m01, m02, // 0, 1, 2
+      m10, m11, m12, // 3, 4, 5
+      m20, m21, m22  // 6, 7, 8
+    ];
 
     that.determinant = function () {
+      var m00 = that[0], m01 = that[1], m02 = that[2],
+          m10 = that[3], m11 = that[4], m12 = that[5],
+          m20 = that[6], m21 = that[7], m22 = that[8];
       return m00 * (m11 * m22 - m21 * m12)
           - m01 * (m10 * m22 - m20 * m12)
           + m02 * (m10 * m21 - m20 * m11);
     };
 
     that.set_zero = function () {
-      m00 = 0; m01 = 0; m02 = 0;
-      m10 = 0; m11 = 0; m12 = 0;
-      m20 = 0; m21 = 0; m22 = 0;
+      that[0] = 0; that[1] = 0; that[2] = 0;
+      that[3] = 0; that[4] = 0; that[5] = 0;
+      that[6] = 0; that[7] = 0; that[8] = 0;
       return that;
     };
 
     that.set_identity = function () {
-      m00 = 1; m01 = 0; m02 = 0;
-      m10 = 0; m11 = 1; m12 = 0;
-      m20 = 0; m21 = 0; m22 = 1;
+      that[0] = 1; that[1] = 0; that[2] = 0;
+      that[3] = 0; that[4] = 1; that[5] = 0;
+      that[6] = 0; that[7] = 0; that[8] = 1;
       return that;
     };
 
     that.set_row = function (row, x, y, z) {
-      switch (row) {
-        case 0:
-          m00 = x; m01 = y; if (z !== undefined) { m02 = z; }
-          break;
-        case 1:
-          m10 = x; m11 = y; if (z !== undefined) { m12 = z; }
-          break;
-        case 2:
-          m20 = x; m21 = y; if (z !== undefined) { m22 = z; }
-          break;
+      row *= 3;
+      that[row] = x;
+      that[row + 1] = y;
+      if (z !== undefined) {
+        that[row + 2] = z;
       }
       return that;
     };
 
     that.set_col = function (col, x, y, z) {
-      switch (col) {
-        case 0:
-          m00 = x; m10 = y; if (z !== undefined) { m20 = z; }
-          break;
-        case 1:
-          m01 = x; m11 = y; if (z !== undefined) { m21 = z; }
-          break;
-        case 2:
-          m02 = x; m12 = y; if (z !== undefined) { m22 = z; }
-          break;
+      that[col] = x;
+      that[col + 3] = y;
+      if (z !== undefined) {
+        that[col + 6] = z;
       }
       return that;
     };
 
     that.transpose = function () {
-      var tmp = m01; m01 = m10; m10 = tmp;
-      tmp = m02; m02 = m20; m20 = tmp;
-      tmp = m12; m12 = m21; m21 = tmp;
+      var tmp = that[1]; that[1] = that[3]; that[3] = tmp;
+      tmp = that[2]; that[2] = that[6]; that[6] = tmp;
+      tmp = that[5]; that[5] = that[7]; that[7] = tmp;
       return that;
     };
 
     that.invert = function () {
       var d = that.determinant(),
+          m00 = that[0], m01 = that[1], m02 = that[2],
+          m10 = that[3], m11 = that[4], m12 = that[5],
+          m20 = that[6], m21 = that[7], m22 = that[8],
           n00 = m11 * m22 - m12 * m21,
           n01 = m02 * m21 - m01 * m22,
           n02 = m01 * m12 - m02 * m11,
@@ -183,9 +206,9 @@
           s;
       if (d !== 0) {
         s = 1 / d;
-        m00 = n00 * s; m01 = n01 * s; m02 = n02 * s;
-        m10 = n10 * s; m11 = n11 * s; m12 = n12 * s;
-        m20 = n20 * s; m21 = n21 * s; m22 = n22 * s;
+        that[0] = n00 * s; that[1] = n01 * s; that[2] = n02 * s;
+        that[3] = n10 * s; that[4] = n11 * s; that[5] = n12 * s;
+        that[6] = n20 * s; that[7] = n21 * s; that[8] = n22 * s;
       }
       return that;
     };
@@ -193,27 +216,27 @@
     that.rot_x = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 = 1; m01 = 0; m02 =  0;
-      m10 = 0; m11 = c; m12 = -s;
-      m20 = 0; m21 = s; m22 =  c;
+      that[0] = 1; that[1] = 0; that[2] =  0;
+      that[3] = 0; that[4] = c; that[5] = -s;
+      that[6] = 0; that[7] = s; that[8] =  c;
       return that;
     };
 
     that.rot_y = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 =  c; m01 = 0; m02 = s;
-      m10 =  0; m11 = 1; m12 = 0;
-      m20 = -s; m21 = 0; m22 = c;
+      that[0] =  c; that[1] = 0; that[2] = s;
+      that[3] =  0; that[4] = 1; that[5] = 0;
+      that[6] = -s; that[7] = 0; that[8] = c;
       return that;
     };
 
     that.rot_z = function (angle) {
       var c = Math.cos(angle),
           s = Math.sin(angle);
-      m00 = c; m01 = -s; m02 = 0;
-      m10 = s; m11 =  c; m12 = 0;
-      m20 = 0; m21 =  0; m22 = 1;
+      that[0] = c; that[1] = -s; that[2] = 0;
+      that[3] = s; that[4] =  c; that[5] = 0;
+      that[6] = 0; that[7] =  0; that[8] = 1;
       return that;
     };
 
@@ -223,24 +246,24 @@
         result = t;
       }
       if (z === undefined) {
-        result.x = m00 * x + m01 * y + m02;
-        result.y = m10 * x + m11 * y + m12;
+        result.x = that[0] * x + that[1] * y + that[2];
+        result.y = that[3] * x + that[4] * y + that[5];
       } else {
-        result.x = m00 * x + m01 * y + m02 * z;
-        result.y = m10 * x + m11 * y + m12 * z;
-        result.z = m20 * x + m21 * y + m22 * z;
+        result.x = that[0] * x + that[1] * y + that[2] * z;
+        result.y = that[3] * x + that[4] * y + that[5] * z;
+        result.z = that[6] * x + that[7] * y + that[8] * z;
       }
       return result;
     };
 
     that.clone = function () {
-      return module.matrix3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+      return module.matrix3(that[0], that[1], that[2], that[3], that[4], that[5], that[6], that[7], that[8]);
     };
 
     that.toString = function () {
-      return "[[" + m00 + "," + m01 + "," + m02
-          + "],[" + m10 + "," + m11 + "," + m12
-          + "],[" + m20 + "," + m21 + "," + m22 + "]";
+      return "[[" + that[0] + "," + that[1] + "," + that[2]
+          + "],[" + that[3] + "," + that[4] + "," + that[5]
+          + "],[" + that[6] + "," + that[7] + "," + that[8] + "]]";
     };
 
     return that;
@@ -250,7 +273,7 @@
 
   module.make_id = function () {
     module.make_id.counter += 1;
-    return module.name + "-" + module.make_id.counter;
+    return module.namespace + "-" + module.make_id.counter;
   };
   module.make_id.counter = 0;
 
@@ -285,7 +308,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           bbox = hbox.clone().scale(2);
       data.bbox = bbox;
@@ -317,7 +340,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           r = hbox.length(),
           bbox = module.vector2(r, r).scale(2);
@@ -340,7 +363,7 @@
     };
 
     that.update = function (g, d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           hbox = data.hbox,
           rx = hbox.x * Math.SQRT2,
           ry = hbox.y * Math.SQRT2,
@@ -367,7 +390,7 @@
 
   module.update_links = function (links) {
     links.each(function (d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           g = d3.select(this),
           text = g.select("text"),
           text_dy = text.attr("dy"),
@@ -377,7 +400,7 @@
           offset;
       if (data === undefined) {
         data = {};
-        d[module.name] = data;
+        d[module.namespace] = data;
       }
       if (text_dy === null) {
         text_dy = 0;
@@ -403,7 +426,7 @@
   module.update_nodes = function (nodes, shape) {
     var bbox = module.vector2(0, 0);
     nodes.each(function (d) {
-      var data = d[module.name],
+      var data = d[module.namespace],
           g = d3.select(this),
           text = g.select("text"),
           text_dy = text.attr("dy"),
@@ -411,7 +434,10 @@
           hbox = module.vector2(text_bbox.width, text_bbox.height).scale(0.5);
       if (data === undefined) {
         data = {};
-        d[module.name] = data;
+        d[module.namespace] = data;
+      }
+      if (hbox.x < hbox.y) {
+        hbox.x = hbox.y;
       }
       data.shape = shape;
       data.hbox = hbox;
@@ -488,14 +514,14 @@
 
     that.update = function (matrix) {
       nodes.each(function (d) {
-        var data = d[module.name];
+        var data = d[module.namespace];
         matrix.transform(d, data);
       });
 
       links.each(function (d) {
-        var data = d[module.name],
-            source = d.source[module.name],
-            target = d.target[module.name],
+        var data = d[module.namespace],
+            source = d.source[module.namespace],
+            target = d.target[module.namespace],
             start = module.offset(source, target, data.start_offset),
             end = module.offset(target, source, data.end_offset),
             middle = start.clone().add(end).scale(0.5),
@@ -517,35 +543,35 @@
       });
 
       nodes.attr("transform", function (d) {
-        var data = d[module.name];
+        var data = d[module.namespace];
         return "translate(" + data.x + "," + data.y + ")";
       });
 
       links.select("text").attr({
         x: function (d) {
-          return d[module.name].middle.x;
+          return d[module.namespace].middle.x;
         },
         y: function (d) {
-          return d[module.name].middle.y;
+          return d[module.namespace].middle.y;
         },
         transform: function (d) {
-          var data = d[module.name];
+          var data = d[module.namespace];
           return "rotate(" + data.angle + " " + data.middle.x + " " + data.middle.y + ")";
         }
       });
 
       links.select("line").attr({
         x1: function (d) {
-          return d[module.name].start.x;
+          return d[module.namespace].start.x;
         },
         y1: function (d) {
-          return d[module.name].start.y;
+          return d[module.namespace].start.y;
         },
         x2: function (d) {
-          return d[module.name].end.x;
+          return d[module.namespace].end.x;
         },
         y2: function (d) {
-          return d[module.name].end.y;
+          return d[module.namespace].end.y;
         }
       });
     };
@@ -567,7 +593,6 @@
   module.construct_force = function (svg, data) {
     var force = d3.layout.force(),
         that = module.construct(svg, data.nodes, data.links);
-
     force.nodes(data.nodes).links(data.links)
         .linkDistance(that.node_bbox.length())
         .charge(-1000);
@@ -581,7 +606,15 @@
     }));
 
     that.resize = function (w, h) {
+      var hbox = module.vector2(w, h).scale(0.5),
+          scale = Math.min(hbox.x, hbox.y);
       that.resize_impl(w, h);
+      $.each(data.nodes, function (i, v) {
+        var rotation = module.matrix3().rot_z(Math.PI * 2 * i / data.nodes.length),
+            position = rotation.transform(module.vector2.x1y0.clone()).scale(scale).add(hbox);
+        v.x = position.x;
+        v.y = position.y;
+      });
       force.size([ w, h ]).start();
     };
 
@@ -661,14 +694,21 @@
         root.clearTimeout(module.run.timer);
       }
       module.run.start = true;
-      d3.json("dromozoa-graph.json", function (error, data) {
-        if (error !== null) {
-          module.console.log(error);
-          root.alert("could not load json");
-          return;
-        }
-        module.main(data);
-      });
+      if (module.data === undefined) {
+        module.data = "dromozoa-graph.json";
+      }
+      if (typeof module.data === "string") {
+        d3.json(module.data, function (error, data) {
+          if (error !== null) {
+            module.console.log(error);
+            root.alert("could not load json");
+            return;
+          }
+          module.main(data);
+        });
+      } else {
+        module.main(module.data);
+      }
     }
   };
 
@@ -695,4 +735,25 @@
     module.run("timeout");
   }, 3000);
 
+  module.test = function () {
+    var matrix, vector;
+    matrix = module.matrix3().set_zero();
+    module.console.assert(matrix.toString() === "[[0,0,0],[0,0,0],[0,0,0]]");
+    matrix = module.matrix3().set_identity();
+    module.console.assert(matrix.toString() === "[[1,0,0],[0,1,0],[0,0,1]]");
+    matrix = module.matrix3().set_identity().set_col(2, 17, 23);
+    module.console.assert(matrix.toString() === "[[1,0,17],[0,1,23],[0,0,1]]");
+    matrix = module.matrix3(1, 2, 3, 4, 5, 6, 7, 8, 9).transpose();
+    module.console.assert(matrix.toString() === "[[1,4,7],[2,5,8],[3,6,9]]");
+    matrix = module.matrix3(1, 2, 1, 2, 1, 0, 1, 1, 2).invert();
+    vector = matrix.transform({ x: 1, y: 0, z: 0 });
+    module.console.assert(Math.abs(vector.x + 0.4) < 0.000001);
+    module.console.assert(Math.abs(vector.y - 0.8) < 0.000001);
+    module.console.assert(Math.abs(vector.z + 0.2) < 0.000001);
+    matrix = module.matrix3().rot_z(Math.PI * 0.5);
+    vector = matrix.transform(module.vector2.x1y0.clone());
+    module.console.assert(Math.abs(vector.x) < 0.000001);
+    module.console.assert(Math.abs(vector.y - 1) < 0.000001);
+  };
+  // module.test();
 }(this.self || global));

@@ -15,8 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs_visitor = require "dromozoa.graph.dfs_visitor"
-
 local function tsort_visitor(_result)
   local self = {}
 
@@ -28,7 +26,7 @@ local function tsort_visitor(_result)
     _result[#_result + 1] = u
   end
 
-  return dfs_visitor(self)
+  return self
 end
 
 return function (g, mode)
