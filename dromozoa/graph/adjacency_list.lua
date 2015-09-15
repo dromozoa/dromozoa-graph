@@ -17,91 +17,101 @@
 
 local clone = require "dromozoa.commons.clone"
 
-local function construct(_g, _mode, _dataset)
-  local _e = _g._e
+local class = {}
 
-  local self = {}
+function class.new(g, mode)
+  return {
+    g = function () return g end;
+    mode = mode;
+    dataset = {};
+  }
+end
 
-  function self:clone(g)
-    return construct(g, _mode, clone(_dataset))
-  end
+function class:clone(g)
+  local that = clone(self)
+  that.g = function () return g end
+  return that
+end
 
-  function self:append_edge(uid, eid)
-    local data = _dataset[uid]
-    if data then
-      if type(data) == "table" then
-        data[#data + 1] = eid
-      else
-        _dataset[uid] = { data, eid }
-      end
-    else
-      _dataset[uid] = eid
-    end
-  end
-
-  function self:remove_edge(uid, eid)
-    local data = _dataset[uid]
+function class:append_edge(uid, eid)
+  local data = self.dataset[uid]
+  if data then
     if type(data) == "table" then
-      for i = 1, #data do
-        if data[i] == eid then
-          table.remove(data, i)
-          if #data == 1 then
-            _dataset[uid] = data[1]
-          end
-          return
-        end
-      end
+      data[#data + 1] = eid
     else
-      if data == eid then
-        _dataset[uid] = nil
+      self.dataset[uid] = { data, eid }
+    end
+  else
+    self.dataset[uid] = eid
+  end
+end
+
+function class:remove_edge(uid, eid)
+  local data = self.dataset[uid]
+  if type(data) == "table" then
+    for i = 1, #data do
+      if data[i] == eid then
+        table.remove(data, i)
+        if #data == 1 then
+          self.dataset[uid] = data[1]
+        end
         return
       end
     end
-    error("could not remove edge " .. eid)
+  else
+    if data == eid then
+      self.dataset[uid] = nil
+      return
+    end
   end
+  error("could not remove edge " .. eid)
+end
 
-  function self:each_adjacent_vertex(uid)
-    local data = _dataset[uid]
-    if data then
-      if type(data) == "table" then
-        local index = 0
-        return function ()
-          local i = index + 1
-          index = i
-          local e = _e:get_edge(data[i])
-          if e then
-            return e[_mode], e
-          end
-        end
-      else
-        return function (_, i)
-          if not i then
-            local e = _e:get_edge(data)
-            return e[_mode], e
-          end
+function class:each_adjacent_vertex(uid)
+  local data = self.dataset[uid]
+  if data then
+    if type(data) == "table" then
+      local index = 0
+      return function ()
+        local i = index + 1
+        index = i
+        local e = self.g()._e:get_edge(data[i])
+        if e then
+          return e[self.mode], e
         end
       end
     else
-      return function () end
-    end
-  end
-
-  function self:count_degree(uid)
-    local data = _dataset[uid]
-    if data then
-      if type(data) == "table" then
-        return #data
-      else
-        return 1
+      return function (_, i)
+        if not i then
+          local e = self.g()._e:get_edge(data)
+          return e[self.mode], e
+        end
       end
-    else
-      return 0
     end
+  else
+    return function () end
   end
-
-  return self
 end
 
-return function (g, mode)
-  return construct(g, mode, {})
+function class:count_degree(uid)
+  local data = self.dataset[uid]
+  if data then
+    if type(data) == "table" then
+      return #data
+    else
+      return 1
+    end
+  else
+    return 0
+  end
 end
+
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function (_, g, mode)
+    return setmetatable(class.new(g, mode), metatable)
+  end;
+})
