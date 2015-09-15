@@ -62,7 +62,6 @@ function class:each_vertex(key)
         coroutine.yield(vertex(self.g(), id))
       end
     end)
-    -- return self.g()._vp:each_item(key, class.get_vertex, self)
   else
     return coroutine.wrap(function ()
       for id in pairs(self.data) do
