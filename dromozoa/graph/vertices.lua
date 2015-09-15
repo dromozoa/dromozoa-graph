@@ -58,7 +58,7 @@ end
 function class:each_vertex(key)
   if key then
     return coroutine.wrap(function ()
-      for id in self.g()._vp:each_item2(key) do
+      for id in self.g()._vp:each_item(key) do
         coroutine.yield(vertex(self.g(), id))
       end
     end)

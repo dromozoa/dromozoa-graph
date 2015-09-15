@@ -36,22 +36,7 @@ function class:remove_item(id)
   end
 end
 
-function class:each_item(key, fn, context)
-  local data = self[key]
-  if data then
-    return function (_, i)
-      if i then
-        return fn(context, next(data, i.id))
-      else
-        return fn(context, next(data))
-      end
-    end
-  else
-    return function () end
-  end
-end
-
-function class:each_item2(key)
+function class:each_item(key)
   local data = self[key]
   if data then
     return coroutine.wrap(function ()
