@@ -29,7 +29,7 @@ local function construct(self)
   local _vp = self._vp
   local _ep = self._ep
   local _v = self._v
-  local _e = self._e
+  local edges = self.edges
   local _uv = self._uv
   local _vu = self._vu
 
@@ -39,7 +39,7 @@ local function construct(self)
       _ep = clone(_ep);
     }
     that._v = _v:clone(that)
-    that._e = _e:clone(that)
+    that.edges = self.edges:clone(that)
     that._uv = _uv:clone(that)
     that._vu = _vu:clone(that)
     return construct(that)
@@ -69,7 +69,7 @@ local function construct(self)
     local uid, vid
     if type(u) == "table" then uid = u.id else uid = u end
     if type(v) == "table" then vid = v.id else vid = v end
-    local e = _e:create_edge(uid, vid)
+    local e = self.edges:create_edge(uid, vid)
     local eid = e.id
     _uv:append_edge(uid, eid)
     _vu:append_edge(vid, eid)
@@ -77,11 +77,11 @@ local function construct(self)
   end
 
   function self:get_edge(id)
-    return _e:get_edge(id)
+    return self.edges:get_edge(id)
   end
 
   function self:each_edge(key)
-    return _e:each_edge(key)
+    return self.edges:each_edge(key)
   end
 
   function self:clear_edge_properties(key)
@@ -121,7 +121,7 @@ return function ()
     _ep = properties();
   }
   self._v = vertices(self)
-  self._e = edges(self)
+  self.edges = edges(self)
   self._uv = adjacency_list(self, "v")
   self._vu = adjacency_list(self, "u")
   return construct(self)

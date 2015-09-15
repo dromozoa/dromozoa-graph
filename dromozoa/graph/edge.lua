@@ -31,7 +31,7 @@ function class:remove()
   self.g()._uv:remove_edge(self.uid, id)
   self.g()._vu:remove_edge(self.vid, id)
   self.g()._ep:remove_item(id)
-  self.g()._e:remove_edge(id)
+  self.g().edges:remove_edge(id)
 end
 
 function class:collapse()
@@ -44,7 +44,7 @@ function class:collapse()
     local e = that[i]
     local id = e.id
     local uid = self.uid
-    self.g()._e:reset_edge(id, uid, e.vid)
+    self.g().edges:reset_edge(id, uid, e.vid)
     self.g()._uv:remove_edge(e.uid, id)
     self.g()._uv:append_edge(uid, id)
   end

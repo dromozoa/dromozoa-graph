@@ -75,7 +75,7 @@ function class:each_adjacent_vertex(uid)
       return function ()
         local i = index + 1
         index = i
-        local e = self.g()._e:get_edge(data[i])
+        local e = self.g().edges:get_edge(data[i])
         if e then
           return e[self.mode], e
         end
@@ -83,7 +83,7 @@ function class:each_adjacent_vertex(uid)
     else
       return function (_, i)
         if not i then
-          local e = self.g()._e:get_edge(data)
+          local e = self.g().edges:get_edge(data)
           return e[self.mode], e
         end
       end
