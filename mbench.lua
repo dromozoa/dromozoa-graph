@@ -23,7 +23,7 @@ local function append(g, u, i)
   if i == 0 then
     return g
   else
-    for j = 1, 4 do
+    for j = 1, 8 do
       local v = g:create_vertex()
       g:create_edge(u, v)
       append(g, v, i)
@@ -34,15 +34,15 @@ end
 collectgarbage()
 collectgarbage()
 local memory1 = collectgarbage("count")
-local tv1 = gettimeofday()
 
+local tv1 = gettimeofday()
 local g = graph()
-append(g, g:create_vertex(), 10)
+append(g, g:create_vertex(), 7)
+local tv2 = gettimeofday()
 
 collectgarbage()
 collectgarbage()
 local memory2 = collectgarbage("count")
-local tv2 = gettimeofday()
 
 print(memory2 - memory1)
 print((tv2.tv_sec - tv1.tv_sec) + (tv2.tv_usec - tv1.tv_usec) * 0.000001)
