@@ -22,7 +22,6 @@ function class.new(mode)
     mode = mode;
     handle = 0;
     next = {};
-    prev = {};
     edge = {};
     data = {};
   }
@@ -34,7 +33,6 @@ function class:append_edge(uid, eid)
     local h = self.handle + 1
     self.handle = h
     self.next[h] = h
-    self.prev[h] = h
     self.edge[h] = eid
     self.data[uid] = h
   else
@@ -42,14 +40,13 @@ function class:append_edge(uid, eid)
     self.handle = h
 
     local next = self.next
-    local prev = self.prev
 
-    local i = prev[handle]
-    next[i] = h
-    next[h] = handle
-    prev[h] = i
-    prev[handle] = h
+    local p = handle
+    local n = next[handle]
+    next[p] = h
+    next[h] = n
     self.edge[h] = eid
+    self.data[uid] = h
   end
 end
 
@@ -57,18 +54,16 @@ function class:remove_edge(uid, eid)
   local handle = self.data[uid]
   if handle ~= nil then
     local next = self.next
-    local prev = self.prev
     local edge = self.edge
     local data = self.data
+    local p = handle
+    handle = next[handle]
     local h = handle
     repeat
       if edge[h] == eid then
-        local p = prev[h]
         local n = next[h]
         next[p] = n
-        prev[n] = p
         next[h] = nil
-        prev[h] = nil
         edge[h] = nil
         if h == n then
           data[uid] = nil
@@ -77,6 +72,7 @@ function class:remove_edge(uid, eid)
         end
         return
       end
+      p = h
       h = next[h]
     until h == handle
   end
@@ -89,6 +85,7 @@ function class:each_adjacent_vertex(g, uid)
     local next = self.next
     local edge = self.edge
     local mode = self.mode
+    handle = next[handle]
     return coroutine.wrap(function ()
       local h = handle
       repeat
