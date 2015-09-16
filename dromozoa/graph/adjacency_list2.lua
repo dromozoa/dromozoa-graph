@@ -22,7 +22,6 @@ function class.new(mode)
     mode = mode;
     handle = 0;
     next = {};
-    edge = {};
     data = {};
   }
 end
@@ -30,13 +29,12 @@ end
 function class:append_edge(uid, eid)
   local handle = self.data[uid]
   if handle == nil then
-    local h = self.handle + 1
+    local h = eid
     self.handle = h
     self.next[h] = h
-    self.edge[h] = eid
     self.data[uid] = h
   else
-    local h = self.handle + 1
+    local h = eid
     self.handle = h
 
     local next = self.next
@@ -45,26 +43,24 @@ function class:append_edge(uid, eid)
     local n = next[handle]
     next[p] = h
     next[h] = n
-    self.edge[h] = eid
     self.data[uid] = h
   end
 end
 
+-- [TODO] optimize by using halfedge mate
 function class:remove_edge(uid, eid)
   local handle = self.data[uid]
   if handle ~= nil then
     local next = self.next
-    local edge = self.edge
     local data = self.data
     local p = handle
     handle = next[handle]
     local h = handle
     repeat
-      if edge[h] == eid then
+      if h == eid then
         local n = next[h]
         next[p] = n
         next[h] = nil
-        edge[h] = nil
         if h == n then
           data[uid] = nil
         elseif h == handle then
@@ -83,13 +79,12 @@ function class:each_adjacent_vertex(g, uid)
   local handle = self.data[uid]
   if handle ~= nil then
     local next = self.next
-    local edge = self.edge
     local mode = self.mode
     handle = next[handle]
     return coroutine.wrap(function ()
       local h = handle
       repeat
-        local e = g:get_edge(edge[h])
+        local e = g:get_edge(h)
         coroutine.yield(e[mode], e)
         h = next[h]
       until h == handle
