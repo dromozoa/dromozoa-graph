@@ -17,18 +17,21 @@
 
 local json = require "dromozoa.commons.json"
 local model = require "dromozoa.graph.model"
+local root = require "dromozoa.graph.root"
 
-local g = model()
+local g = root()
+
+print(g:empty())
 
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
 local v4 = g:create_vertex()
 local v5 = g:create_vertex()
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v2, v3)
+local e1 = g:create_edge(v1.id, v2.id)
+local e2 = g:create_edge(v2.id, v3.id)
 -- json.write(io.stdout, g):write("\n")
-local e3 = g:create_edge(v2, v4)
+local e3 = g:create_edge(v2.id, v4.id)
 -- g:create_edge(v3, v4)
 -- g:create_edge(v3, v5)
 -- g:create_edge(v1, v5)
@@ -40,13 +43,15 @@ local e3 = g:create_edge(v2, v4)
 json.write(io.stdout, g):write("\n")
 -- g:remove_edge(e3)
 -- json.write(io.stdout, g):write("\n")
-g:remove_edge(e1)
+e1:remove()
 json.write(io.stdout, g):write("\n")
 
-for v, e in g:each_adjacent_vertex(v2) do
-  print(v, e)
+for v, e in v2:each_adjacent_vertex() do
+  print(v.id, e.id)
 end
-print(g:count_degree(v2))
+print(v2:count_degree())
+
+print(g:empty())
 
 print("--")
 
@@ -59,3 +64,4 @@ print("--")
 for e in g:each_edge() do
   print(e)
 end
+

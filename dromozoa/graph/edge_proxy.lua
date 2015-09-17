@@ -1,0 +1,74 @@
+-- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+--
+-- This file is part of dromozoa-graph.
+--
+-- dromozoa-graph is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- dromozoa-graph is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
+
+local private_root = function () end
+
+local class = {}
+
+function class.new(root, id, uid, vid)
+  return {
+    [private_root] = root;
+    id = id;
+    uid = uid;
+    vid = vid;
+  }
+end
+
+function class:remove()
+  local eid = self.id
+  local root = self[private_root]
+  local model = root.model
+  local props = root.ep
+  model:remove_edge(eid)
+  props:remove_item(eid)
+end
+
+local metatable = {}
+
+function metatable:__index(key)
+  local eid = self.id
+  local root = self[private_root]
+  local props = root.ep
+  local value
+  if key == "u" then
+    value = root:get_vertex(rawget(self, "uid"))
+  elseif key == "v" then
+    value = root:get_vertex(rawget(self, "vid"))
+  end
+  if value == nil then
+    value = props:get_property(eid, key)
+    if value == nil then
+      return class[key]
+    end
+  else
+    rawset(self, key, value)
+  end
+  return value
+end
+
+function metatable:__newindex(key)
+  local eid = self.id
+  local root = self[private_root]
+  local props = root.ep
+  props:set_property(eid, key, value)
+end
+
+return setmetatable(class, {
+  __call = function (_, root, id, uid, vid)
+    return setmetatable(class.new(root, id, uid, vid), metatable)
+  end;
+})

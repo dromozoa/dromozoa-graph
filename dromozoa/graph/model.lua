@@ -108,6 +108,10 @@ function class:remove_vertex(uid)
   self.ve[uid] = nil
 end
 
+function class:empty()
+  return next(self.ue) == nil
+end
+
 function class:each_vertex()
   return next, self.ue, nil
 end
@@ -127,20 +131,24 @@ function class:remove_edge(eid)
   remove_edge(ev[eid], eid, self.ve, ev, self.vu)
 end
 
+function class:get_edge(eid)
+  return self.eu[eid], self.ev[eid]
+end
+
 function class:each_edge()
   return next, self.eu, nil
 end
 
-function class:each_adjacent_vertex(uid, mode)
-  if mode == "v" then
+function class:each_adjacent_vertex(uid, start)
+  if start == "v" then
     return each_adjacent_vertex(uid, self.ve, self.eu, self.vu)
   else
     return each_adjacent_vertex(uid, self.ue, self.ev, self.uv)
   end
 end
 
-function class:count_degree(uid, mode)
-  if mode == "v" then
+function class:count_degree(uid, start)
+  if start == "v" then
     return count_degree(uid, self.ve, self.vu)
   else
     return count_degree(uid, self.ue, self.uv)
