@@ -17,6 +17,7 @@
 
 local json = require "dromozoa.commons.json"
 local root = require "dromozoa.graph.root"
+local model = require "dromozoa.graph.model"
 
 local g = root()
 
@@ -27,13 +28,13 @@ local v4 = g:create_vertex()
 local v5 = g:create_vertex()
 g:create_edge(v1, v2)
 g:create_edge(v2, v3)
-g:create_edge(v3, v1)
-g:create_edge(v3, v4)
-g:create_edge(v3, v5)
-g:create_edge(v1, v5)
+g:create_edge(v2, v4)
+-- g:create_edge(v3, v4)
+-- g:create_edge(v3, v5)
+-- g:create_edge(v1, v5)
 
-for v, e in g:each_adjacent_uv(v1) do
-  print(v)
+for v, e in g:each_adjacent_vertex_uv(v2) do
+  print(v, e)
 end
 
 json.write(io.stdout, g):write("\n")

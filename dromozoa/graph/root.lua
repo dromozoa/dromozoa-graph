@@ -87,7 +87,7 @@ function class:each_adjacent_vertex(uid, mode)
   end
 end
 
-function class:each_adjacent_uv(uid)
+function class:each_adjacent_vertex_uv(uid)
   return each_adjacent_vertex(uid, self.ue, self.ev, self.uv)
 end
 
