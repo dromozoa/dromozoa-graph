@@ -16,10 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local json = require "dromozoa.commons.json"
-local root = require "dromozoa.graph.root"
 local model = require "dromozoa.graph.model"
 
-local g = root()
+local g = model()
 
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
