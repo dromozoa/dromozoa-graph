@@ -15,6 +15,71 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local function create_edge(uid, eid, ue, eu, uv)
+  local prev_eid = ue[uid]
+  ue[uid] = eid
+  eu[eid] = uid
+  if prev_eid == 0 then
+    uv[eid] = eid
+  else
+    uv[eid] = prev_eid
+    uv[prev_eid] = eid
+  end
+end
+
+local function remove_edge(uid, eid, ue, eu, uv)
+  local next_eid = uv[eid]
+  if next_eid == eid then
+    assert(ue[uid] == eid)
+    ue[uid] = 0
+  else
+    local prev_eid
+    local this_eid = eid
+    repeat
+      prev_eid = this_eid
+      this_eid = next_eid
+      next_eid = uv[next_eid]
+    until this_eid == eid
+    if ue[uid] == eid then
+      ue[uid] = prev_eid
+    end
+    uv[prev_eid] = next_eid
+  end
+  eu[eid] = nil
+  uv[eid] = nil
+end
+
+local function each_adjacent_vertex(uid, ue, ev, uv)
+  local ueid = ue[uid]
+  if ueid == 0 then
+    return function () end
+  else
+    ueid = uv[ueid]
+    return coroutine.wrap(function ()
+      local eid = ueid
+      repeat
+        coroutine.yield(ev[eid], eid)
+        eid = uv[eid]
+      until eid == ueid
+    end)
+  end
+end
+
+local function count_degree(uid, ue, uv)
+  local ueid = ue[uid]
+  if ueid == 0 then
+    return 0
+  else
+    local count = 0
+    local eid = ueid
+    repeat
+      count = count + 1
+      eid = uv[eid]
+    until eid == ueid
+    return count
+  end
+end
+
 local class = {}
 
 function class.new()
@@ -43,16 +108,8 @@ function class:remove_vertex(uid)
   self.ve[uid] = nil
 end
 
-local function create_edge(uid, eid, ue, eu, uv)
-  local ueid = ue[uid]
-  ue[uid] = eid
-  eu[eid] = uid
-  if ueid == 0 then
-    uv[eid] = eid
-  else
-    uv[eid] = ueid
-    uv[ueid] = eid
-  end
+function class:each_vertex()
+  return next, self.ue, nil
 end
 
 function class:create_edge(uid, vid)
@@ -63,20 +120,15 @@ function class:create_edge(uid, vid)
   return eid
 end
 
-local function each_adjacent_vertex(uid, ue, ev, uv)
-  local ueid = ue[uid]
-  if ueid == 0 then
-    return function () end
-  else
-    ueid = uv[ueid]
-    return coroutine.wrap(function ()
-      local eid = ueid
-      repeat
-        coroutine.yield(ev[eid], eid)
-        eid = uv[eid]
-      until eid == ueid
-    end)
-  end
+function class:remove_edge(eid)
+  local eu = self.eu
+  local ev = self.ev
+  remove_edge(eu[eid], eid, self.ue, eu, self.uv)
+  remove_edge(ev[eid], eid, self.ve, ev, self.vu)
+end
+
+function class:each_edge()
+  return next, self.eu, nil
 end
 
 function class:each_adjacent_vertex(uid, mode)
@@ -87,8 +139,12 @@ function class:each_adjacent_vertex(uid, mode)
   end
 end
 
-function class:each_adjacent_vertex_uv(uid)
-  return each_adjacent_vertex(uid, self.ue, self.ev, self.uv)
+function class:count_degree(uid, mode)
+  if mode == "v" then
+    return count_degree(uid, self.ve, self.vu)
+  else
+    return count_degree(uid, self.ue, self.uv)
+  end
 end
 
 local metatable = {

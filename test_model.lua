@@ -25,15 +25,37 @@ local v2 = g:create_vertex()
 local v3 = g:create_vertex()
 local v4 = g:create_vertex()
 local v5 = g:create_vertex()
-g:create_edge(v1, v2)
-g:create_edge(v2, v3)
-g:create_edge(v2, v4)
+local e1 = g:create_edge(v1, v2)
+local e2 = g:create_edge(v2, v3)
+-- json.write(io.stdout, g):write("\n")
+local e3 = g:create_edge(v2, v4)
 -- g:create_edge(v3, v4)
 -- g:create_edge(v3, v5)
 -- g:create_edge(v1, v5)
 
-for v, e in g:each_adjacent_vertex_uv(v2) do
-  print(v, e)
-end
+-- for v, e in g:each_adjacent_vertex(v2) do
+--   print(v, e)
+-- end
 
 json.write(io.stdout, g):write("\n")
+-- g:remove_edge(e3)
+-- json.write(io.stdout, g):write("\n")
+g:remove_edge(e1)
+json.write(io.stdout, g):write("\n")
+
+for v, e in g:each_adjacent_vertex(v2) do
+  print(v, e)
+end
+print(g:count_degree(v2))
+
+print("--")
+
+for u in g:each_vertex() do
+  print(u)
+end
+
+print("--")
+
+for e in g:each_edge() do
+  print(e)
+end

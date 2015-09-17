@@ -39,26 +39,18 @@ end
 function class:each_item(key)
   local data = self[key]
   if data then
-    return coroutine.wrap(function ()
-      for id in pairs(data) do
-        coroutine.yield(id)
-      end
-    end)
+    return next, data, nil
   else
-    return nil
+    return function () end
   end
 end
 
 function class:set_property(id, key, value)
   local data = self[key]
   if data then
-    if value ~= nil then
-      data[id] = value
-    else
-      data[id] = nil
-      if next(data) == nil then
-        self[key] = nil
-      end
+    data[id] = value
+    if next(data) == nil then
+      self[key] = nil
     end
   else
     if value ~= nil then
@@ -75,14 +67,14 @@ function class:get_property(id, key)
 end
 
 function class:each_property(id)
-  return function (_, i)
-    for key, data in next, self, i do
+  return coroutine.wrap(function ()
+    for key, data in pairs(self) do
       local value = data[id]
       if value ~= nil then
-        return key, value
+        coroutine.yield(key, value)
       end
     end
-  end
+  end)
 end
 
 local metatable = {
