@@ -106,12 +106,12 @@ function class:merge(that)
   merge(self, that)
 end
 
-function class:dfs(visitor, mode)
-  dfs(self, visitor, nil, mode)
+function class:dfs(visitor, start)
+  dfs(self, visitor, nil, start)
 end
 
-function class:tsort(mode)
-  return tsort(self, mode)
+function class:tsort(start)
+  return tsort(self, start)
 end
 
 function class:write_graphviz(out, visitor)
