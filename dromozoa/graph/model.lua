@@ -16,14 +16,14 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function create_edge(uid, eid, ue, eu, uv)
-  local prev_eid = ue[uid]
+  local ueid = ue[uid]
   ue[uid] = eid
   eu[eid] = uid
-  if prev_eid == 0 then
+  if ueid == 0 then
     uv[eid] = eid
   else
-    uv[eid] = prev_eid
-    uv[prev_eid] = eid
+    uv[eid] = ueid
+    uv[ueid] = eid
   end
 end
 

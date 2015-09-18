@@ -17,6 +17,11 @@
 
 local private_root = function () end
 
+local function unpack_item(self)
+  local root = self[private_root]
+  return self.id, root, root.model, root.ep
+end
+
 local class = {}
 
 function class.new(root, id, uid, vid)
@@ -29,10 +34,7 @@ function class.new(root, id, uid, vid)
 end
 
 function class:remove()
-  local eid = self.id
-  local root = self[private_root]
-  local model = root.model
-  local props = root.ep
+  local eid, root, model, props = unpack_item(self)
   model:remove_edge(eid)
   props:remove_item(eid)
 end
@@ -40,14 +42,12 @@ end
 local metatable = {}
 
 function metatable:__index(key)
-  local eid = self.id
-  local root = self[private_root]
-  local props = root.ep
+  local eid, root, model, props = unpack_item(self)
   local value
   if key == "u" then
-    value = root:get_vertex(rawget(self, "uid"))
+    value = root:get_vertex(self.uid)
   elseif key == "v" then
-    value = root:get_vertex(rawget(self, "vid"))
+    value = root:get_vertex(self.vid)
   end
   if value == nil then
     value = props:get_property(eid, key)
@@ -61,7 +61,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key)
-  local eid = self.id
+  local eid, root, model, props = unpack_item(self)
   local root = self[private_root]
   local props = root.ep
   props:set_property(eid, key, value)

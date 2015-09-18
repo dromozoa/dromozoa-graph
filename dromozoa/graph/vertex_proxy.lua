@@ -17,6 +17,11 @@
 
 local private_root = function () end
 
+local function unpack_item(self)
+  local root = self[private_root]
+  return self.id, root, root.model, root.vp
+end
+
 local class = {}
 
 function class.new(root, id)
@@ -27,18 +32,13 @@ function class.new(root, id)
 end
 
 function class:remove()
-  local uid = self.id
-  local root = self[private_root]
-  local model = root.model
-  local props = root.vp
+  local uid, root, model, props = unpack_item(self)
   model:remove_vertex(uid)
   props:remove_item(uid)
 end
 
 function class:each_adjacent_vertex(mode)
-  local uid = self.id
-  local root = self[private_root]
-  local model = root.model
+  local uid, root, model, props = unpack_item(self)
   return coroutine.wrap(function ()
     for vid, eid in model:each_adjacent_vertex(uid, mode) do
       coroutine.yield(root:get_vertex(vid), root:get_edge(eid))
@@ -47,18 +47,14 @@ function class:each_adjacent_vertex(mode)
 end
 
 function class:count_degree(mode)
-  local uid = self.id
-  local root = self[private_root]
-  local model = root.model
+  local uid, root, model, props = unpack_item(self)
   return model:count_degree(uid, mode)
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local uid = self.id
-  local root = self[private_root]
-  local props = root.vp
+  local uid, root, model, props = unpack_item(self)
   local value = props:get_property(uid, key)
   if value == nil then
     return class[key]
@@ -67,9 +63,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key, value)
-  local uid = self.id
-  local root = self[private_root]
-  local props = root.vp
+  local uid, root, model, props = unpack_item(self)
   props:set_property(uid, key, value)
 end
 
