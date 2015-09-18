@@ -24,6 +24,7 @@ local write_graphviz = require "dromozoa.graph.write_graphviz"
 local properties = require "dromozoa.graph.properties"
 local tsort = require "dromozoa.graph.tsort"
 local vertices = require "dromozoa.graph.vertices"
+local root = require "dromozoa.graph.root"
 
 local function construct(self)
   local _vp = self._vp
@@ -105,13 +106,17 @@ local function construct(self)
   return self
 end
 
-return function ()
-  return construct({
-    _vp = properties();
-    _ep = properties();
-    vertices = vertices();
-    edges = edges();
-    _uv = adjacency_list("v");
-    _vu = adjacency_list("u");
-  })
+if true then
+  return function ()
+    return construct({
+      _vp = properties();
+      _ep = properties();
+      vertices = vertices();
+      edges = edges();
+      _uv = adjacency_list("v");
+      _vu = adjacency_list("u");
+    })
+  end
+else
+  return root
 end

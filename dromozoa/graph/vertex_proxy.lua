@@ -15,6 +15,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local bfs = require "dromozoa.graph.bfs"
+local dfs = require "dromozoa.graph.dfs"
+
 local private_root = function () end
 
 local function unpack_item(self)
@@ -49,6 +52,16 @@ end
 function class:count_degree(mode)
   local uid, root, model, props = unpack_item(self)
   return model:count_degree(uid, mode)
+end
+
+function class:bfs(visitor, mode)
+  local uid, root, model, props = unpack_item(self)
+  bfs(root, visitor, self, mode)
+end
+
+function class:dfs(visitor, mode)
+  local uid, root, model, props = unpack_item(self)
+  dfs(root, visitor, self, mode)
 end
 
 local metatable = {}

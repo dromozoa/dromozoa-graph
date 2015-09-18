@@ -43,7 +43,7 @@ local e3 = g:create_edge(v2.id, v4.id)
 json.write(io.stdout, g):write("\n")
 -- g:remove_edge(e3)
 -- json.write(io.stdout, g):write("\n")
-e1:remove()
+-- e1:remove()
 json.write(io.stdout, g):write("\n")
 
 for v, e in v2:each_adjacent_vertex() do
@@ -64,4 +64,34 @@ print("--")
 for e in g:each_edge() do
   print(e)
 end
+
+print("--")
+
+v1:dfs({
+  tree_edge = function (ctx, g, e, u, v)
+    print("tree_edge", u.id, v.id)
+  end;
+  back_edge = function (ctx, g, e, u, v)
+    print("back_edge", u.id, v.id)
+  end;
+  forward_or_cross_edge = function (ctx, g, e, u, v)
+    print("forward_or_cross_edge", u.id, v.id)
+  end;
+})
+
+print("--")
+
+local g = root()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+local e1 = g:create_edge(v1, v1)
+local e2 = g:create_edge(v1, v2)
+local e3 = g:create_edge(v1, v3)
+
+print(v1:count_degree("u"))
+print(v1:count_degree("v"))
+
+print(json.encode(g))
+
 

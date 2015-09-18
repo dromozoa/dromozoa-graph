@@ -15,10 +15,23 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.commons.clone"
+local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge_proxy"
+local merge = require "dromozoa.graph.merge"
 local model = require "dromozoa.graph.model"
 local properties = require "dromozoa.graph.properties"
+local tsort = require "dromozoa.graph.tsort"
 local vertex = require "dromozoa.graph.vertex_proxy"
+local write_graphviz = require "dromozoa.graph.write_graphviz"
+
+local function id(value)
+  if type(value) == "table" then
+    return value.id
+  else
+    return value
+  end
+end
 
 local function each(self, constructor, iterator, context)
   return coroutine.wrap(function ()
@@ -39,16 +52,20 @@ function class.new()
   return this
 end
 
+function class:clone()
+  return clone(self)
+end
+
 function class:empty()
   return self.model:empty()
 end
 
-function class:get_vertex(uid)
-  return vertex(self, uid)
+function class:create_vertex()
+  return vertex(self, self.model:create_vertex())
 end
 
-function class:create_vertex()
-  return self:get_vertex(self.model:create_vertex())
+function class:get_vertex(uid)
+  return vertex(self, uid)
 end
 
 function class:each_vertex(key)
@@ -59,12 +76,18 @@ function class:each_vertex(key)
   end
 end
 
-function class:get_edge(eid)
-  return edge(self, eid, self.model:get_edge(eid))
+function class:clear_vertex_properties(key)
+  self.vp:clear_properties(key)
 end
 
-function class:create_edge(uid, vid)
-  return self:get_edge(self.model:create_edge(uid, vid))
+function class:create_edge(u, v)
+  local uid = id(u)
+  local vid = id(v)
+  return edge(self, self.model:create_edge(uid, vid), uid, vid)
+end
+
+function class:get_edge(eid)
+  return edge(self, eid, self.model:get_edge(eid))
 end
 
 function class:each_edge(key)
@@ -73,6 +96,26 @@ function class:each_edge(key)
   else
     return each(self, class.get_edge, self.ep:each_item(key))
   end
+end
+
+function class:clear_edge_properties(key)
+  self.ep:clear_properties(key)
+end
+
+function class:merge(that)
+  merge(self, that)
+end
+
+function class:dfs(visitor, mode)
+  dfs(self, visitor, nil, mode)
+end
+
+function class:tsort(mode)
+  return tsort(self, mode)
+end
+
+function class:write_graphviz(out, visitor)
+  return write_graphviz(self, out, visitor)
 end
 
 local metatable = {

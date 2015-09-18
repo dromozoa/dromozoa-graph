@@ -17,6 +17,7 @@
 
 local graph = require "dromozoa.graph"
 local gettimeofday = require "dromozoa.ubench.gettimeofday"
+local root = require "dromozoa.graph.root"
 
 local function append(g, u, i)
   i = i - 1
@@ -25,7 +26,7 @@ local function append(g, u, i)
   else
     for j = 1, 8 do
       local v = g:create_vertex()
-      g:create_edge(u, v)
+      g:create_edge(u.id, v.id)
       append(g, v, i)
     end
   end
