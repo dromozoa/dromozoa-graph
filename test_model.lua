@@ -86,12 +86,11 @@ local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
 local e1 = g:create_edge(v1, v1)
+print(json.encode(g))
 local e2 = g:create_edge(v1, v2)
+print(json.encode(g))
 local e3 = g:create_edge(v1, v3)
+print(json.encode(g))
 
 print(v1:count_degree("u"))
 print(v1:count_degree("v"))
-
-print(json.encode(g))
-
-

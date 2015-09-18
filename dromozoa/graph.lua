@@ -106,7 +106,7 @@ local function construct(self)
   return self
 end
 
-if true then
+if false then
   return function ()
     return construct({
       _vp = properties();

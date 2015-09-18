@@ -60,10 +60,8 @@ function metatable:__index(key)
   return value
 end
 
-function metatable:__newindex(key)
+function metatable:__newindex(key, value)
   local eid, root, model, props = unpack_item(self)
-  local root = self[private_root]
-  local props = root.ep
   props:set_property(eid, key, value)
 end
 

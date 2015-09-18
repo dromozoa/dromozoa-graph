@@ -28,23 +28,18 @@ end
 
 function class:append_edge(uid, eid)
   local handle = self.data[uid]
+  local h = eid
+  self.handle = h
+  local next = self.next
   if handle == nil then
-    local h = eid
-    self.handle = h
-    self.next[h] = h
-    self.data[uid] = h
+    next[h] = h
   else
-    local h = eid
-    self.handle = h
-
-    local next = self.next
-
     local p = handle
     local n = next[handle]
     next[p] = h
     next[h] = n
-    self.data[uid] = h
   end
+  self.data[uid] = h
 end
 
 -- [TODO] optimize by using halfedge mate

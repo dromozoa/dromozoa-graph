@@ -22,7 +22,7 @@ local function create_edge(uid, eid, ue, eu, uv)
   if ueid == 0 then
     uv[eid] = eid
   else
-    uv[eid] = ueid
+    uv[eid] = uv[ueid]
     uv[ueid] = eid
   end
 end
