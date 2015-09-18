@@ -24,7 +24,7 @@ function class.new()
 end
 
 function class:clear_properties(key)
-  self[key] = nil
+  rawset(self, key, nil)
 end
 
 function class:remove_item(id)
@@ -37,7 +37,7 @@ function class:remove_item(id)
 end
 
 function class:each_item(key)
-  local data = self[key]
+  local data = rawget(self, key)
   if data then
     return next, data, nil
   else
@@ -46,7 +46,7 @@ function class:each_item(key)
 end
 
 function class:set_property(id, key, value)
-  local data = self[key]
+  local data = rawget(self, key)
   if data then
     data[id] = value
     if next(data) == nil then
@@ -60,7 +60,7 @@ function class:set_property(id, key, value)
 end
 
 function class:get_property(id, key)
-  local data = self[key]
+  local data = rawget(self, key)
   if data then
     return data[id]
   end

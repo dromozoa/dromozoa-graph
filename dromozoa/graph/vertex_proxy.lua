@@ -40,28 +40,33 @@ function class:remove()
   props:remove_item(uid)
 end
 
-function class:each_adjacent_vertex(mode)
+function class:each_property()
+  local uid, root, model, props = unpack_item(self)
+  return props:each_property(uid)
+end
+
+function class:each_adjacent_vertex(start)
   local uid, root, model, props = unpack_item(self)
   return coroutine.wrap(function ()
-    for vid, eid in model:each_adjacent_vertex(uid, mode) do
+    for vid, eid in model:each_adjacent_vertex(uid, start) do
       coroutine.yield(root:get_vertex(vid), root:get_edge(eid))
     end
   end)
 end
 
-function class:count_degree(mode)
+function class:count_degree(start)
   local uid, root, model, props = unpack_item(self)
-  return model:count_degree(uid, mode)
+  return model:count_degree(uid, start)
 end
 
-function class:bfs(visitor, mode)
+function class:bfs(visitor, start)
   local uid, root, model, props = unpack_item(self)
-  bfs(root, visitor, self, mode)
+  bfs(root, visitor, self, start)
 end
 
-function class:dfs(visitor, mode)
+function class:dfs(visitor, start)
   local uid, root, model, props = unpack_item(self)
-  dfs(root, visitor, self, mode)
+  dfs(root, visitor, self, start)
 end
 
 local metatable = {}
