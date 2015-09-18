@@ -49,6 +49,14 @@ local function remove_edge(uid, eid, ue, eu, uv)
   uv[eid] = nil
 end
 
+local function reset_edge(uid, eid, ue, eu, uv)
+  local prev_uid = eu[eid]
+  if uid ~= prev_uid then
+    remove_edge(prev_uid, eid, ue, eu, uv)
+    create_edge(uid, eid, ue, eu, uv)
+  end
+end
+
 local function each_adjacent_vertex(uid, ue, ev, uv)
   local ueid = ue[uid]
   if ueid == 0 then
@@ -129,6 +137,11 @@ function class:remove_edge(eid)
   local ev = self.ev
   remove_edge(eu[eid], eid, self.ue, eu, self.uv)
   remove_edge(ev[eid], eid, self.ve, ev, self.vu)
+end
+
+function class:reset_edge(eid, uid, vid)
+  reset_edge(uid, eid, self.ue, self.eu, self.uv)
+  reset_edge(vid, eid, self.ve, self.ev, self.vu)
 end
 
 function class:get_edge(eid)
