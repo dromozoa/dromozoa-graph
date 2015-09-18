@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local clone = require "dromozoa.commons.clone"
-local adjacency_list = require "dromozoa.graph.adjacency_list2"
+local adjacency_list = require "dromozoa.graph.adjacency_list"
 local dfs = require "dromozoa.graph.dfs"
 local edges = require "dromozoa.graph.edges"
 local merge = require "dromozoa.graph.merge"

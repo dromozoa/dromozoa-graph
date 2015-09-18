@@ -19,6 +19,9 @@ local graph = require "dromozoa.graph"
 local gettimeofday = require "dromozoa.ubench.gettimeofday"
 local root = require "dromozoa.graph.root"
 
+local vn = 0
+local en = 0
+
 local function append(g, u, i)
   i = i - 1
   if i == 0 then
@@ -26,7 +29,11 @@ local function append(g, u, i)
   else
     for j = 1, 8 do
       local v = g:create_vertex()
+      vn = vn + 1
       g:create_edge(u.id, v.id)
+      en = en + 1
+      g:create_edge(v.id, u.id)
+      en = en + 1
       append(g, v, i)
     end
   end
@@ -39,6 +46,7 @@ local memory1 = collectgarbage("count")
 local tv1 = gettimeofday()
 local g = graph()
 append(g, g:create_vertex(), 7)
+vn = vn + 1
 local tv2 = gettimeofday()
 
 collectgarbage()
@@ -47,3 +55,5 @@ local memory2 = collectgarbage("count")
 
 print(memory2 - memory1)
 print((tv2.tv_sec - tv1.tv_sec) + (tv2.tv_usec - tv1.tv_usec) * 0.000001)
+
+print(vn, en, 28 * (vn * 2 + en * 4) / 1024)
