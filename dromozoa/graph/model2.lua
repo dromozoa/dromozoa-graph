@@ -39,6 +39,9 @@ local function remove_edge(eid, ue, eu, nu, pu)
     ue[uid] = 0
   else
     local prev_eid = pu[eid]
+    if ue[uid] == eid then
+      ue[uid] = prev_eid
+    end
     nu[prev_eid] = next_eid
     pu[next_eid] = prev_eid
   end
