@@ -16,14 +16,18 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function create_edge(uid, eid, ue, eu, nu, pu)
-  local ueid = ue[uid]
+  local prev_eid = ue[uid]
   ue[uid] = eid
   eu[eid] = uid
-  if ueid == 0 then
+  if prev_eid == 0 then
     nu[eid] = eid
+    pu[eid] = eid
   else
-    nu[eid] = nu[ueid]
-    nu[ueid] = eid
+    local next_eid = nu[prev_eid]
+    nu[prev_eid] = eid
+    nu[eid] = next_eid
+    pu[eid] = prev_eid
+    pu[next_eid] = eid
   end
 end
 
@@ -34,56 +38,49 @@ local function remove_edge(eid, ue, eu, nu, pu)
     assert(ue[uid] == eid)
     ue[uid] = 0
   else
-    local prev_eid
-    local this_eid = eid
-    repeat
-      prev_eid = this_eid
-      this_eid = next_eid
-      next_eid = nu[next_eid]
-    until this_eid == eid
-    if ue[uid] == eid then
-      ue[uid] = prev_eid
-    end
+    local prev_eid = pu[eid]
     nu[prev_eid] = next_eid
+    pu[next_eid] = prev_eid
   end
   eu[eid] = nil
   nu[eid] = nil
+  pu[eid] = nil
 end
 
 local function reset_edge(uid, eid, ue, eu, nu, pu)
   if uid ~= eu[eid] then
-    remove_edge(eid, ue, eu, nu)
-    create_edge(uid, eid, ue, eu, nu)
+    remove_edge(eid, ue, eu, nu, pu)
+    create_edge(uid, eid, ue, eu, nu, pu)
   end
 end
 
 local function each_adjacent_vertex(uid, ue, ev, nu)
-  local ueid = ue[uid]
-  if ueid == 0 then
+  local end_eid = ue[uid]
+  if end_eid == 0 then
     return function () end
   else
-    ueid = nu[ueid]
+    local start_eid = nu[end_eid]
     return coroutine.wrap(function ()
-      local eid = ueid
+      local eid = start_eid
       repeat
         coroutine.yield(ev[eid], eid)
         eid = nu[eid]
-      until eid == ueid
+      until eid == start_eid
     end)
   end
 end
 
 local function count_degree(uid, ue, nu)
-  local ueid = ue[uid]
-  if ueid == 0 then
+  local start_eid = ue[uid]
+  if start_eid == 0 then
     return 0
   else
     local count = 0
-    local eid = ueid
+    local eid = start_eid
     repeat
       count = count + 1
       eid = nu[eid]
-    until eid == ueid
+    until eid == start_eid
     return count
   end
 end
