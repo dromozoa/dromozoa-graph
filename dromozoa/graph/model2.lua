@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function create_edge(uid, eid, ue, eu, nu)
+local function create_edge(uid, eid, ue, eu, nu, pu)
   local ueid = ue[uid]
   ue[uid] = eid
   eu[eid] = uid
@@ -27,7 +27,8 @@ local function create_edge(uid, eid, ue, eu, nu)
   end
 end
 
-local function remove_edge(uid, eid, ue, eu, nu)
+local function remove_edge(eid, ue, eu, nu, pu)
+  local uid = eu[eid]
   local next_eid = nu[eid]
   if next_eid == eid then
     assert(ue[uid] == eid)
@@ -49,10 +50,9 @@ local function remove_edge(uid, eid, ue, eu, nu)
   nu[eid] = nil
 end
 
-local function reset_edge(uid, eid, ue, eu, nu)
-  local prev_uid = eu[eid]
-  if uid ~= prev_uid then
-    remove_edge(prev_uid, eid, ue, eu, nu)
+local function reset_edge(uid, eid, ue, eu, nu, pu)
+  if uid ~= eu[eid] then
+    remove_edge(eid, ue, eu, nu)
     create_edge(uid, eid, ue, eu, nu)
   end
 end
@@ -100,6 +100,8 @@ function class.new()
     ev = {};
     nu = {};
     nv = {};
+    pu = {};
+    pv = {};
   }
 end
 
@@ -127,21 +129,19 @@ end
 function class:create_edge(uid, vid)
   local eid = self.en + 1
   self.en = eid
-  create_edge(uid, eid, self.ue, self.eu, self.nu)
-  create_edge(vid, eid, self.ve, self.ev, self.nv)
+  create_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
+  create_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
   return eid
 end
 
 function class:remove_edge(eid)
-  local eu = self.eu
-  local ev = self.ev
-  remove_edge(eu[eid], eid, self.ue, eu, self.nu)
-  remove_edge(ev[eid], eid, self.ve, ev, self.nv)
+  remove_edge(eid, self.ue, self.eu, self.nu, self.pu)
+  remove_edge(eid, self.ve, self.ev, self.nv, self.pv)
 end
 
 function class:reset_edge(eid, uid, vid)
-  reset_edge(uid, eid, self.ue, self.eu, self.nu)
-  reset_edge(vid, eid, self.ve, self.ev, self.nv)
+  reset_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
+  reset_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
 end
 
 function class:get_edge(eid)
