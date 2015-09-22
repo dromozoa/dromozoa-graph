@@ -47,3 +47,15 @@ assert(not equal(e2, e4))
 local e = g1:get_edge(e1.id)
 assert(e ~= e1)
 assert(equal(e, e1))
+
+assert(not pcall(function () v1.id = 42 end))
+assert(not pcall(function () e1.id = 42 end))
+
+e1.u = v2
+e1.v = v1
+
+local data = {}
+for u, e in v2:each_adjacent_vertex() do
+  data[#data + 1] = u.id
+end
+assert(equal(data, { v3.id, v1.id }))

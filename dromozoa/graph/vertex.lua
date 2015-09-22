@@ -19,10 +19,11 @@ local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
 
 local private_root = function () end
+local private_id = function () end
 
 local function unpack_item(self)
   local root = self[private_root]
-  return self.id, root, root.model, root.vp
+  return self[private_id], root, root.model, root.vp
 end
 
 local class = {}
@@ -30,7 +31,7 @@ local class = {}
 function class.new(root, id)
   return {
     [private_root] = root;
-    id = id;
+    [private_id] = id;
   }
 end
 
@@ -73,15 +74,22 @@ local metatable = {}
 
 function metatable:__index(key)
   local uid, root, model, props = unpack_item(self)
-  local value = props:get_property(uid, key)
-  if value == nil then
-    return class[key]
+  if key == "id" then
+    return uid
+  else
+    local value = props:get_property(uid, key)
+    if value == nil then
+      return class[key]
+    end
+    return value
   end
-  return value
 end
 
 function metatable:__newindex(key, value)
   local uid, root, model, props = unpack_item(self)
+  if key == "id" then
+    error("cannot modify constant")
+  end
   props:set_property(uid, key, value)
 end
 

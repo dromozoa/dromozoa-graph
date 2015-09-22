@@ -16,10 +16,11 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local private_root = function () end
+local private_id = function () end
 
 local function unpack_item(self)
   local root = self[private_root]
-  return self.id, root, root.model, root.ep
+  return self[private_id], root, root.model, root.ep
 end
 
 local class = {}
@@ -27,7 +28,7 @@ local class = {}
 function class.new(root, id)
   return {
     [private_root] = root;
-    id = id;
+    [private_id] = id;
   }
 end
 
@@ -53,7 +54,9 @@ local metatable = {}
 
 function metatable:__index(key)
   local eid, root, model, props = unpack_item(self)
-  if key == "uid" then
+  if key == "id" then
+    return eid
+  elseif key == "uid" then
     return model:get_edge_uid(eid)
   elseif key == "vid" then
     return model:get_edge_vid(eid)
@@ -61,17 +64,30 @@ function metatable:__index(key)
     return root:get_vertex(model:get_edge_uid(eid))
   elseif key == "v" then
     return root:get_vertex(model:get_edge_vid(eid))
+  else
+    local value = props:get_property(eid, key)
+    if value == nil then
+      return class[key]
+    end
+    return value
   end
-  local value = props:get_property(eid, key)
-  if value == nil then
-    return class[key]
-  end
-  return value
 end
 
 function metatable:__newindex(key, value)
   local eid, root, model, props = unpack_item(self)
-  props:set_property(eid, key, value)
+  if key == "id" then
+    error("cannot modify constant")
+  elseif key == "uid" then
+    model:reset_edge(eid, value, model:get_edge_vid(eid))
+  elseif key == "vid" then
+    model:reset_edge(eid, model:get_edge_uid(eid), value)
+  elseif key == "u" then
+    model:reset_edge(eid, value.id, model:get_edge_vid(eid))
+  elseif key == "v" then
+    model:reset_edge(eid, model:get_edge_uid(eid), value.id)
+  else
+    props:set_property(eid, key, value)
+  end
 end
 
 return setmetatable(class, {
