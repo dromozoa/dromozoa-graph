@@ -44,25 +44,9 @@ end
 
 function class:collapse(start)
   local eid, root, model, props = unpack_item(self)
-  local uid
-  local v
-  if start == "v" then
-    uid = self.vid
-    v = self.u
-  else
-    uid = self.uid
-    v = self.v
-  end
-  local that = {}
-  for _, e in v:each_adjacent_vertex() do
-    that[#that + 1] = e
-  end
-  for i = 1, #that do
-    local e = that[i]
-    model:reset_edge(e.id, uid, e.vid)
-  end
+  local vid = model:collapse_edge(eid, start)
   self:remove()
-  v:remove()
+  root:get_vertex(vid):remove()
 end
 
 local metatable = {}

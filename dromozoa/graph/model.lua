@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function create_edge(uid, eid, ue, eu, nu, pu)
+local function create_edge(eid, uid, ue, eu, nu, pu)
   eu[eid] = uid
   local next_eid = ue[uid]
   if next_eid == 0 then
@@ -50,10 +50,10 @@ local function remove_edge(eid, ue, eu, nu, pu)
   pu[eid] = nil
 end
 
-local function reset_edge(uid, eid, ue, eu, nu, pu)
+local function reset_edge(eid, uid, ue, eu, nu, pu)
   if uid ~= eu[eid] then
     remove_edge(eid, ue, eu, nu, pu)
-    create_edge(uid, eid, ue, eu, nu, pu)
+    create_edge(eid, uid, ue, eu, nu, pu)
   end
 end
 
@@ -128,8 +128,8 @@ end
 function class:create_edge(uid, vid)
   local eid = self.en + 1
   self.en = eid
-  create_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
-  create_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
+  create_edge(eid, uid, self.ue, self.eu, self.nu, self.pu)
+  create_edge(eid, vid, self.ve, self.ev, self.nv, self.pv)
   return eid
 end
 
@@ -139,8 +139,39 @@ function class:remove_edge(eid)
 end
 
 function class:reset_edge(eid, uid, vid)
-  reset_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
-  reset_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
+  reset_edge(eid, uid, self.ue, self.eu, self.nu, self.pu)
+  reset_edge(eid, vid, self.ve, self.ev, self.nv, self.pv)
+end
+
+local function collapse_edge(self, eid, ue, eu, ev, nu, start)
+  local uid = eu[eid]
+  local vid = ev[eid]
+  local that = {}
+
+  local start_eid = ue[vid]
+  assert(start_eid ~= 0)
+  local eid = start_eid
+  repeat
+    that[#that + 1] = eid
+    eid = nu[eid]
+  until eid == start_eid
+  for i = 1, #that do
+    local eid = that[i]
+    if start == "v" then
+      class.reset_edge(self, eid, ev[eid], uid)
+    else
+      class.reset_edge(self, eid, uid, ev[eid])
+    end
+  end
+  return vid
+end
+
+function class:collapse_edge(eid, start)
+  if start == "v" then
+    return collapse_edge(self, eid, self.ve, self.ev, self.eu, self.nv, start)
+  else
+    return collapse_edge(self, eid, self.ue, self.eu, self.ev, self.nu, start)
+  end
 end
 
 function class:get_edge_uid(eid)
