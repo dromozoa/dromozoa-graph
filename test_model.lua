@@ -95,9 +95,3 @@ print(json.encode(g))
 print(v1:count_degree("u"))
 print(v1:count_degree("v"))
 
--- e3:remove()
-g.model:reset_edge(e3.id, v3.id, v1.id)
--- print(json.encode(g))
-
-print(v1:count_degree("u"))
-print(v1:count_degree("v"))

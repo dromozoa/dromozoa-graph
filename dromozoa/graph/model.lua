@@ -51,10 +51,8 @@ local function remove_edge(eid, ue, eu, nu, pu)
 end
 
 local function reset_edge(eid, uid, ue, eu, nu, pu)
-  if uid ~= eu[eid] then
-    remove_edge(eid, ue, eu, nu, pu)
-    create_edge(eid, uid, ue, eu, nu, pu)
-  end
+  remove_edge(eid, ue, eu, nu, pu)
+  create_edge(eid, uid, ue, eu, nu, pu)
 end
 
 local function each_adjacent_vertex(uid, ue, ev, nu)
@@ -138,40 +136,12 @@ function class:remove_edge(eid)
   remove_edge(eid, self.ve, self.ev, self.nv, self.pv)
 end
 
-function class:reset_edge(eid, uid, vid)
+function class:reset_edge_uid(eid, uid)
   reset_edge(eid, uid, self.ue, self.eu, self.nu, self.pu)
+end
+
+function class:reset_edge_vid(eid, vid)
   reset_edge(eid, vid, self.ve, self.ev, self.nv, self.pv)
-end
-
-local function collapse_edge(self, eid, ue, eu, ev, nu, start)
-  local uid = eu[eid]
-  local vid = ev[eid]
-  local that = {}
-
-  local start_eid = ue[vid]
-  assert(start_eid ~= 0)
-  local eid = start_eid
-  repeat
-    that[#that + 1] = eid
-    eid = nu[eid]
-  until eid == start_eid
-  for i = 1, #that do
-    local eid = that[i]
-    if start == "v" then
-      class.reset_edge(self, eid, ev[eid], uid)
-    else
-      class.reset_edge(self, eid, uid, ev[eid])
-    end
-  end
-  return vid
-end
-
-function class:collapse_edge(eid, start)
-  if start == "v" then
-    return collapse_edge(self, eid, self.ve, self.ev, self.eu, self.nv, start)
-  else
-    return collapse_edge(self, eid, self.ue, self.eu, self.ev, self.nu, start)
-  end
 end
 
 function class:get_edge_uid(eid)

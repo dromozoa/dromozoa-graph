@@ -15,12 +15,26 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local sequence = require "dromozoa.commons.sequence"
+
 local private_root = function () end
 local private_id = function () end
 
 local function unpack_item(self)
   local root = self[private_root]
   return self[private_id], root, root.model, root.ep
+end
+
+local function collapse(self, u, v, start)
+  local edges = sequence()
+  for _, e in v:each_adjacent_vertex(start) do
+    edges:push(e)
+  end
+  for e in edges:each() do
+    e[start] = u
+  end
+  self:remove()
+  v:remove()
 end
 
 local class = {}
@@ -45,9 +59,11 @@ end
 
 function class:collapse(start)
   local eid, root, model, props = unpack_item(self)
-  local vid = model:collapse_edge(eid, start)
-  self:remove()
-  root:get_vertex(vid):remove()
+  if start == "v" then
+    collapse(self, self.v, self.u, "v")
+  else
+    collapse(self, self.u, self.v, "u")
+  end
 end
 
 local metatable = {}
@@ -78,13 +94,13 @@ function metatable:__newindex(key, value)
   if key == "id" then
     error("cannot modify constant")
   elseif key == "uid" then
-    model:reset_edge(eid, value, model:get_edge_vid(eid))
+    model:reset_edge_uid(eid, value)
   elseif key == "vid" then
-    model:reset_edge(eid, model:get_edge_uid(eid), value)
+    model:reset_edge_vid(eid, value)
   elseif key == "u" then
-    model:reset_edge(eid, value.id, model:get_edge_vid(eid))
+    model:reset_edge_uid(eid, value.id)
   elseif key == "v" then
-    model:reset_edge(eid, model:get_edge_uid(eid), value.id)
+    model:reset_edge_vid(eid, value.id)
   else
     props:set_property(eid, key, value)
   end
