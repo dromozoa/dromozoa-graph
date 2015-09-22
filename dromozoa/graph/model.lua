@@ -15,75 +15,74 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function create_edge(uid, eid, ue, eu, uv)
-  local ueid = ue[uid]
-  ue[uid] = eid
+local function create_edge(uid, eid, ue, eu, nu, pu)
   eu[eid] = uid
-  if ueid == 0 then
-    uv[eid] = eid
+  local next_eid = ue[uid]
+  if next_eid == 0 then
+    ue[uid] = eid
+    nu[eid] = eid
+    pu[eid] = eid
   else
-    uv[eid] = uv[ueid]
-    uv[ueid] = eid
+    local prev_eid = pu[next_eid]
+    nu[prev_eid] = eid
+    nu[eid] = next_eid
+    pu[eid] = prev_eid
+    pu[next_eid] = eid
   end
 end
 
-local function remove_edge(uid, eid, ue, eu, uv)
-  local next_eid = uv[eid]
+local function remove_edge(eid, ue, eu, nu, pu)
+  local uid = eu[eid]
+  eu[eid] = nil
+  local next_eid = nu[eid]
   if next_eid == eid then
     assert(ue[uid] == eid)
     ue[uid] = 0
   else
-    local prev_eid
-    local this_eid = eid
-    repeat
-      prev_eid = this_eid
-      this_eid = next_eid
-      next_eid = uv[next_eid]
-    until this_eid == eid
     if ue[uid] == eid then
-      ue[uid] = prev_eid
+      ue[uid] = next_eid
     end
-    uv[prev_eid] = next_eid
+    local prev_eid = pu[eid]
+    nu[prev_eid] = next_eid
+    pu[next_eid] = prev_eid
   end
-  eu[eid] = nil
-  uv[eid] = nil
+  nu[eid] = nil
+  pu[eid] = nil
 end
 
-local function reset_edge(uid, eid, ue, eu, uv)
-  local prev_uid = eu[eid]
-  if uid ~= prev_uid then
-    remove_edge(prev_uid, eid, ue, eu, uv)
-    create_edge(uid, eid, ue, eu, uv)
+local function reset_edge(uid, eid, ue, eu, nu, pu)
+  if uid ~= eu[eid] then
+    remove_edge(eid, ue, eu, nu, pu)
+    create_edge(uid, eid, ue, eu, nu, pu)
   end
 end
 
-local function each_adjacent_vertex(uid, ue, ev, uv)
-  local ueid = ue[uid]
-  if ueid == 0 then
+local function each_adjacent_vertex(uid, ue, ev, nu)
+  local start_eid = ue[uid]
+  if start_eid == 0 then
     return function () end
   else
-    ueid = uv[ueid]
     return coroutine.wrap(function ()
-      local eid = ueid
+      local eid = start_eid
       repeat
         coroutine.yield(ev[eid], eid)
-        eid = uv[eid]
-      until eid == ueid
+        eid = nu[eid]
+      until eid == start_eid
     end)
   end
 end
 
-local function count_degree(uid, ue, uv)
-  local ueid = ue[uid]
-  if ueid == 0 then
+local function count_degree(uid, ue, nu)
+  local start_eid = ue[uid]
+  if start_eid == 0 then
     return 0
   else
     local count = 0
-    local eid = ueid
+    local eid = start_eid
     repeat
       count = count + 1
-      eid = uv[eid]
-    until eid == ueid
+      eid = nu[eid]
+    until eid == start_eid
     return count
   end
 end
@@ -98,8 +97,10 @@ function class.new()
     en = 0;
     eu = {};
     ev = {};
-    uv = {};
-    vu = {};
+    nu = {};
+    nv = {};
+    pu = {};
+    pv = {};
   }
 end
 
@@ -127,21 +128,19 @@ end
 function class:create_edge(uid, vid)
   local eid = self.en + 1
   self.en = eid
-  create_edge(uid, eid, self.ue, self.eu, self.uv)
-  create_edge(vid, eid, self.ve, self.ev, self.vu)
+  create_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
+  create_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
   return eid
 end
 
 function class:remove_edge(eid)
-  local eu = self.eu
-  local ev = self.ev
-  remove_edge(eu[eid], eid, self.ue, eu, self.uv)
-  remove_edge(ev[eid], eid, self.ve, ev, self.vu)
+  remove_edge(eid, self.ue, self.eu, self.nu, self.pu)
+  remove_edge(eid, self.ve, self.ev, self.nv, self.pv)
 end
 
 function class:reset_edge(eid, uid, vid)
-  reset_edge(uid, eid, self.ue, self.eu, self.uv)
-  reset_edge(vid, eid, self.ve, self.ev, self.vu)
+  reset_edge(uid, eid, self.ue, self.eu, self.nu, self.pu)
+  reset_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
 end
 
 function class:get_edge(eid)
@@ -154,17 +153,17 @@ end
 
 function class:each_adjacent_vertex(uid, start)
   if start == "v" then
-    return each_adjacent_vertex(uid, self.ve, self.eu, self.vu)
+    return each_adjacent_vertex(uid, self.ve, self.eu, self.nv)
   else
-    return each_adjacent_vertex(uid, self.ue, self.ev, self.uv)
+    return each_adjacent_vertex(uid, self.ue, self.ev, self.nu)
   end
 end
 
 function class:count_degree(uid, start)
   if start == "v" then
-    return count_degree(uid, self.ve, self.vu)
+    return count_degree(uid, self.ve, self.nv)
   else
-    return count_degree(uid, self.ue, self.uv)
+    return count_degree(uid, self.ue, self.nu)
   end
 end
 
