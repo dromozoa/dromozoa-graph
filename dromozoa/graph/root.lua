@@ -43,12 +43,12 @@ end
 local class = {}
 
 function class.new()
-  local this = {
+  local self = {
     model = model();
     vp = properties();
     ep = properties();
   }
-  return this
+  return self
 end
 
 function class:empty()
