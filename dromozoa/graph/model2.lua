@@ -16,19 +16,19 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function create_edge(uid, eid, ue, eu, nu, pu)
-  local prev_eid = ue[uid]
-  ue[uid] = eid
-  eu[eid] = uid
-  if prev_eid == 0 then
+  local next_eid = ue[uid]
+  if next_eid == 0 then
+    ue[uid] = eid
     nu[eid] = eid
     pu[eid] = eid
   else
-    local next_eid = nu[prev_eid]
+    local prev_eid = pu[next_eid]
     nu[prev_eid] = eid
     nu[eid] = next_eid
     pu[eid] = prev_eid
     pu[next_eid] = eid
   end
+  eu[eid] = uid
 end
 
 local function remove_edge(eid, ue, eu, nu, pu)
@@ -39,10 +39,10 @@ local function remove_edge(eid, ue, eu, nu, pu)
     assert(ue[uid] == eid)
     ue[uid] = 0
   else
-    local prev_eid = pu[eid]
     if ue[uid] == eid then
-      ue[uid] = prev_eid
+      ue[uid] = next_eid
     end
+    local prev_eid = pu[eid]
     nu[prev_eid] = next_eid
     pu[next_eid] = prev_eid
   end
@@ -58,11 +58,10 @@ local function reset_edge(uid, eid, ue, eu, nu, pu)
 end
 
 local function each_adjacent_vertex(uid, ue, ev, nu)
-  local end_eid = ue[uid]
-  if end_eid == 0 then
+  local start_eid = ue[uid]
+  if start_eid == 0 then
     return function () end
   else
-    local start_eid = nu[end_eid]
     return coroutine.wrap(function ()
       local eid = start_eid
       repeat
