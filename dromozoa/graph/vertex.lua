@@ -18,66 +18,75 @@
 local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
 
+local private_root = function () end
+
+local function unpack_item(self)
+  local root = self[private_root]
+  return self.id, root, root.model, root.vp
+end
+
 local class = {}
 
-function class.new(g, id)
+function class.new(root, id)
   return {
-    g = function () return g end;
+    [private_root] = root;
     id = id;
   }
 end
 
 function class:remove()
-  local id = self.id
-  self.g()._vp:remove_item(id)
-  self.g().vertices:remove_vertex(id)
-end
-
-function class:impl_get_property(key)
-  return self.g()._vp:get_property(self.id, key)
-end
-
-function class:impl_set_property(key, value)
-  self.g()._vp:set_property(self.id, key, value)
+  local uid, root, model, props = unpack_item(self)
+  model:remove_vertex(uid)
+  props:remove_item(uid)
 end
 
 function class:each_property()
-  return self.g()._vp:each_property(self.id)
+  local uid, root, model, props = unpack_item(self)
+  return props:each_property(uid)
 end
 
-function class:each_adjacent_vertex(mode)
-  return self.g():impl_get_adjacencies(mode):each_adjacent_vertex(self.g(), self.id)
+function class:each_adjacent_vertex(start)
+  local uid, root, model, props = unpack_item(self)
+  return coroutine.wrap(function ()
+    for vid, eid in model:each_adjacent_vertex(uid, start) do
+      coroutine.yield(root:get_vertex(vid), root:get_edge(eid))
+    end
+  end)
 end
 
-function class:count_degree(mode)
-  return self.g():impl_get_adjacencies(mode):count_degree(self.id)
+function class:count_degree(start)
+  local uid, root, model, props = unpack_item(self)
+  return model:count_degree(uid, start)
 end
 
-function class:bfs(visitor, mode)
-  bfs(self.g(), visitor, self, mode)
+function class:bfs(visitor, start)
+  local uid, root, model, props = unpack_item(self)
+  bfs(root, visitor, self, start)
 end
 
-function class:dfs(visitor, mode)
-  dfs(self.g(), visitor, self, mode)
+function class:dfs(visitor, start)
+  local uid, root, model, props = unpack_item(self)
+  dfs(root, visitor, self, start)
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local fn = class[key]
-  if fn == nil then
-    return self:impl_get_property(key)
-  else
-    return fn
+  local uid, root, model, props = unpack_item(self)
+  local value = props:get_property(uid, key)
+  if value == nil then
+    return class[key]
   end
+  return value
 end
 
 function metatable:__newindex(key, value)
-  self:impl_set_property(key, value)
+  local uid, root, model, props = unpack_item(self)
+  props:set_property(uid, key, value)
 end
 
 return setmetatable(class, {
-  __call = function (_, g, id)
-    return setmetatable(class.new(g, id), metatable)
+  __call = function (_, root, id)
+    return setmetatable(class.new(root, id), metatable)
   end;
 })

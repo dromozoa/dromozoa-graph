@@ -15,11 +15,18 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local private_root = function () end
+
+local function unpack_item(self)
+  local root = self[private_root]
+  return self.id, root, root.model, root.ep
+end
+
 local class = {}
 
-function class.new(g, id, uid, vid)
+function class.new(root, id, uid, vid)
   return {
-    g = function () return g end;
+    [private_root] = root;
     id = id;
     uid = uid;
     vid = vid;
@@ -27,78 +34,67 @@ function class.new(g, id, uid, vid)
 end
 
 function class:remove()
-  local id = self.id
-  self.g()._uv:remove_edge(self.uid, id)
-  self.g()._vu:remove_edge(self.vid, id)
-  self.g()._ep:remove_item(id)
-  self.g().edges:remove_edge(id)
+  local eid, root, model, props = unpack_item(self)
+  model:remove_edge(eid)
+  props:remove_item(eid)
 end
 
-function class:collapse()
-  local v = self.v
+function class:each_property()
+  local eid, root, model, props = unpack_item(self)
+  return props:each_property(eid)
+end
+
+function class:collapse(start)
+  local eid, root, model, props = unpack_item(self)
+  local uid
+  local v
+  if start == "v" then
+    uid = self.vid
+    v = self.u
+  else
+    uid = self.uid
+    v = self.v
+  end
   local that = {}
   for _, e in v:each_adjacent_vertex() do
     that[#that + 1] = e
   end
   for i = 1, #that do
     local e = that[i]
-    local id = e.id
-    local uid = self.uid
-    self.g().edges:reset_edge(id, uid, e.vid)
-    self.g()._uv:remove_edge(e.uid, id)
-    self.g()._uv:append_edge(uid, id)
+    model:reset_edge(e.id, uid, e.vid)
   end
-  v:remove()
   self:remove()
-end
-
-function class:impl_get_u()
-  local u = self.g():get_vertex(self.uid)
-  rawset(self, "u", u)
-  return u
-end
-
-function class:impl_get_v()
-  local v = self.g():get_vertex(self.vid)
-  rawset(self, "v", v)
-  return v
-end
-
-function class:impl_get_property(key)
-  return self.g()._ep:get_property(self.id, key)
-end
-
-function class:impl_set_property(key, value)
-  self.g()._ep:set_property(self.id, key, value)
-end
-
-function class:each_property()
-  return self.g()._ep:each_property(self.id)
+  v:remove()
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local fn = class[key]
-  if fn == nil then
-    if key == "u" then
-      return self:impl_get_u()
-    elseif key == "v" then
-      return self:impl_get_v()
-    else
-      return self:impl_get_property(key)
+  local eid, root, model, props = unpack_item(self)
+  local value
+  if key == "u" then
+    value = root:get_vertex(self.uid)
+  elseif key == "v" then
+    value = root:get_vertex(self.vid)
+  end
+  if value == nil then
+    value = props:get_property(eid, key)
+    if value == nil then
+      return class[key]
     end
   else
-    return fn
+    rawset(self, key, value)
   end
+  return value
 end
 
 function metatable:__newindex(key, value)
-  self:impl_set_property(key, value)
+  local eid, root, model, props = unpack_item(self)
+  props:set_property(eid, key, value)
 end
 
 return setmetatable(class, {
-  __call = function (_, g, id, uid, vid)
-    return setmetatable(class.new(g, id, uid, vid), metatable)
+  __call = function (_, root, id, uid, vid)
+    return setmetatable(class.new(root, id, uid, vid), metatable)
   end;
 })

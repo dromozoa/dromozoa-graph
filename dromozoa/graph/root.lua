@@ -17,12 +17,12 @@
 
 local clone = require "dromozoa.commons.clone"
 local dfs = require "dromozoa.graph.dfs"
-local edge = require "dromozoa.graph.edge_proxy"
+local edge = require "dromozoa.graph.edge"
 local merge = require "dromozoa.graph.merge"
 local model = require "dromozoa.graph.model2"
 local properties = require "dromozoa.graph.properties"
 local tsort = require "dromozoa.graph.tsort"
-local vertex = require "dromozoa.graph.vertex_proxy"
+local vertex = require "dromozoa.graph.vertex"
 local write_graphviz = require "dromozoa.graph.write_graphviz"
 
 local function id(value)
