@@ -15,7 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
 local merge = require "dromozoa.graph.merge"
@@ -50,10 +49,6 @@ function class.new()
     ep = properties();
   }
   return this
-end
-
-function class:clone()
-  return clone(self)
 end
 
 function class:empty()
