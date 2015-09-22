@@ -24,12 +24,10 @@ end
 
 local class = {}
 
-function class.new(root, id, uid, vid)
+function class.new(root, id)
   return {
     [private_root] = root;
     id = id;
-    uid = uid;
-    vid = vid;
   }
 end
 
@@ -71,19 +69,18 @@ local metatable = {}
 
 function metatable:__index(key)
   local eid, root, model, props = unpack_item(self)
-  local value
-  if key == "u" then
-    value = root:get_vertex(self.uid)
+  if key == "uid" then
+    return model:get_edge_uid(eid)
+  elseif key == "vid" then
+    return model:get_edge_vid(eid)
+  elseif key == "u" then
+    return root:get_vertex(model:get_edge_uid(eid))
   elseif key == "v" then
-    value = root:get_vertex(self.vid)
+    return root:get_vertex(model:get_edge_vid(eid))
   end
+  local value = props:get_property(eid, key)
   if value == nil then
-    value = props:get_property(eid, key)
-    if value == nil then
-      return class[key]
-    end
-  else
-    rawset(self, key, value)
+    return class[key]
   end
   return value
 end
@@ -94,7 +91,7 @@ function metatable:__newindex(key, value)
 end
 
 return setmetatable(class, {
-  __call = function (_, root, id, uid, vid)
-    return setmetatable(class.new(root, id, uid, vid), metatable)
+  __call = function (_, root, id)
+    return setmetatable(class.new(root, id), metatable)
   end;
 })

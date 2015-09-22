@@ -143,8 +143,12 @@ function class:reset_edge(eid, uid, vid)
   reset_edge(vid, eid, self.ve, self.ev, self.nv, self.pv)
 end
 
-function class:get_edge(eid)
-  return self.eu[eid], self.ev[eid]
+function class:get_edge_uid(eid)
+  return self.eu[eid]
+end
+
+function class:get_edge_vid(eid)
+  return self.ev[eid]
 end
 
 function class:each_edge()

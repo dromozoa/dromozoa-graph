@@ -87,7 +87,7 @@ function class:create_edge(u, v)
 end
 
 function class:get_edge(eid)
-  return edge(self, eid, self.model:get_edge(eid))
+  return edge(self, eid)
 end
 
 function class:each_edge(key)
