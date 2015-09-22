@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function create_edge(uid, eid, ue, eu, nu, pu)
+  eu[eid] = uid
   local next_eid = ue[uid]
   if next_eid == 0 then
     ue[uid] = eid
@@ -28,7 +29,6 @@ local function create_edge(uid, eid, ue, eu, nu, pu)
     pu[eid] = prev_eid
     pu[next_eid] = eid
   end
-  eu[eid] = uid
 end
 
 local function remove_edge(eid, ue, eu, nu, pu)
