@@ -20,15 +20,17 @@ local pairs = require "dromozoa.commons.pairs"
 local class = {}
 
 function class.new()
-  return {}
+  return {
+    dataset = {};
+  }
 end
 
 function class:clear_properties(key)
-  rawset(self, key, nil)
+  self.dataset[key] = nil
 end
 
 function class:remove_item(id)
-  for key, data in pairs(self) do
+  for key, data in pairs(self.dataset) do
     data[id] = nil
     if next(data) == nil then
       self[key] = nil
@@ -37,7 +39,7 @@ function class:remove_item(id)
 end
 
 function class:each_item(key)
-  local data = rawget(self, key)
+  local data = self.dataset[key]
   if data then
     return next, data, nil
   else
@@ -46,21 +48,22 @@ function class:each_item(key)
 end
 
 function class:set_property(id, key, value)
-  local data = rawget(self, key)
+  local dataset = self.dataset
+  local data = dataset[key]
   if data then
     data[id] = value
     if next(data) == nil then
-      self[key] = nil
+      dataset[key] = nil
     end
   else
     if value ~= nil then
-      self[key] = { [id] = value }
+      dataset[key] = { [id] = value }
     end
   end
 end
 
 function class:get_property(id, key)
-  local data = rawget(self, key)
+  local data = self.dataset[key]
   if data then
     return data[id]
   end
@@ -68,7 +71,7 @@ end
 
 function class:each_property(id)
   return coroutine.wrap(function ()
-    for key, data in pairs(self) do
+    for key, data in pairs(self.dataset) do
       local value = data[id]
       if value ~= nil then
         coroutine.yield(key, value)
