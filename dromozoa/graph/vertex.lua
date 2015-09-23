@@ -23,7 +23,7 @@ local private_id = function () end
 
 local function unpack_item(self)
   local root = self[private_root]
-  return self[private_id], root, root.model, root.vp
+  return self[private_id], root.model, root.vp, root
 end
 
 local class = {}
@@ -36,18 +36,18 @@ function class.new(root, id)
 end
 
 function class:remove()
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   model:remove_vertex(uid)
   props:remove_item(uid)
 end
 
 function class:each_property()
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   return props:each_property(uid)
 end
 
 function class:each_adjacent_vertex(start)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   return coroutine.wrap(function ()
     for vid, eid in model:each_adjacent_vertex(uid, start) do
       coroutine.yield(root:get_vertex(vid), root:get_edge(eid))
@@ -56,24 +56,24 @@ function class:each_adjacent_vertex(start)
 end
 
 function class:count_degree(start)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   return model:count_degree(uid, start)
 end
 
 function class:bfs(visitor, start)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   bfs(root, visitor, self, start)
 end
 
 function class:dfs(visitor, start)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   dfs(root, visitor, self, start)
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   if key == "id" then
     return uid
   else
@@ -86,7 +86,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key, value)
-  local uid, root, model, props = unpack_item(self)
+  local uid, model, props, root = unpack_item(self)
   if key == "id" then
     error("cannot modify constant")
   end
