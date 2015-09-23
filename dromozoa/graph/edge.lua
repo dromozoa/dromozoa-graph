@@ -58,7 +58,6 @@ function class:each_property()
 end
 
 function class:collapse(start)
-  local eid, model, props, root = unpack_item(self)
   if start == "v" then
     collapse(self, self.v, self.u, "v")
   else
