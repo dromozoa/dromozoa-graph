@@ -59,8 +59,8 @@ function class:create_vertex()
   return vertex(self, self.model:create_vertex())
 end
 
-function class:get_vertex(uid)
-  return vertex(self, uid)
+function class:get_vertex(u)
+  return vertex(self, id(u))
 end
 
 function class:each_vertex(key)
@@ -81,8 +81,8 @@ function class:create_edge(u, v)
   return edge(self, self.model:create_edge(uid, vid), uid, vid)
 end
 
-function class:get_edge(eid)
-  return edge(self, eid)
+function class:get_edge(e)
+  return edge(self, id(e))
 end
 
 function class:each_edge(key)
