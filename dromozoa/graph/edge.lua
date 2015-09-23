@@ -22,7 +22,7 @@ local private_id = function () end
 
 local function unpack_item(self)
   local root = self[private_root]
-  return self[private_id], root, root.model, root.ep
+  return self[private_id], root.model, root.ep, root
 end
 
 local function collapse(self, u, v, start)
@@ -47,18 +47,18 @@ function class.new(root, id)
 end
 
 function class:remove()
-  local eid, root, model, props = unpack_item(self)
+  local eid, model, props, root = unpack_item(self)
   model:remove_edge(eid)
   props:remove_item(eid)
 end
 
 function class:each_property()
-  local eid, root, model, props = unpack_item(self)
+  local eid, model, props, root = unpack_item(self)
   return props:each_property(eid)
 end
 
 function class:collapse(start)
-  local eid, root, model, props = unpack_item(self)
+  local eid, model, props, root = unpack_item(self)
   if start == "v" then
     collapse(self, self.v, self.u, "v")
   else
@@ -69,7 +69,7 @@ end
 local metatable = {}
 
 function metatable:__index(key)
-  local eid, root, model, props = unpack_item(self)
+  local eid, model, props, root = unpack_item(self)
   if key == "id" then
     return eid
   elseif key == "uid" then
@@ -90,7 +90,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key, value)
-  local eid, root, model, props = unpack_item(self)
+  local eid, model, props, root = unpack_item(self)
   if key == "id" then
     error("cannot modify constant")
   elseif key == "uid" then
