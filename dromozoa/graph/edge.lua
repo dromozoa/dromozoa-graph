@@ -17,12 +17,12 @@
 
 local sequence = require "dromozoa.commons.sequence"
 
-local private_root = function () end
+local private_graph = function () end
 local private_id = function () end
 
 local function unpack_item(self)
-  local root = self[private_root]
-  return self[private_id], root.model, root.ep, root
+  local g = self[private_graph]
+  return self[private_id], g.model, g.ep, g
 end
 
 local function collapse(self, u, v, start)
@@ -39,21 +39,21 @@ end
 
 local class = {}
 
-function class.new(root, id)
+function class.new(g, id)
   return {
-    [private_root] = root;
+    [private_graph] = g;
     [private_id] = id;
   }
 end
 
 function class:remove()
-  local eid, model, props, root = unpack_item(self)
+  local eid, model, props, g = unpack_item(self)
   model:remove_edge(eid)
   props:remove_item(eid)
 end
 
 function class:each_property()
-  local eid, model, props, root = unpack_item(self)
+  local eid, model, props, g = unpack_item(self)
   return props:each_property(eid)
 end
 
@@ -68,7 +68,7 @@ end
 local metatable = {}
 
 function metatable:__index(key)
-  local eid, model, props, root = unpack_item(self)
+  local eid, model, props, g = unpack_item(self)
   if key == "id" then
     return eid
   elseif key == "uid" then
@@ -76,9 +76,9 @@ function metatable:__index(key)
   elseif key == "vid" then
     return model:get_edge_vid(eid)
   elseif key == "u" then
-    return root:get_vertex(model:get_edge_uid(eid))
+    return g:get_vertex(model:get_edge_uid(eid))
   elseif key == "v" then
-    return root:get_vertex(model:get_edge_vid(eid))
+    return g:get_vertex(model:get_edge_vid(eid))
   else
     local value = props:get_property(eid, key)
     if value == nil then
@@ -89,7 +89,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key, value)
-  local eid, model, props, root = unpack_item(self)
+  local eid, model, props, g = unpack_item(self)
   if key == "id" then
     error("cannot modify constant")
   elseif key == "uid" then
@@ -106,7 +106,7 @@ function metatable:__newindex(key, value)
 end
 
 return setmetatable(class, {
-  __call = function (_, root, id)
-    return setmetatable(class.new(root, id), metatable)
+  __call = function (_, g, id)
+    return setmetatable(class.new(g, id), metatable)
   end;
 })
