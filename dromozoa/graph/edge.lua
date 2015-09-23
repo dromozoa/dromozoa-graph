@@ -15,90 +15,99 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local sequence = require "dromozoa.commons.sequence"
+
+local private_root = function () end
+local private_id = function () end
+
+local function unpack_item(self)
+  local root = self[private_root]
+  return self[private_id], root, root.model, root.ep
+end
+
+local function collapse(self, u, v, start)
+  local edges = sequence()
+  for _, e in v:each_adjacent_vertex(start) do
+    edges:push(e)
+  end
+  for e in edges:each() do
+    e[start] = u
+  end
+  self:remove()
+  v:remove()
+end
+
 local class = {}
 
-function class.new(g, id, uid, vid)
+function class.new(root, id)
   return {
-    g = function () return g end;
-    id = id;
-    uid = uid;
-    vid = vid;
+    [private_root] = root;
+    [private_id] = id;
   }
 end
 
 function class:remove()
-  local id = self.id
-  self.g()._uv:remove_edge(self.uid, id)
-  self.g()._vu:remove_edge(self.vid, id)
-  self.g()._ep:remove_item(id)
-  self.g()._e:remove_edge(id)
-end
-
-function class:collapse()
-  local v = self.v
-  local that = {}
-  for _, e in v:each_adjacent_vertex() do
-    that[#that + 1] = e
-  end
-  for i = 1, #that do
-    local e = that[i]
-    local id = e.id
-    local uid = self.uid
-    self.g()._e:reset_edge(id, uid, e.vid)
-    self.g()._uv:remove_edge(e.uid, id)
-    self.g()._uv:append_edge(uid, id)
-  end
-  v:remove()
-  self:remove()
-end
-
-function class:impl_get_u()
-  local u = self.g()._v:get_vertex(self.uid)
-  rawset(self, "u", u)
-  return u
-end
-
-function class:impl_get_v()
-  local v = self.g()._v:get_vertex(self.vid)
-  rawset(self, "v", v)
-  return v
-end
-
-function class:impl_get_property(key)
-  return self.g()._ep:get_property(self.id, key)
-end
-
-function class:impl_set_property(key, value)
-  self.g()._ep:set_property(self.id, key, value)
+  local eid, root, model, props = unpack_item(self)
+  model:remove_edge(eid)
+  props:remove_item(eid)
 end
 
 function class:each_property()
-  return self.g()._ep:each_property(self.id)
+  local eid, root, model, props = unpack_item(self)
+  return props:each_property(eid)
+end
+
+function class:collapse(start)
+  local eid, root, model, props = unpack_item(self)
+  if start == "v" then
+    collapse(self, self.v, self.u, "v")
+  else
+    collapse(self, self.u, self.v, "u")
+  end
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local fn = class[key]
-  if fn == nil then
-    if key == "u" then
-      return self:impl_get_u()
-    elseif key == "v" then
-      return self:impl_get_v()
-    else
-      return self:impl_get_property(key)
-    end
+  local eid, root, model, props = unpack_item(self)
+  if key == "id" then
+    return eid
+  elseif key == "uid" then
+    return model:get_edge_uid(eid)
+  elseif key == "vid" then
+    return model:get_edge_vid(eid)
+  elseif key == "u" then
+    return root:get_vertex(model:get_edge_uid(eid))
+  elseif key == "v" then
+    return root:get_vertex(model:get_edge_vid(eid))
   else
-    return fn
+    local value = props:get_property(eid, key)
+    if value == nil then
+      return class[key]
+    end
+    return value
   end
 end
 
 function metatable:__newindex(key, value)
-  self:impl_set_property(key, value)
+  local eid, root, model, props = unpack_item(self)
+  if key == "id" then
+    error("cannot modify constant")
+  elseif key == "uid" then
+    model:reset_edge_uid(eid, value)
+  elseif key == "vid" then
+    model:reset_edge_vid(eid, value)
+  elseif key == "u" then
+    model:reset_edge_uid(eid, value.id)
+  elseif key == "v" then
+    model:reset_edge_vid(eid, value.id)
+  else
+    props:set_property(eid, key, value)
+  end
 end
 
 return setmetatable(class, {
-  __call = function (_, g, id, uid, vid)
-    return setmetatable(class.new(g, id, uid, vid), metatable)
+  __call = function (_, root, id)
+    return setmetatable(class.new(root, id), metatable)
   end;
 })

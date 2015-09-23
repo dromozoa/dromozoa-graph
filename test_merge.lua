@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.commons.clone"
 local graph = require "dromozoa.graph"
 
 local g = graph()
@@ -29,6 +30,6 @@ v2.foo = 69
 
 g:create_edge(v1, v2)
 g:create_edge(v2, v3)
-g:merge(g:clone())
+g:merge(clone(g))
 
 g:write_graphviz(assert(io.open("test.dot", "w"))):close()

@@ -19,7 +19,21 @@ local json = require "dromozoa.commons.json"
 local sequence = require "dromozoa.commons.sequence"
 local graph = require "dromozoa.graph"
 
+local function append(g, u, i)
+  i = i - 1
+  if i == 0 then
+    return g
+  else
+    for j = 1, 4 do
+      local v = g:create_vertex()
+      g:create_edge(u, v)
+      append(g, v, i)
+    end
+  end
+end
+
 local g = graph()
+-- append(g, g:create_vertex(), 6)
 
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()

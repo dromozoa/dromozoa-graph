@@ -46,8 +46,25 @@ end
 assert(result[v1.id])
 assert(not result[v2.id])
 
+local g = graph()
+
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+
+local e1 = g:create_edge(v1, v2)
+local e2 = g:create_edge(v2, v3)
+local e3 = g:create_edge(v3, v1)
+
+e1:collapse("v")
+
+assert(e2.uid == e3.vid)
+assert(e2.vid == e3.uid)
+
 io.write "digraph \"graph\" { \n  graph [rankdir = LR];\n"
 for e in g:each_edge() do
   io.write("  ", e.uid, " -> ", e.vid, ";\n")
 end
 io.write "}\n"
+
+

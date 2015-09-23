@@ -20,15 +20,17 @@ local pairs = require "dromozoa.commons.pairs"
 local class = {}
 
 function class.new()
-  return {}
+  return {
+    dataset = {};
+  }
 end
 
 function class:clear_properties(key)
-  self[key] = nil
+  self.dataset[key] = nil
 end
 
 function class:remove_item(id)
-  for key, data in pairs(self) do
+  for key, data in pairs(self.dataset) do
     data[id] = nil
     if next(data) == nil then
       self[key] = nil
@@ -36,55 +38,46 @@ function class:remove_item(id)
   end
 end
 
-function class:each_item(key, fn, context)
-  local data = self[key]
+function class:each_item(key)
+  local data = self.dataset[key]
   if data then
-    return function (_, i)
-      if i then
-        return fn(context, next(data, i.id))
-      else
-        return fn(context, next(data))
-      end
-    end
+    return next, data, nil
   else
     return function () end
   end
 end
 
 function class:set_property(id, key, value)
-  local data = self[key]
+  local dataset = self.dataset
+  local data = dataset[key]
   if data then
-    if value ~= nil then
-      data[id] = value
-    else
-      data[id] = nil
-      if next(data) == nil then
-        self[key] = nil
-      end
+    data[id] = value
+    if next(data) == nil then
+      dataset[key] = nil
     end
   else
     if value ~= nil then
-      self[key] = { [id] = value }
+      dataset[key] = { [id] = value }
     end
   end
 end
 
 function class:get_property(id, key)
-  local data = self[key]
+  local data = self.dataset[key]
   if data then
     return data[id]
   end
 end
 
 function class:each_property(id)
-  return function (_, i)
-    for key, data in next, self, i do
+  return coroutine.wrap(function ()
+    for key, data in pairs(self.dataset) do
       local value = data[id]
       if value ~= nil then
-        return key, value
+        coroutine.yield(key, value)
       end
     end
-  end
+  end)
 end
 
 local metatable = {

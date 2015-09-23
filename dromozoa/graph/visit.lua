@@ -15,10 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (ctx, event, ...)
-  local fn = ctx[event]
+return function (context, event, ...)
+  local fn = context[event]
   if fn == nil then
     return
   end
-  return fn(ctx, ...)
+  return fn(context, ...)
 end
