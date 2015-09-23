@@ -17,7 +17,7 @@
 
 local visit = require "dromozoa.graph.visit"
 
-return function (g, visitor, s, mode)
+return function (g, visitor, s, start)
   local color = {}
   for u in g:each_vertex() do
     visit(visitor, "initialize_vertex", g, u)
@@ -33,7 +33,7 @@ return function (g, visitor, s, mode)
     q[i] = nil
     i = i + 1
     visit(visitor, "examine_vertex", g, u)
-    for v, e in u:each_adjacent_vertex(mode) do
+    for v, e in u:each_adjacent_vertex(start) do
       if visit(visitor, "examine_edge", g, e, u, v) ~= false then
         local vid = v.id
         local c = color[vid]

@@ -17,16 +17,16 @@
 
 local visit = require "dromozoa.graph.visit"
 
-local function dfs(g, visitor, u, mode, color)
+local function dfs(g, visitor, u, start, color)
   local uid = u.id
   visit(visitor, "discover_vertex", g, u)
   color[uid] = 2
-  for v, e in u:each_adjacent_vertex(mode) do
+  for v, e in u:each_adjacent_vertex(start) do
     if visit(visitor, "examine_edge", g, e, u, v) ~= false then
       local c = color[v.id]
       if c == 1 then
         visit(visitor, "tree_edge", g, e, u, v)
-        dfs(g, visitor, v, mode, color)
+        dfs(g, visitor, v, start, color)
       elseif c == 2 then
         visit(visitor, "back_edge", g, e, u, v)
       else
@@ -39,7 +39,7 @@ local function dfs(g, visitor, u, mode, color)
   color[uid] = 3
 end
 
-return function (g, visitor, s, mode)
+return function (g, visitor, s, start)
   local color = {}
   for u in g:each_vertex() do
     visit(visitor, "initialize_vertex", g, u)
@@ -47,12 +47,12 @@ return function (g, visitor, s, mode)
   end
   if s then
     visit(visitor, "start_vertex", g, s)
-    dfs(g, visitor, s, mode, color)
+    dfs(g, visitor, s, start, color)
   else
     for u in g:each_vertex() do
       if color[u.id] == 1 then
         visit(visitor, "start_vertex", g, u)
-        dfs(g, visitor, u, mode, color)
+        dfs(g, visitor, u, start, color)
       end
     end
   end

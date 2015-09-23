@@ -29,8 +29,8 @@ local function tsort_visitor(_result)
   return self
 end
 
-return function (g, mode)
+return function (g, start)
   local result = {}
-  g:dfs(tsort_visitor(result), mode)
+  g:dfs(tsort_visitor(result), start)
   return result
 end
