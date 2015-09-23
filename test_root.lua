@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local equal = require "dromozoa.commons.equal"
-local root = require "dromozoa.graph.root"
+local root = require "dromozoa.graph"
 
 local g1 = root()
 local v1 = g1:create_vertex()
