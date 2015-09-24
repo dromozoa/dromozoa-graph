@@ -62,12 +62,12 @@ end
 
 function class:bfs(visitor, start)
   local uid, model, props, g = unpack_item(self)
-  return bfs(g, visitor, self, start)
+  bfs(g, visitor, self, start)
 end
 
 function class:dfs(visitor, start)
   local uid, model, props, g = unpack_item(self)
-  return dfs(g, visitor, self, start)
+  dfs(g, visitor, self, start)
 end
 
 local metatable = {}

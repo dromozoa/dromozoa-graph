@@ -58,5 +58,4 @@ return function (g, visitor, s, start)
     color[u.id] = 3
     visit(visitor, "finish_vertex", g, u)
   end
-  return visitor
 end

@@ -56,5 +56,4 @@ return function (g, visitor, s, start)
       end
     end
   end
-  return visitor
 end
