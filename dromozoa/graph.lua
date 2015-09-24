@@ -15,12 +15,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local sequence = require "dromozoa.commons.sequence"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
 local merge = require "dromozoa.graph.merge"
 local model = require "dromozoa.graph.model"
 local properties = require "dromozoa.graph.properties"
-local tsort = require "dromozoa.graph.tsort"
 local vertex = require "dromozoa.graph.vertex"
 local write_graphviz = require "dromozoa.graph.write_graphviz"
 
@@ -106,7 +106,16 @@ function class:dfs(visitor, start)
 end
 
 function class:tsort(start)
-  return tsort(self, start)
+  local vertices = sequence()
+  self:dfs({
+    back_edge = function (context, g, e, u, v)
+      error("found back edge " .. e.id)
+    end;
+    finish_vertex = function (context, g, u)
+      vertices:push(u)
+    end;
+  }, start)
+  return vertices
 end
 
 function class:write_graphviz(out, visitor)
