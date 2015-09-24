@@ -23,15 +23,16 @@ return function (g, visitor, s, start)
     visit(visitor, "initialize_vertex", g, u)
     color[u.id] = 1
   end
+  -- construct queue
   local q = { s }
-  local i = 1
-  local j = 2
+  local i = 0
+  local j = 1
   visit(visitor, "discover_vertex", g, s)
   while i < j do
     -- pop queue
+    i = i + 1
     local u = q[i]
     q[i] = nil
-    i = i + 1
     visit(visitor, "examine_vertex", g, u)
     for v, e in u:each_adjacent_vertex(start) do
       if visit(visitor, "examine_edge", g, e, u, v) ~= false then
@@ -41,8 +42,8 @@ return function (g, visitor, s, start)
           visit(visitor, "tree_edge", g, e, u, v)
           color[vid] = 2
           -- push queue
-          q[j] = v
           j = j + 1
+          q[j] = v
           visit(visitor, "discover_vertex", g, v)
         else
           visit(visitor, "non_tree_edge", g, e, u, v)
@@ -57,4 +58,5 @@ return function (g, visitor, s, start)
     color[u.id] = 3
     visit(visitor, "finish_vertex", g, u)
   end
+  return visitor
 end

@@ -15,22 +15,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function tsort_visitor(_result)
-  local self = {}
-
-  function self:back_edge(g, e, u, v)
-    error("found back edge " .. e.id)
-  end
-
-  function self:finish_vertex(g, u)
-    _result[#_result + 1] = u
-  end
-
-  return self
-end
+local sequence = require "dromozoa.commons.sequence"
 
 return function (g, start)
-  local result = {}
-  g:dfs(tsort_visitor(result), start)
-  return result
+  local vertices = sequence()
+  g:dfs({
+    back_edge = function (context, g, e, u, v)
+      error("found back edge " .. e.id)
+    end;
+    finish_vertex = function (context, g, u)
+      vertices:push(u)
+    end;
+  }, start)
+  return vertices
 end
