@@ -15,10 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.commons.clone"
 local sequence = require "dromozoa.commons.sequence"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
-local merge = require "dromozoa.graph.merge"
 local model = require "dromozoa.graph.model"
 local properties = require "dromozoa.graph.properties"
 local vertex = require "dromozoa.graph.vertex"
@@ -97,12 +97,25 @@ function class:clear_edge_properties(key)
   self.ep:clear_properties(key)
 end
 
-function class:merge(that)
-  merge(self, that)
-end
-
 function class:dfs(visitor, start)
   dfs(self, visitor, nil, start)
+end
+
+function class:merge(that)
+  local map = {}
+  for a in that:each_vertex() do
+    local b = self:create_vertex()
+    map[a.id] = b.id
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
+  for a in that:each_edge() do
+    local b = self:create_edge(map[a.uid], map[a.vid])
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
 end
 
 function class:tsort(start)
