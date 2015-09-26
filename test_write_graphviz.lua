@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local xml = require "dromozoa.commons.xml"
 local graph = require "dromozoa.graph"
 local graphviz = require "dromozoa.graph.graphviz"
 
@@ -41,11 +42,18 @@ function attributes:graph_attributes(g)
 end
 
 function attributes:node_attributes(g, u)
-  return { label = graphviz.quote_string("node " .. u.id); color = "blue" }
+  return {
+    color = "blue";
+    label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
+    style = "filled";
+    fillcolor = "gray";
+  }
 end
 
 function attributes:edge_attributes(g, e)
-  return { label = graphviz.quote_string("edge\n" .. e.id) }
+  return {
+    label = "<edge<br/>" .. e.id .. ">";
+  }
 end
 
 g:write_graphviz(io.stdout)
