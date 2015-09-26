@@ -19,10 +19,10 @@ local clone = require "dromozoa.commons.clone"
 local sequence = require "dromozoa.commons.sequence"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
+local graphviz = require "dromozoa.graph.graphviz"
 local model = require "dromozoa.graph.model"
 local properties = require "dromozoa.graph.properties"
 local vertex = require "dromozoa.graph.vertex"
-local write_graphviz = require "dromozoa.graph.write_graphviz"
 
 local function id(value)
   if type(value) == "table" then
@@ -101,6 +101,10 @@ function class:dfs(visitor, start)
   dfs(self, visitor, nil, start)
 end
 
+function class:write_graphviz(out, visitor)
+  return graphviz.write(out, self, visitor)
+end
+
 function class:merge(that)
   local map = {}
   for a in that:each_vertex() do
@@ -129,10 +133,6 @@ function class:tsort(start)
     end;
   }, start)
   return vertices
-end
-
-function class:write_graphviz(out, visitor)
-  return write_graphviz(self, out, visitor)
 end
 
 local metatable = {

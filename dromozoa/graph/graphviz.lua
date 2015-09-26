@@ -15,25 +15,52 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local quote_string = {
-  ["\""] = "\\\"";
-  ["\\"] = "\\\\";
-  ["\n"] = "\\n";
-}
+local pairs = require "dromozoa.commons.pairs"
+local visit = require "dromozoa.graph.visit"
 
-local escape_html = {
-  ["\""] = "&quot;";
-  ["&"] = "&amp;";
-  ["<"] = "&lt;";
-  [">"] = "&gt;";
-}
+local function write_attributes(out, attributes, prolog, epilog)
+  if attributes ~= nil then
+    if prolog ~= nil then
+      out:write(prolog)
+    end
+    out:write(" [")
+    local first = true
+    for k, v in pairs(attributes) do
+      if first then
+        first = false
+      else
+        out:write(", ")
+      end
+      out:write(k, " = ", v)
+    end
+    out:write("]")
+    if epilog ~= nil then
+      out:write(epilog)
+    end
+  end
+end
+
+local function write(out, g, visitor)
+  out:write("digraph g {\n")
+  if visitor == nil then
+    for e in g:each_edge() do
+      out:write("  ", e.uid, " -> ", e.vid, ";\n")
+    end
+  else
+    write_attributes(out, visit(visitor, "graph_attributes", g), "  graph", ";\n")
+    for u in g:each_vertex() do
+      write_attributes(out, visit(visitor, "node_attributes", g, u), "  " .. u.id, ";\n")
+    end
+    for e in g:each_edge() do
+      out:write("  ", e.uid, " -> ", e.vid)
+      write_attributes(out, visit(visitor, "edge_attributes", g, e))
+      out:write(";\n")
+    end
+  end
+  out:write("}\n")
+  return out
+end
 
 return {
-  quote_string = function (value)
-    return "\"" .. value:gsub("[\"\\\n]", quote_string) .. "\""
-  end;
-
-  escape_html = function (value)
-    return (value:gsub("[\"&<>]", escape_html))
-  end;
+  write = write;
 }
