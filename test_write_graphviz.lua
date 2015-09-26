@@ -17,7 +17,6 @@
 
 local xml = require "dromozoa.commons.xml"
 local graph = require "dromozoa.graph"
-local graphviz = require "dromozoa.graph.graphviz"
 
 local g = graph()
 
@@ -41,18 +40,30 @@ function attributes:graph_attributes(g)
   return { rankdir = "LR" }
 end
 
-function attributes:node_attributes(g, u)
+function attributes:default_node_attributes(g)
   return {
-    color = "blue";
-    label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
     style = "filled";
     fillcolor = "gray";
   }
 end
 
+function attributes:node_attributes(g, u)
+  return {
+    color = "blue";
+    label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
+  }
+end
+
+function attributes:default_edge_attributes(g)
+  return {
+    color = "blue";
+    fontcolor = "red";
+  }
+end
+
 function attributes:edge_attributes(g, e)
   return {
-    label = "<edge<br/>" .. e.id .. ">";
+    label = "<edge<br/>" .. xml.escape(e.id) .. ">";
   }
 end
 

@@ -44,15 +44,17 @@ local function write(out, g, visitor)
   out:write("digraph g {\n")
   if visitor == nil then
     for e in g:each_edge() do
-      out:write("  ", e.uid, " -> ", e.vid, ";\n")
+      out:write(e.uid, " -> ", e.vid, ";\n")
     end
   else
-    write_attributes(out, visit(visitor, "graph_attributes", g), "  graph", ";\n")
+    write_attributes(out, visit(visitor, "graph_attributes", g), "graph", ";\n")
+    write_attributes(out, visit(visitor, "default_node_attributes", g), "node", ";\n")
     for u in g:each_vertex() do
-      write_attributes(out, visit(visitor, "node_attributes", g, u), "  " .. u.id, ";\n")
+      write_attributes(out, visit(visitor, "node_attributes", g, u), u.id, ";\n")
     end
+    write_attributes(out, visit(visitor, "default_edge_attributes", g), "edge", ";\n")
     for e in g:each_edge() do
-      out:write("  ", e.uid, " -> ", e.vid)
+      out:write(e.uid, " -> ", e.vid)
       write_attributes(out, visit(visitor, "edge_attributes", g, e))
       out:write(";\n")
     end
