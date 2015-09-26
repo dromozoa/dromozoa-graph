@@ -15,6 +15,132 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local root = require "dromozoa.graph.root"
+local clone = require "dromozoa.commons.clone"
+local sequence = require "dromozoa.commons.sequence"
+local dfs = require "dromozoa.graph.dfs"
+local edge = require "dromozoa.graph.edge"
+local graphviz = require "dromozoa.graph.graphviz"
+local model = require "dromozoa.graph.model"
+local properties = require "dromozoa.graph.properties"
+local vertex = require "dromozoa.graph.vertex"
 
-return root
+local function id(value)
+  if type(value) == "table" then
+    return value.id
+  else
+    return value
+  end
+end
+
+local function each(self, constructor, iterator, context)
+  return coroutine.wrap(function ()
+    for id in iterator, context do
+      coroutine.yield(constructor(self, id))
+    end
+  end)
+end
+
+local class = {}
+
+function class.new()
+  local self = {
+    model = model();
+    vp = properties();
+    ep = properties();
+  }
+  return self
+end
+
+function class:empty()
+  return self.model:empty()
+end
+
+function class:create_vertex()
+  return vertex(self, self.model:create_vertex())
+end
+
+function class:get_vertex(u)
+  return vertex(self, id(u))
+end
+
+function class:each_vertex(key)
+  if key == nil then
+    return each(self, class.get_vertex, self.model:each_vertex())
+  else
+    return each(self, class.get_vertex, self.vp:each_item(key))
+  end
+end
+
+function class:clear_vertex_properties(key)
+  self.vp:clear_properties(key)
+end
+
+function class:create_edge(u, v)
+  local uid = id(u)
+  local vid = id(v)
+  return edge(self, self.model:create_edge(uid, vid), uid, vid)
+end
+
+function class:get_edge(e)
+  return edge(self, id(e))
+end
+
+function class:each_edge(key)
+  if key == nil then
+    return each(self, class.get_edge, self.model:each_edge())
+  else
+    return each(self, class.get_edge, self.ep:each_item(key))
+  end
+end
+
+function class:clear_edge_properties(key)
+  self.ep:clear_properties(key)
+end
+
+function class:dfs(visitor, start)
+  dfs(self, visitor, nil, start)
+end
+
+function class:write_graphviz(out, visitor)
+  return graphviz.write(out, self, visitor)
+end
+
+function class:merge(that)
+  local map = {}
+  for a in that:each_vertex() do
+    local b = self:create_vertex()
+    map[a.id] = b.id
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
+  for a in that:each_edge() do
+    local b = self:create_edge(map[a.uid], map[a.vid])
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
+end
+
+function class:tsort(start)
+  local vertices = sequence()
+  self:dfs({
+    back_edge = function (context, g, e, u, v)
+      error("found back edge " .. e.id)
+    end;
+    finish_vertex = function (context, g, u)
+      vertices:push(u)
+    end;
+  }, start)
+  return vertices
+end
+
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function ()
+    return setmetatable(class.new(), metatable)
+  end;
+})

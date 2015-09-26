@@ -17,7 +17,7 @@
 
 local json = require "dromozoa.commons.json"
 local model = require "dromozoa.graph.model"
-local root = require "dromozoa.graph.root"
+local root = require "dromozoa.graph"
 
 local g = root()
 

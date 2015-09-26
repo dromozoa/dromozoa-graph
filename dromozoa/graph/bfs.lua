@@ -15,34 +15,28 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local queue = require "dromozoa.commons.queue"
 local visit = require "dromozoa.graph.visit"
 
-return function (g, visitor, s, mode)
+return function (g, visitor, s, start)
   local color = {}
   for u in g:each_vertex() do
     visit(visitor, "initialize_vertex", g, u)
     color[u.id] = 1
   end
-  local q = { s }
-  local i = 1
-  local j = 2
+  local q = queue():push(s)
   visit(visitor, "discover_vertex", g, s)
-  while i < j do
-    -- pop queue
-    local u = q[i]
-    q[i] = nil
-    i = i + 1
+  while not q:empty() do
+    local u = q:pop()
     visit(visitor, "examine_vertex", g, u)
-    for v, e in u:each_adjacent_vertex(mode) do
+    for v, e in u:each_adjacent_vertex(start) do
       if visit(visitor, "examine_edge", g, e, u, v) ~= false then
         local vid = v.id
         local c = color[vid]
         if c == 1 then
           visit(visitor, "tree_edge", g, e, u, v)
           color[vid] = 2
-          -- push queue
-          q[j] = v
-          j = j + 1
+          q:push(v)
           visit(visitor, "discover_vertex", g, v)
         else
           visit(visitor, "non_tree_edge", g, e, u, v)
