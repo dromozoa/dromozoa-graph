@@ -45,8 +45,8 @@ local class = {}
 function class.new()
   local self = {
     model = model();
-    vp = property_map();
-    ep = property_map();
+    vprops = property_map();
+    eprops = property_map();
   }
   return self
 end
@@ -67,12 +67,12 @@ function class:each_vertex(key)
   if key == nil then
     return each(self, class.get_vertex, self.model:each_vertex())
   else
-    return each(self, class.get_vertex, self.vp:each_item(key))
+    return each(self, class.get_vertex, self.vprops:each_item(key))
   end
 end
 
 function class:clear_vertex_properties(key)
-  self.vp:clear(key)
+  self.vprops:clear(key)
 end
 
 function class:create_edge(u, v)
@@ -89,12 +89,12 @@ function class:each_edge(key)
   if key == nil then
     return each(self, class.get_edge, self.model:each_edge())
   else
-    return each(self, class.get_edge, self.ep:each_item(key))
+    return each(self, class.get_edge, self.eprops:each_item(key))
   end
 end
 
 function class:clear_edge_properties(key)
-  self.ep:clear(key)
+  self.eprops:clear(key)
 end
 
 function class:dfs(visitor, start)
