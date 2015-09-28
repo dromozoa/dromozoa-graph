@@ -63,8 +63,9 @@ local function each_adjacent_vertex(uid, ue, ev, nu)
     return coroutine.wrap(function ()
       local eid = start_eid
       repeat
+        local next_eid = nu[eid]
         coroutine.yield(ev[eid], eid)
-        eid = nu[eid]
+        eid = next_eid
       until eid == start_eid
     end)
   end

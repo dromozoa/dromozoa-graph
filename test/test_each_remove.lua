@@ -22,47 +22,16 @@ local g = graph()
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
-local v4 = g:create_vertex()
 
 local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v2, v3)
-local e3 = g:create_edge(v2, v4)
-local e4 = g:create_edge(v3, v1)
-local e5 = g:create_edge(v4, v1)
-
-e1:collapse()
+local e2 = g:create_edge(v1, v3)
 
 local n = 0
-for v, e in v1:each_adjacent_vertex() do
-  assert(v.id == v3.id or v.id == v4.id)
+for v, e in v1:each_adjacent_vertex(v1) do
+  print(v.id, e.id)
   n = n + 1
+  e:remove()
 end
 assert(n == 2)
 
-local result = {}
-for v in g:each_vertex() do
-  result[v.id] = true
-end
-assert(result[v1.id])
-assert(not result[v2.id])
-
-local g = graph()
-
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
-
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v2, v3)
-local e3 = g:create_edge(v3, v1)
-
-e1:collapse("v")
-
-assert(e2.uid == e3.vid)
-assert(e2.vid == e3.uid)
-
-io.write "digraph \"graph\" { \n  graph [rankdir = LR];\n"
-for e in g:each_edge() do
-  io.write("  ", e.uid, " -> ", e.vid, ";\n")
-end
-io.write "}\n"
+g:write_graphviz(io.stdout)
