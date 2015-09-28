@@ -1,8 +1,8 @@
 package = "dromozoa-graph"
-version = "1.12-1"
+version = "1.13-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.12.tar.gz";
-  file = "dromozoa-graph-1.12.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.13.tar.gz";
+  file = "dromozoa-graph-1.13.tar.gz";
 }
 description = {
   summary = "Graph data structures and algorithms";
@@ -19,6 +19,7 @@ build = {
     ["dromozoa.graph"] = "dromozoa/graph.lua";
     ["dromozoa.graph.bfs"] = "dromozoa/graph/bfs.lua";
     ["dromozoa.graph.dfs"] = "dromozoa/graph/dfs.lua";
+    ["dromozoa.graph.d3_json"] = "dromozoa/graph/d3_json.lua";
     ["dromozoa.graph.edge"] = "dromozoa/graph/edge.lua";
     ["dromozoa.graph.graphviz"] = "dromozoa/graph/graphviz.lua";
     ["dromozoa.graph.model"] = "dromozoa/graph/model.lua";

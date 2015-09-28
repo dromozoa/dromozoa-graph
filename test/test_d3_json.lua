@@ -15,8 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local json = require "dromozoa.commons.json"
-local sequence = require "dromozoa.commons.sequence"
 local graph = require "dromozoa.graph"
 
 local function append(g, u, i)
@@ -49,29 +47,21 @@ g:create_edge(v1, v4)
 g:create_edge(v2, v5)
 g:create_edge(v5, v4)
 
-local map = {}
-local nodes = sequence()
-local links = sequence()
-
-local i = 0
-for u in g:each_vertex() do
-  map[u.id] = #nodes
-  nodes:push({ text = tostring(u.id) })
-end
-for e in g:each_edge() do
-  links:push({
-    source = map[e.uid];
-    target = map[e.vid];
-  })
-end
-
 local handle = assert(io.open("doc/dromozoa-graph.html"))
 io.write(handle:read("*a"))
 handle:close()
 
 io.write("<script>dromozoa.graph(");
-json.write(io.stdout, {
-  nodes = nodes;
-  links = links;
+g:write_d3_json(io.stdout, {
+  node_attributes = function (context, g, u)
+    return {
+      text = tostring(u.id);
+    }
+  end;
+  link_attributes = function (context, g, e)
+    return {
+      text = tostring(e.id);
+    }
+  end;
 })
 io.write(");</script>\n")

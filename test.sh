@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-for i in test*.lua
+for i in test/test*.lua
 do
   lua "$i"
 done
