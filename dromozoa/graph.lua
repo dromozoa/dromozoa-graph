@@ -18,7 +18,6 @@
 local clone = require "dromozoa.commons.clone"
 local property_map = require "dromozoa.commons.property_map"
 local sequence = require "dromozoa.commons.sequence"
-
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
 local graphviz = require "dromozoa.graph.graphviz"
@@ -73,7 +72,7 @@ function class:each_vertex(key)
 end
 
 function class:clear_vertex_properties(key)
-  self.vp:clear_key(key)
+  self.vp:clear(key)
 end
 
 function class:create_edge(u, v)
@@ -95,7 +94,7 @@ function class:each_edge(key)
 end
 
 function class:clear_edge_properties(key)
-  self.ep:clear_key(key)
+  self.ep:clear(key)
 end
 
 function class:dfs(visitor, start)
