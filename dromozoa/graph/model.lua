@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local empty = require "dromozoa.commons.empty"
+
 local function create_edge(eid, uid, ue, eu, nu, pu)
   eu[eid] = uid
   local next_eid = ue[uid]
@@ -116,7 +118,7 @@ function class:remove_vertex(uid)
 end
 
 function class:empty()
-  return next(self.ue) == nil
+  return empty(self.ue)
 end
 
 function class:each_vertex()
