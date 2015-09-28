@@ -15,11 +15,25 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local json = require "dromozoa.commons.json"
+local sequence = require "dromozoa.commons.sequence"
 local graph = require "dromozoa.graph"
-local graphviz = require "dromozoa.graph.graphviz"
-local graphviz_attributes_adapter = require "dromozoa.graph.graphviz_attributes_adapter"
+
+local function append(g, u, i)
+  i = i - 1
+  if i == 0 then
+    return g
+  else
+    for j = 1, 4 do
+      local v = g:create_vertex()
+      g:create_edge(u, v)
+      append(g, v, i)
+    end
+  end
+end
 
 local g = graph()
+-- append(g, g:create_vertex(), 6)
 
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
@@ -35,19 +49,29 @@ g:create_edge(v1, v4)
 g:create_edge(v2, v5)
 g:create_edge(v5, v4)
 
-local attributes = {}
+local map = {}
+local nodes = sequence()
+local links = sequence()
 
-function attributes:graph_attributes(g)
-  return { rankdir = "LR" }
+local i = 0
+for u in g:each_vertex() do
+  map[u.id] = #nodes
+  nodes:push({ text = tostring(u.id) })
+end
+for e in g:each_edge() do
+  links:push({
+    source = map[e.uid];
+    target = map[e.vid];
+  })
 end
 
-function attributes:node_attributes(g, u)
-  return { label = graphviz.quote_string("node " .. u.id); color = "blue" }
-end
+local handle = assert(io.open("doc/dromozoa-graph.html"))
+io.write(handle:read("*a"))
+handle:close()
 
-function attributes:edge_attributes(g, e)
-  return { label = graphviz.quote_string("edge\n" .. e.id) }
-end
-
-g:write_graphviz(io.stdout)
-g:write_graphviz(assert(io.open("test.dot", "w")), graphviz_attributes_adapter(attributes)):close()
+io.write("<script>dromozoa.graph(");
+json.write(io.stdout, {
+  nodes = nodes;
+  links = links;
+})
+io.write(");</script>\n")

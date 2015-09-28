@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local xml = require "dromozoa.commons.xml"
 local graph = require "dromozoa.graph"
 
 local g = graph()
@@ -23,48 +24,48 @@ local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
 local v4 = g:create_vertex()
+local v5 = g:create_vertex()
+local v6 = g:create_vertex()
 
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v2, v3)
-local e3 = g:create_edge(v2, v4)
-local e4 = g:create_edge(v3, v1)
-local e5 = g:create_edge(v4, v1)
+g:create_edge(v1, v2)
+g:create_edge(v3, v5)
+g:create_edge(v3, v6)
+g:create_edge(v1, v4)
+g:create_edge(v2, v5)
+g:create_edge(v5, v4)
 
-e1:collapse()
+local attributes = {}
 
-local n = 0
-for v, e in v1:each_adjacent_vertex() do
-  assert(v.id == v3.id or v.id == v4.id)
-  n = n + 1
+function attributes:graph_attributes(g)
+  return { rankdir = "LR" }
 end
-assert(n == 2)
 
-local result = {}
-for v in g:each_vertex() do
-  result[v.id] = true
+function attributes:default_node_attributes(g)
+  return {
+    style = "filled";
+    fillcolor = "gray";
+  }
 end
-assert(result[v1.id])
-assert(not result[v2.id])
 
-local g = graph()
-
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
-
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v2, v3)
-local e3 = g:create_edge(v3, v1)
-
-e1:collapse("v")
-
-assert(e2.uid == e3.vid)
-assert(e2.vid == e3.uid)
-
-io.write "digraph \"graph\" { \n  graph [rankdir = LR];\n"
-for e in g:each_edge() do
-  io.write("  ", e.uid, " -> ", e.vid, ";\n")
+function attributes:node_attributes(g, u)
+  return {
+    color = "blue";
+    label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
+  }
 end
-io.write "}\n"
 
+function attributes:default_edge_attributes(g)
+  return {
+    color = "blue";
+    fontcolor = "red";
+  }
+end
 
+function attributes:edge_attributes(g, e)
+  return {
+    label = "<edge<br/>" .. xml.escape(e.id) .. ">";
+  }
+end
+
+g:write_graphviz(io.stdout)
+g:write_graphviz(assert(io.open("test.dot", "w")), attributes):close()

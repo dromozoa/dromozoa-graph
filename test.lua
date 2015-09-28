@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.commons.clone"
 local graph = require "dromozoa.graph"
 
 local g = graph()
@@ -112,16 +113,16 @@ v.color = 2
 e.color = 1
 g:create_edge(v, u).color = 2
 
-local clone = g:clone()
+local cg = clone(g)
 
 for u in g:each_vertex() do
-  local c = clone:get_vertex(u.id)
+  local c = cg:get_vertex(u.id)
   assert(u.id == c.id)
   assert(u.color == c.color)
 end
 
 for e in g:each_edge() do
-  local c = clone:get_edge(e.id)
+  local c = cg:get_edge(e.id)
   assert(e.id == c.id)
   assert(e.color == c.color)
 end

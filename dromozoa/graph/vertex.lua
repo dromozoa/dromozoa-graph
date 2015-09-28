@@ -18,56 +18,83 @@
 local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
 
+local private_graph = function () end
+local private_id = function () end
+
+local function unpack_item(self)
+  local g = self[private_graph]
+  return self[private_id], g.model, g.vprops, g
+end
+
+local class = {}
+
+function class.new(g, id)
+  return {
+    [private_graph] = g;
+    [private_id] = id;
+  }
+end
+
+function class:remove()
+  local uid, model, props, g = unpack_item(self)
+  model:remove_vertex(uid)
+  props:remove_item(uid)
+end
+
+function class:each_property()
+  local uid, model, props, g = unpack_item(self)
+  return props:each_property(uid)
+end
+
+function class:each_adjacent_vertex(start)
+  local uid, model, props, g = unpack_item(self)
+  return coroutine.wrap(function ()
+    for vid, eid in model:each_adjacent_vertex(uid, start) do
+      coroutine.yield(g:get_vertex(vid), g:get_edge(eid))
+    end
+  end)
+end
+
+function class:count_degree(start)
+  local uid, model, props, g = unpack_item(self)
+  return model:count_degree(uid, start)
+end
+
+function class:bfs(visitor, start)
+  local uid, model, props, g = unpack_item(self)
+  bfs(g, visitor, self, start)
+end
+
+function class:dfs(visitor, start)
+  local uid, model, props, g = unpack_item(self)
+  dfs(g, visitor, self, start)
+end
+
 local metatable = {}
 
 function metatable:__index(key)
-  return self:impl_get_property(key)
+  local uid, model, props, g = unpack_item(self)
+  if key == "id" then
+    return uid
+  else
+    local value = props:get_property(uid, key)
+    if value == nil then
+      return class[key]
+    end
+    return value
+  end
 end
 
 function metatable:__newindex(key, value)
-  self:impl_set_property(key, value)
+  local uid, model, props, g = unpack_item(self)
+  if key == "id" then
+    error("cannot modify constant")
+  end
+  props:set_property(uid, key, value)
 end
 
-return function (_g, _id)
-  local _v = _g._v
-  local _p = _g._vp
-
-  local self = {
-    id = _id;
-  }
-
-  function self:remove()
-    _p:remove_item(_id)
-    _v:remove_vertex(_id)
-  end
-
-  function self:impl_get_property(key)
-    return _p:get_property(_id, key)
-  end
-
-  function self:impl_set_property(key, value)
-    _p:set_property(_id, key, value)
-  end
-
-  function self:each_property()
-    return _p:each_property(_id)
-  end
-
-  function self:each_adjacent_vertex(mode)
-    return _g:impl_get_adjacencies(mode):each_adjacent_vertex(_id)
-  end
-
-  function self:count_degree(mode)
-    return _g:impl_get_adjacencies(mode):count_degree(_id)
-  end
-
-  function self:bfs(visitor, mode)
-    bfs(_g, visitor, self, mode)
-  end
-
-  function self:dfs(visitor, mode)
-    dfs(_g, visitor, self, mode)
-  end
-
-  return setmetatable(self, metatable)
-end
+return setmetatable(class, {
+  __call = function (_, g, id)
+    return setmetatable(class.new(g, id), metatable)
+  end;
+})

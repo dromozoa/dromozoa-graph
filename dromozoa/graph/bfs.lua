@@ -15,44 +15,41 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, visitor, s, mode)
+local empty = require "dromozoa.commons.empty"
+local queue = require "dromozoa.commons.queue"
+local visit = require "dromozoa.graph.visit"
+
+return function (g, visitor, s, start)
   local color = {}
   for u in g:each_vertex() do
-    visitor:initialize_vertex(g, u)
+    visit(visitor, "initialize_vertex", g, u)
     color[u.id] = 1
   end
-  local q = { s }
-  local i = 1
-  local j = 2
-  visitor:discover_vertex(g, s)
-  while i < j do
-    -- pop queue
-    local u = q[i]
-    q[i] = nil
-    i = i + 1
-    visitor:examine_vertex(g, u)
-    for v, e in u:each_adjacent_vertex(mode) do
-      if visitor:examine_edge(g, e, u, v) ~= false then
+  local q = queue():push(s)
+  visit(visitor, "discover_vertex", g, s)
+  while not empty(q) do
+    local u = q:pop()
+    visit(visitor, "examine_vertex", g, u)
+    for v, e in u:each_adjacent_vertex(start) do
+      if visit(visitor, "examine_edge", g, e, u, v) ~= false then
         local vid = v.id
         local c = color[vid]
         if c == 1 then
-          visitor:tree_edge(g, e, u, v)
+          visit(visitor, "tree_edge", g, e, u, v)
           color[vid] = 2
-          -- push queue
-          q[j] = v
-          j = j + 1
-          visitor:discover_vertex(g, v)
+          q:push(v)
+          visit(visitor, "discover_vertex", g, v)
         else
-          visitor:non_tree_edge(g, e, u, v)
+          visit(visitor, "non_tree_edge", g, e, u, v)
           if c == 2 then
-            visitor:gray_target(g, e, u, v)
+            visit(visitor, "gray_target", g, e, u, v)
           else
-            visitor:black_target(g, e, u, v)
+            visit(visitor, "black_target", g, e, u, v)
           end
         end
       end
     end
     color[u.id] = 3
-    visitor:finish_vertex(g, u)
+    visit(visitor, "finish_vertex", g, u)
   end
 end

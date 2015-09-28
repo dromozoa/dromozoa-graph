@@ -15,24 +15,59 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
+local json = require "dromozoa.commons.json"
+local model = require "dromozoa.graph.model"
+local root = require "dromozoa.graph"
 
-local g = graph()
+local g = root()
+
+print(g:empty())
 
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
 local v4 = g:create_vertex()
 local v5 = g:create_vertex()
+local e1 = g:create_edge(v1.id, v2.id)
+local e2 = g:create_edge(v2.id, v3.id)
+-- json.write(io.stdout, g):write("\n")
+local e3 = g:create_edge(v2.id, v4.id)
+-- g:create_edge(v3, v4)
+-- g:create_edge(v3, v5)
+-- g:create_edge(v1, v5)
 
-g:create_edge(v1, v2)
-g:create_edge(v2, v2)
-g:create_edge(v2, v3)
-g:create_edge(v3, v2)
-g:create_edge(v1, v4)
-g:create_edge(v5, v4)
+-- for v, e in g:each_adjacent_vertex(v2) do
+--   print(v, e)
+-- end
 
-g:dfs({
+json.write(io.stdout, g):write("\n")
+-- g:remove_edge(e3)
+-- json.write(io.stdout, g):write("\n")
+-- e1:remove()
+json.write(io.stdout, g):write("\n")
+
+for v, e in v2:each_adjacent_vertex() do
+  print(v.id, e.id)
+end
+print(v2:count_degree())
+
+print(g:empty())
+
+print("--")
+
+for u in g:each_vertex() do
+  print(u)
+end
+
+print("--")
+
+for e in g:each_edge() do
+  print(e)
+end
+
+print("--")
+
+v1:dfs({
   tree_edge = function (ctx, g, e, u, v)
     print("tree_edge", u.id, v.id)
   end;
@@ -44,44 +79,19 @@ g:dfs({
   end;
 })
 
-local result, message = pcall(g.tsort, g)
-assert(not result)
-print(message)
+print("--")
 
-local g = graph()
-
+local g = root()
 local v1 = g:create_vertex()
 local v2 = g:create_vertex()
 local v3 = g:create_vertex()
-local v4 = g:create_vertex()
-local v5 = g:create_vertex()
+local e1 = g:create_edge(v1, v1)
+print(json.encode(g))
+local e2 = g:create_edge(v1, v2)
+print(json.encode(g))
+local e3 = g:create_edge(v1, v3)
+print(json.encode(g))
 
-g:create_edge(v1, v2)
-g:create_edge(v1, v3)
-g:create_edge(v2, v4)
-g:create_edge(v3, v5)
+print(v1:count_degree("u"))
+print(v1:count_degree("v"))
 
-local result = {}
-v1:dfs({
-  discover_vertex = function (ctx, g, u)
-    result[#result + 1] = u.id
-  end;
-})
-assert(result[1] == 1)
-assert(result[2] == 2)
-assert(result[3] == 4)
-assert(result[4] == 3)
-assert(result[5] == 5)
-
-local result = {}
-v1:dfs({
-  examine_edge = function (ctx, g, e, u, v)
-    return e.id ~= 1
-  end;
-  discover_vertex = function (ctx, g, u)
-    result[#result + 1] = u.id
-  end;
-})
-assert(result[1] == 1)
-assert(result[2] == 3)
-assert(result[3] == 5)

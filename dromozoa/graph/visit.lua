@@ -15,14 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visitor_adapter = require "dromozoa.graph.visitor_adapter"
-
-local events = {
-  "graph_attributes",
-  "node_attributes",
-  "edge_attributes",
-}
-
-return function (visitor)
-  return visitor_adapter(visitor, events)
+return function (context, event, ...)
+  local fn = context[event]
+  if fn == nil then
+    return
+  end
+  return fn(context, ...)
 end

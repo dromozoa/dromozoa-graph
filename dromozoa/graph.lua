@@ -15,113 +15,132 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
+local clone = require "dromozoa.commons.clone"
+local property_map = require "dromozoa.commons.property_map"
+local sequence = require "dromozoa.commons.sequence"
 local dfs = require "dromozoa.graph.dfs"
-local edges = require "dromozoa.graph.edges"
-local merge = require "dromozoa.graph.merge"
-local write_graphviz = require "dromozoa.graph.write_graphviz"
-local properties = require "dromozoa.graph.properties"
-local tsort = require "dromozoa.graph.tsort"
-local vertices = require "dromozoa.graph.vertices"
+local edge = require "dromozoa.graph.edge"
+local graphviz = require "dromozoa.graph.graphviz"
+local model = require "dromozoa.graph.model"
+local vertex = require "dromozoa.graph.vertex"
 
-local function construct(self)
-  local _vp = self._vp
-  local _ep = self._ep
-  local _v = self._v
-  local _e = self._e
-  local _uv = self._uv
-  local _vu = self._vu
-
-  function self:clone()
-    local that = {
-      _vp = _vp:clone();
-      _ep = _ep:clone();
-    }
-    that._v = _v:clone(that)
-    that._e = _e:clone(that)
-    that._uv = _uv:clone(that)
-    that._vu = _vu:clone(that)
-    return construct(that)
+local function id(value)
+  if type(value) == "table" then
+    return value.id
+  else
+    return value
   end
+end
 
-  function self:empty()
-    return _v:empty()
-  end
-
-  function self:create_vertex()
-    return _v:create_vertex()
-  end
-
-  function self:get_vertex(id)
-    return _v:get_vertex(id)
-  end
-
-  function self:each_vertex(key)
-    return _v:each_vertex(key)
-  end
-
-  function self:clear_vertex_properties(key)
-    _vp:clear_properties(key)
-  end
-
-  function self:create_edge(u, v)
-    local uid, vid
-    if type(u) == "table" then uid = u.id else uid = u end
-    if type(v) == "table" then vid = v.id else vid = v end
-    local e = _e:create_edge(uid, vid)
-    local eid = e.id
-    _uv:append_edge(uid, eid)
-    _vu:append_edge(vid, eid)
-    return e
-  end
-
-  function self:get_edge(id)
-    return _e:get_edge(id)
-  end
-
-  function self:each_edge(key)
-    return _e:each_edge(key)
-  end
-
-  function self:clear_edge_properties(key)
-    _ep:clear_properties(key)
-  end
-
-  function self:merge(that)
-    merge(self, that)
-  end
-
-  function self:dfs(visitor, mode)
-    dfs(self, visitor, nil, mode)
-  end
-
-  function self:tsort(mode)
-    return tsort(self, mode)
-  end
-
-  function self:write_graphviz(out, visitor)
-    return write_graphviz(self, out, visitor)
-  end
-
-  function self:impl_get_adjacencies(mode)
-    if mode == "v" then
-      return _vu
-    else
-      return _uv
+local function each(self, constructor, iterator, context)
+  return coroutine.wrap(function ()
+    for id in iterator, context do
+      coroutine.yield(constructor(self, id))
     end
-  end
+  end)
+end
 
+local class = {}
+
+function class.new()
+  local self = {
+    model = model();
+    vprops = property_map();
+    eprops = property_map();
+  }
   return self
 end
 
-return function ()
-  local self = {
-    _vp = properties();
-    _ep = properties();
-  }
-  self._v = vertices(self)
-  self._e = edges(self)
-  self._uv = adjacency_list(self, "v")
-  self._vu = adjacency_list(self, "u")
-  return construct(self)
+function class:empty()
+  return self.model:empty()
 end
+
+function class:create_vertex()
+  return vertex(self, self.model:create_vertex())
+end
+
+function class:get_vertex(u)
+  return vertex(self, id(u))
+end
+
+function class:each_vertex(key)
+  if key == nil then
+    return each(self, class.get_vertex, self.model:each_vertex())
+  else
+    return each(self, class.get_vertex, self.vprops:each_item(key))
+  end
+end
+
+function class:clear_vertex_properties(key)
+  self.vprops:clear(key)
+end
+
+function class:create_edge(u, v)
+  local uid = id(u)
+  local vid = id(v)
+  return edge(self, self.model:create_edge(uid, vid), uid, vid)
+end
+
+function class:get_edge(e)
+  return edge(self, id(e))
+end
+
+function class:each_edge(key)
+  if key == nil then
+    return each(self, class.get_edge, self.model:each_edge())
+  else
+    return each(self, class.get_edge, self.eprops:each_item(key))
+  end
+end
+
+function class:clear_edge_properties(key)
+  self.eprops:clear(key)
+end
+
+function class:dfs(visitor, start)
+  dfs(self, visitor, nil, start)
+end
+
+function class:write_graphviz(out, visitor)
+  return graphviz.write(out, self, visitor)
+end
+
+function class:merge(that)
+  local map = {}
+  for a in that:each_vertex() do
+    local b = self:create_vertex()
+    map[a.id] = b.id
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
+  for a in that:each_edge() do
+    local b = self:create_edge(map[a.uid], map[a.vid])
+    for k, v in a:each_property() do
+      b[clone(k)] = clone(v)
+    end
+  end
+end
+
+function class:tsort(start)
+  local vertices = sequence()
+  self:dfs({
+    back_edge = function (context, g, e, u, v)
+      error("found back edge " .. e.id)
+    end;
+    finish_vertex = function (context, g, u)
+      vertices:push(u)
+    end;
+  }, start)
+  return vertices
+end
+
+local metatable = {
+  __index = class;
+}
+
+return setmetatable(class, {
+  __call = function ()
+    return setmetatable(class.new(), metatable)
+  end;
+})
