@@ -54,7 +54,6 @@ local function write(out, g, visitor)
       local attrbutes = visit(visitor, "link_attributes", g, e)
       if attrbutes ~= nil then
         for k, v in pairs(attrbutes) do
-          assert(k ~= "source" and k ~= "target")
           out:write(",", json.quote(k), ":")
           json.write(out, v)
         end

@@ -36,7 +36,6 @@ local function remove_edge(eid, ue, eu, nu, pu)
   eu[eid] = nil
   local next_eid = nu[eid]
   if next_eid == eid then
-    assert(ue[uid] == eid)
     ue[uid] = 0
   else
     if ue[uid] == eid then
