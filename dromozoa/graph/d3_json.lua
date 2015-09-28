@@ -16,56 +16,52 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local json = require "dromozoa.commons.json"
+local pairs = require "dromozoa.commons.pairs"
 local visit = require "dromozoa.graph.visit"
-
-local function write_attributes(out, attributes)
-  if attributes == nil then
-    out:write("{}")
-  else
-    json.write(out, attributes)
-  end
-end
 
 local function write(out, g, visitor)
   local map = {}
-
   out:write("{\"nodes\":[")
-
-  local first = true
-  local n = 0
-  for u in g:each_vertex() do
-    if first then
-      first = false
-    else
-      out:write(",")
+  do
+    local first = true
+    local n = 0
+    for u in g:each_vertex() do
+      if first then
+        first = false
+      else
+        out:write(",")
+      end
+      local attrbutes = visit(visitor, "node_attributes", g, u)
+      if attrbutes == nil then
+        io.write("{}")
+      else
+        json.write(out, attrbutes)
+      end
+      map[u.id] = n
+      n = n + 1
     end
-    local attrbutes = visit(visitor, "node_attributes", g, u)
-    if attrbutes == nil then
-      io.write("{}")
-    else
-      json.write(out, attrbutes)
-    end
-    map[u.id] = n
-    n = n + 1
   end
   out:write("],\"links\":[")
-
-  local first = true
-  for e in g:each_edge() do
-    if first then
-      first = false
-    else
-      out:write(",")
+  do
+    local first = true
+    for e in g:each_edge() do
+      if first then
+        first = false
+      else
+        out:write(",")
+      end
+      out:write("{\"source\":", map[e.uid], ",\"target\":", map[e.vid])
+      local attrbutes = visit(visitor, "link_attributes", g, e)
+      if attrbutes ~= nil then
+        for k, v in pairs(attrbutes) do
+          assert(k ~= "source" and k ~= "target")
+          out:write(",", json.quote(k), ":")
+          json.write(out, v)
+        end
+      end
+      out:write("}")
     end
-    local attrbutes = visit(visitor, "link_attributes", g, e)
-    if attrbutes == nil then
-      attrbutes = {}
-    end
-    attrbutes.source = map[e.uid]
-    attrbutes.target = map[e.vid]
-    json.write(out, attrbutes)
   end
-
   out:write("]}")
   return out
 end

@@ -58,5 +58,10 @@ g:write_d3_json(io.stdout, {
       text = tostring(u.id);
     }
   end;
+  link_attributes = function (context, g, e)
+    return {
+      text = tostring(e.id);
+    }
+  end;
 })
 io.write(");</script>\n")
