@@ -22,7 +22,7 @@ local private_id = function () end
 
 local function unpack_item(self)
   local g = self[private_graph]
-  return self[private_id], g.model, g.ep, g
+  return self[private_id], g.model, g.eprops, g
 end
 
 local function collapse(self, u, v, start)

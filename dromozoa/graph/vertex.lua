@@ -23,7 +23,7 @@ local private_id = function () end
 
 local function unpack_item(self)
   local g = self[private_graph]
-  return self[private_id], g.model, g.vp, g
+  return self[private_id], g.model, g.vprops, g
 end
 
 local class = {}

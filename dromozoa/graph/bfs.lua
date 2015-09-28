@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local empty = require "dromozoa.commons.empty"
 local queue = require "dromozoa.commons.queue"
 local visit = require "dromozoa.graph.visit"
 
@@ -26,7 +27,7 @@ return function (g, visitor, s, start)
   end
   local q = queue():push(s)
   visit(visitor, "discover_vertex", g, s)
-  while not q:empty() do
+  while not empty(q) do
     local u = q:pop()
     visit(visitor, "examine_vertex", g, u)
     for v, e in u:each_adjacent_vertex(start) do
