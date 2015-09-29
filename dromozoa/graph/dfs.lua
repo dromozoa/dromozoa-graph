@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local visit = require "dromozoa.graph.visit"
+local visit = require "dromozoa.commons.visit"
 
 local function dfs(g, visitor, u, start, color)
   local uid = u.id

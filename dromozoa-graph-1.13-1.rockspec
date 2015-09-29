@@ -24,6 +24,5 @@ build = {
     ["dromozoa.graph.graphviz"] = "dromozoa/graph/graphviz.lua";
     ["dromozoa.graph.model"] = "dromozoa/graph/model.lua";
     ["dromozoa.graph.vertex"] = "dromozoa/graph/vertex.lua";
-    ["dromozoa.graph.visit"] = "dromozoa/graph/visit.lua";
   };
 }

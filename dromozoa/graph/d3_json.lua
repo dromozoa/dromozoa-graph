@@ -17,7 +17,7 @@
 
 local json = require "dromozoa.commons.json"
 local pairs = require "dromozoa.commons.pairs"
-local visit = require "dromozoa.graph.visit"
+local visit = require "dromozoa.commons.visit"
 
 local function write(out, g, visitor)
   local map = {}

@@ -85,7 +85,7 @@ end
 function metatable:__newindex(key, value)
   local eid, model, props, g = unpack_item(self)
   if key == "id" then
-    error("cannot modify constant")
+    error "cannot modify constant"
   elseif key == "uid" then
     model:reset_edge_uid(eid, value)
   elseif key == "vid" then

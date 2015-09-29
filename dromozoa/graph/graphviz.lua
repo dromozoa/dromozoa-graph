@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local pairs = require "dromozoa.commons.pairs"
-local visit = require "dromozoa.graph.visit"
+local visit = require "dromozoa.commons.visit"
 
 local function write_attributes(out, attributes, prolog, epilog)
   if attributes ~= nil then
