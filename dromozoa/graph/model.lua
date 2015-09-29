@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local empty = require "dromozoa.commons.empty"
+local pairs = require "dromozoa.commons.pairs"
 
 local function create_edge(eid, uid, ue, eu, nu, pu)
   eu[eid] = uid
@@ -122,7 +123,7 @@ function class:empty()
 end
 
 function class:each_vertex()
-  return next, self.ue, nil
+  return pairs(self.ue)
 end
 
 function class:create_edge(uid, vid)
@@ -155,7 +156,7 @@ function class:get_edge_vid(eid)
 end
 
 function class:each_edge()
-  return next, self.eu, nil
+  return pairs(self.eu)
 end
 
 function class:each_adjacent_vertex(uid, start)
