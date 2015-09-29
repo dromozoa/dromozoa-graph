@@ -25,11 +25,11 @@ local graphviz = require "dromozoa.graph.graphviz"
 local model = require "dromozoa.graph.model"
 local vertex = require "dromozoa.graph.vertex"
 
-local function id(value)
-  if type(value) == "table" then
-    return value.id
+local function id(this)
+  if type(this) == "table" then
+    return this.id
   else
-    return value
+    return this
   end
 end
 
