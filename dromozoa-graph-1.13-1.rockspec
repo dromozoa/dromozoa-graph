@@ -19,7 +19,6 @@ build = {
     ["dromozoa.graph"] = "dromozoa/graph.lua";
     ["dromozoa.graph.bfs"] = "dromozoa/graph/bfs.lua";
     ["dromozoa.graph.dfs"] = "dromozoa/graph/dfs.lua";
-    ["dromozoa.graph.d3_json"] = "dromozoa/graph/d3_json.lua";
     ["dromozoa.graph.edge"] = "dromozoa/graph/edge.lua";
     ["dromozoa.graph.graphviz"] = "dromozoa/graph/graphviz.lua";
     ["dromozoa.graph.model"] = "dromozoa/graph/model.lua";
