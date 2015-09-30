@@ -15,6 +15,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local empty = require "dromozoa.commons.empty"
+local pairs = require "dromozoa.commons.pairs"
+
 local function create_edge(eid, uid, ue, eu, nu, pu)
   eu[eid] = uid
   local next_eid = ue[uid]
@@ -36,7 +39,6 @@ local function remove_edge(eid, ue, eu, nu, pu)
   eu[eid] = nil
   local next_eid = nu[eid]
   if next_eid == eid then
-    assert(ue[uid] == eid)
     ue[uid] = 0
   else
     if ue[uid] == eid then
@@ -63,8 +65,9 @@ local function each_adjacent_vertex(uid, ue, ev, nu)
     return coroutine.wrap(function ()
       local eid = start_eid
       repeat
+        local next_eid = nu[eid]
         coroutine.yield(ev[eid], eid)
-        eid = nu[eid]
+        eid = next_eid
       until eid == start_eid
     end)
   end
@@ -116,11 +119,11 @@ function class:remove_vertex(uid)
 end
 
 function class:empty()
-  return next(self.ue) == nil
+  return empty(self.ue)
 end
 
 function class:each_vertex()
-  return next, self.ue, nil
+  return pairs(self.ue)
 end
 
 function class:create_edge(uid, vid)
@@ -153,7 +156,7 @@ function class:get_edge_vid(eid)
 end
 
 function class:each_edge()
-  return next, self.eu, nil
+  return pairs(self.eu)
 end
 
 function class:each_adjacent_vertex(uid, start)
@@ -170,6 +173,10 @@ function class:count_degree(uid, start)
   else
     return count_degree(uid, self.ue, self.nu)
   end
+end
+
+function class:isolated(uid)
+  return self.ue[uid] == 0 and self.ve[uid] == 0
 end
 
 local metatable = {

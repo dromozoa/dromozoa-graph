@@ -66,5 +66,3 @@ for e in g:each_edge() do
   io.write("  ", e.uid, " -> ", e.vid, ";\n")
 end
 io.write "}\n"
-
-
