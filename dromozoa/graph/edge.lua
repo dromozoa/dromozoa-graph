@@ -15,8 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local sequence = require "dromozoa.commons.sequence"
-
 local private_graph = function () end
 local private_id = function () end
 
@@ -26,11 +24,7 @@ local function unpack_item(self)
 end
 
 local function collapse(self, u, v, start)
-  local edges = sequence()
   for _, e in v:each_adjacent_vertex(start) do
-    edges:push(e)
-  end
-  for e in edges:each() do
     e[start] = u
   end
   self:remove()
@@ -91,7 +85,7 @@ end
 function metatable:__newindex(key, value)
   local eid, model, props, g = unpack_item(self)
   if key == "id" then
-    error("cannot modify constant")
+    error "cannot modify constant"
   elseif key == "uid" then
     model:reset_edge_uid(eid, value)
   elseif key == "vid" then

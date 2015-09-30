@@ -17,7 +17,7 @@
 
 local empty = require "dromozoa.commons.empty"
 local queue = require "dromozoa.commons.queue"
-local visit = require "dromozoa.graph.visit"
+local visit = require "dromozoa.commons.visit"
 
 return function (g, visitor, s, start)
   local color = {}
