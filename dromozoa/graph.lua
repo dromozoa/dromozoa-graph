@@ -18,7 +18,6 @@
 local clone = require "dromozoa.commons.clone"
 local property_map = require "dromozoa.commons.property_map"
 local sequence = require "dromozoa.commons.sequence"
-local d3_json = require "dromozoa.graph.d3_json"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
 local graphviz = require "dromozoa.graph.graphviz"
@@ -100,10 +99,6 @@ end
 
 function class:dfs(visitor, start)
   dfs(self, visitor, nil, start)
-end
-
-function class:write_d3_json(out, visitor)
-  return d3_json.write(out, self, visitor)
 end
 
 function class:write_graphviz(out, visitor)
