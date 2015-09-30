@@ -45,15 +45,15 @@ return function (g, visitor, s, start)
     visit(visitor, "initialize_vertex", g, u)
     color[u.id] = 1
   end
-  if s then
-    visit(visitor, "start_vertex", g, s)
-    dfs(g, visitor, s, start, color)
-  else
+  if s == nil then
     for u in g:each_vertex() do
       if color[u.id] == 1 then
         visit(visitor, "start_vertex", g, u)
         dfs(g, visitor, u, start, color)
       end
     end
+  else
+    visit(visitor, "start_vertex", g, s)
+    dfs(g, visitor, s, start, color)
   end
 end
