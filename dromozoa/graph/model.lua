@@ -175,6 +175,10 @@ function class:count_degree(uid, start)
   end
 end
 
+function class:isolated(uid)
+  return self.ue[uid] == 0 and self.ve[uid] == 0
+end
+
 local metatable = {
   __index = class;
 }

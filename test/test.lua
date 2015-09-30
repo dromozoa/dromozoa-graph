@@ -126,3 +126,13 @@ for e in g:each_edge() do
   assert(e.id == c.id)
   assert(e.color == c.color)
 end
+
+local g = graph()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+g:create_edge(v1, v2)
+assert(not v1:isolated())
+assert(not v2:isolated())
+assert(v3:isolated())
+

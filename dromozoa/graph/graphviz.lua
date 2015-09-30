@@ -44,7 +44,7 @@ local function write(out, g, visitor)
   out:write("digraph g {\n")
   if visitor == nil then
     for u in g:each_vertex() do
-      if u:count_degree("u") == 0 and u:count_degree("v") == 0 then
+      if u:isolated() then
         out:write(u.id, ";\n")
       end
     end
@@ -56,7 +56,7 @@ local function write(out, g, visitor)
     write_attributes(out, visit(visitor, "default_node_attributes", g), "node", ";\n")
     for u in g:each_vertex() do
       local attributes = visit(visitor, "node_attributes", g, u)
-      if attributes ~= nil or u:count_degree("u") == 0 and u:count_degree("v") == 0 then
+      if attributes ~= nil or u:isolated() then
         out:write(u.id)
         write_attributes(out, attributes)
         out:write(";\n")

@@ -60,6 +60,11 @@ function class:count_degree(start)
   return model:count_degree(uid, start)
 end
 
+function class:isolated()
+  local uid, model, props, g = unpack_item(self)
+  return model:isolated(uid)
+end
+
 function class:bfs(visitor, start)
   local uid, model, props, g = unpack_item(self)
   bfs(g, visitor, self, start)
