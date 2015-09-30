@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local sequence_writer = require "dromozoa.commons.sequence_writer"
 local xml = require "dromozoa.commons.xml"
 local graph = require "dromozoa.graph"
 
@@ -26,6 +27,7 @@ local v3 = g:create_vertex()
 local v4 = g:create_vertex()
 local v5 = g:create_vertex()
 local v6 = g:create_vertex()
+local v7 = g:create_vertex()
 
 g:create_edge(v1, v2)
 g:create_edge(v3, v5)
@@ -48,10 +50,14 @@ function attributes:default_node_attributes(g)
 end
 
 function attributes:node_attributes(g, u)
-  return {
-    color = "blue";
-    label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
-  }
+  if u.id % 2 == 1 then
+    return nil
+  else
+    return {
+      color = "blue";
+      label = "<node <font color=\"red\">" .. xml.escape(u.id) .. "</font>>";
+    }
+  end
 end
 
 function attributes:default_edge_attributes(g)
@@ -67,5 +73,12 @@ function attributes:edge_attributes(g, e)
   }
 end
 
-g:write_graphviz(io.stdout)
-g:write_graphviz(assert(io.open("test.dot", "w")), attributes):close()
+local data = g:write_graphviz(sequence_writer()):concat()
+assert(not data:find(v1.id .. ";"))
+assert(data:find(v7.id .. ";"))
+local data = g:write_graphviz(sequence_writer(), attributes):concat()
+assert(not data:find(v1.id .. ";"))
+assert(data:find(v7.id .. ";"))
+local out = assert(io.open("test.dot", "w"))
+out:write(data)
+out:close()
