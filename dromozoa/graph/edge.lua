@@ -40,6 +40,11 @@ function class.new(graph, id)
   }
 end
 
+function class:graph()
+  local eid, model, props, graph = unpack_item(self)
+  return graph
+end
+
 function class:remove()
   local eid, model, props, graph = unpack_item(self)
   model:remove_edge(eid)

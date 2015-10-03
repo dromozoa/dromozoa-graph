@@ -136,3 +136,4 @@ assert(not v1:isolated())
 assert(not v2:isolated())
 assert(v3:isolated())
 
+v1:graph():create_edge(v2, v3):graph():create_edge(v3, v1)
