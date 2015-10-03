@@ -33,13 +33,13 @@ g:create_edge(v1, v4)
 g:create_edge(v5, v4)
 
 v1:bfs({
-  tree_edge = function (ctx, g, e, u, v)
+  tree_edge = function (ctx, e, u, v)
     print("tree_edge", u.id, v.id)
   end;
-  gray_target = function (ctx, g, e, u, v)
+  gray_target = function (ctx, e, u, v)
     print("gray_target", u.id, v.id)
   end;
-  black_target = function (ctx, g, e, u, v)
+  black_target = function (ctx, e, u, v)
     print("black_target", u.id, v.id)
   end;
 })
@@ -59,7 +59,7 @@ g:create_edge(v3, v5)
 
 local result = {}
 v1:bfs({
-  discover_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, u)
     result[#result + 1] = u.id
   end;
 })
@@ -71,10 +71,10 @@ assert(result[5] == 5)
 
 local result = {}
 v1:bfs({
-  examine_edge = function (ctx, g, e, u, v)
+  examine_edge = function (ctx, e, u, v)
     return e.id ~= 1
   end;
-  discover_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, u)
     result[#result + 1] = u.id
   end;
 })
