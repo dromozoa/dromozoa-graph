@@ -19,37 +19,37 @@ local empty = require "dromozoa.commons.empty"
 local queue = require "dromozoa.commons.queue"
 local visit = require "dromozoa.commons.visit"
 
-return function (g, visitor, s, start)
+return function (graph, visitor, s, start)
   local color = {}
-  for u in g:each_vertex() do
-    visit(visitor, "initialize_vertex", g, u)
+  for u in graph:each_vertex() do
+    visit(visitor, "initialize_vertex", graph, u)
     color[u.id] = 1
   end
   local q = queue():push(s)
-  visit(visitor, "discover_vertex", g, s)
+  visit(visitor, "discover_vertex", graph, s)
   while not empty(q) do
     local u = q:pop()
-    visit(visitor, "examine_vertex", g, u)
+    visit(visitor, "examine_vertex", graph, u)
     for v, e in u:each_adjacent_vertex(start) do
-      if visit(visitor, "examine_edge", g, e, u, v) ~= false then
+      if visit(visitor, "examine_edge", graph, e, u, v) ~= false then
         local vid = v.id
         local c = color[vid]
         if c == 1 then
-          visit(visitor, "tree_edge", g, e, u, v)
+          visit(visitor, "tree_edge", graph, e, u, v)
           color[vid] = 2
           q:push(v)
-          visit(visitor, "discover_vertex", g, v)
+          visit(visitor, "discover_vertex", graph, v)
         else
-          visit(visitor, "non_tree_edge", g, e, u, v)
+          visit(visitor, "non_tree_edge", graph, e, u, v)
           if c == 2 then
-            visit(visitor, "gray_target", g, e, u, v)
+            visit(visitor, "gray_target", graph, e, u, v)
           else
-            visit(visitor, "black_target", g, e, u, v)
+            visit(visitor, "black_target", graph, e, u, v)
           end
         end
       end
     end
     color[u.id] = 3
-    visit(visitor, "finish_vertex", g, u)
+    visit(visitor, "finish_vertex", graph, u)
   end
 end
