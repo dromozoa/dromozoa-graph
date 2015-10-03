@@ -19,41 +19,41 @@ local visit = require "dromozoa.commons.visit"
 
 local function dfs(graph, visitor, u, start, color)
   local uid = u.id
-  visit(visitor, "discover_vertex", graph, u)
+  visit(visitor, "discover_vertex", u)
   color[uid] = 2
   for v, e in u:each_adjacent_vertex(start) do
-    if visit(visitor, "examine_edge", graph, e, u, v) ~= false then
+    if visit(visitor, "examine_edge", e, u, v) ~= false then
       local c = color[v.id]
       if c == 1 then
-        visit(visitor, "tree_edge", graph, e, u, v)
+        visit(visitor, "tree_edge", e, u, v)
         dfs(graph, visitor, v, start, color)
       elseif c == 2 then
-        visit(visitor, "back_edge", graph, e, u, v)
+        visit(visitor, "back_edge", e, u, v)
       else
-        visit(visitor, "forward_or_cross_edge", graph, e, u, v)
+        visit(visitor, "forward_or_cross_edge", e, u, v)
       end
-      visit(visitor, "finish_edge", graph, e, u, v)
+      visit(visitor, "finish_edge", e, u, v)
     end
   end
-  visit(visitor, "finish_vertex", graph, u)
+  visit(visitor, "finish_vertex", u)
   color[uid] = 3
 end
 
 return function (graph, visitor, s, start)
   local color = {}
   for u in graph:each_vertex() do
-    visit(visitor, "initialize_vertex", graph, u)
+    visit(visitor, "initialize_vertex", u)
     color[u.id] = 1
   end
   if s == nil then
     for u in graph:each_vertex() do
       if color[u.id] == 1 then
-        visit(visitor, "start_vertex", graph, u)
+        visit(visitor, "start_vertex", u)
         dfs(graph, visitor, u, start, color)
       end
     end
   else
-    visit(visitor, "start_vertex", graph, s)
+    visit(visitor, "start_vertex", s)
     dfs(graph, visitor, s, start, color)
   end
 end

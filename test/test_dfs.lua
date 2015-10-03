@@ -33,13 +33,13 @@ g:create_edge(v1, v4)
 g:create_edge(v5, v4)
 
 g:dfs({
-  tree_edge = function (ctx, g, e, u, v)
+  tree_edge = function (ctx, e, u, v)
     print("tree_edge", u.id, v.id)
   end;
-  back_edge = function (ctx, g, e, u, v)
+  back_edge = function (ctx, e, u, v)
     print("back_edge", u.id, v.id)
   end;
-  forward_or_cross_edge = function (ctx, g, e, u, v)
+  forward_or_cross_edge = function (ctx, e, u, v)
     print("forward_or_cross_edge", u.id, v.id)
   end;
 })
@@ -63,7 +63,7 @@ g:create_edge(v3, v5)
 
 local result = {}
 v1:dfs({
-  discover_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, u)
     result[#result + 1] = u.id
   end;
 })
@@ -75,10 +75,10 @@ assert(result[5] == 5)
 
 local result = {}
 v1:dfs({
-  examine_edge = function (ctx, g, e, u, v)
+  examine_edge = function (ctx, e, u, v)
     return e.id ~= 1
   end;
-  discover_vertex = function (ctx, g, u)
+  discover_vertex = function (ctx, u)
     result[#result + 1] = u.id
   end;
 })
