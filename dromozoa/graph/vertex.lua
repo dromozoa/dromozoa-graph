@@ -22,63 +22,68 @@ local private_graph = function () end
 local private_id = function () end
 
 local function unpack_item(self)
-  local g = self[private_graph]
-  return self[private_id], g.model, g.vprops, g
+  local graph = self[private_graph]
+  return self[private_id], graph.model, graph.vprops, graph
 end
 
 local class = {}
 
-function class.new(g, id)
+function class.new(graph, id)
   return {
-    [private_graph] = g;
+    [private_graph] = graph;
     [private_id] = id;
   }
 end
 
+function class:graph()
+  local uid, model, props, graph = unpack_item(self)
+  return graph
+end
+
 function class:remove()
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   model:remove_vertex(uid)
   props:remove_item(uid)
 end
 
 function class:each_property()
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   return props:each_property(uid)
 end
 
 function class:each_adjacent_vertex(start)
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   return coroutine.wrap(function ()
     for vid, eid in model:each_adjacent_vertex(uid, start) do
-      coroutine.yield(g:get_vertex(vid), g:get_edge(eid))
+      coroutine.yield(graph:get_vertex(vid), graph:get_edge(eid))
     end
   end)
 end
 
 function class:count_degree(start)
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   return model:count_degree(uid, start)
 end
 
 function class:isolated()
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   return model:isolated(uid)
 end
 
 function class:bfs(visitor, start)
-  local uid, model, props, g = unpack_item(self)
-  bfs(g, visitor, self, start)
+  local uid, model, props, graph = unpack_item(self)
+  bfs(graph, visitor, self, start)
 end
 
 function class:dfs(visitor, start)
-  local uid, model, props, g = unpack_item(self)
-  dfs(g, visitor, self, start)
+  local uid, model, props, graph = unpack_item(self)
+  dfs(graph, visitor, self, start)
 end
 
 local metatable = {}
 
 function metatable:__index(key)
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   if key == "id" then
     return uid
   else
@@ -91,7 +96,7 @@ function metatable:__index(key)
 end
 
 function metatable:__newindex(key, value)
-  local uid, model, props, g = unpack_item(self)
+  local uid, model, props, graph = unpack_item(self)
   if key == "id" then
     error "cannot modify constant"
   end
@@ -99,7 +104,7 @@ function metatable:__newindex(key, value)
 end
 
 return setmetatable(class, {
-  __call = function (_, g, id)
-    return setmetatable(class.new(g, id), metatable)
+  __call = function (_, graph, id)
+    return setmetatable(class.new(graph, id), metatable)
   end;
 })
