@@ -52,20 +52,20 @@ local function write(out, graph, visitor)
       out:write(e.uid, " -> ", e.vid, ";\n")
     end
   else
-    write_attributes(out, visit(visitor, "graph_attributes", graph), "graph", ";\n")
-    write_attributes(out, visit(visitor, "default_node_attributes", graph), "node", ";\n")
+    write_attributes(out, visit(visitor, "graph_attributes"), "graph", ";\n")
+    write_attributes(out, visit(visitor, "default_node_attributes"), "node", ";\n")
     for u in graph:each_vertex() do
-      local attributes = visit(visitor, "node_attributes", graph, u)
+      local attributes = visit(visitor, "node_attributes", u)
       if attributes ~= nil or u:isolated() then
         out:write(u.id)
         write_attributes(out, attributes)
         out:write(";\n")
       end
     end
-    write_attributes(out, visit(visitor, "default_edge_attributes", graph), "edge", ";\n")
+    write_attributes(out, visit(visitor, "default_edge_attributes"), "edge", ";\n")
     for e in graph:each_edge() do
       out:write(e.uid, " -> ", e.vid)
-      write_attributes(out, visit(visitor, "edge_attributes", graph, e))
+      write_attributes(out, visit(visitor, "edge_attributes", e))
       out:write(";\n")
     end
   end

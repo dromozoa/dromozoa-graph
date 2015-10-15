@@ -38,18 +38,18 @@ g:create_edge(v5, v4)
 
 local attributes = {}
 
-function attributes:graph_attributes(g)
+function attributes:graph_attributes()
   return { rankdir = "LR" }
 end
 
-function attributes:default_node_attributes(g)
+function attributes:default_node_attributes()
   return {
     style = "filled";
     fillcolor = "gray";
   }
 end
 
-function attributes:node_attributes(g, u)
+function attributes:node_attributes(u)
   if u.id % 2 == 1 then
     return nil
   else
@@ -60,14 +60,14 @@ function attributes:node_attributes(g, u)
   end
 end
 
-function attributes:default_edge_attributes(g)
+function attributes:default_edge_attributes()
   return {
     color = "blue";
     fontcolor = "red";
   }
 end
 
-function attributes:edge_attributes(g, e)
+function attributes:edge_attributes(e)
   return {
     label = "<edge<br/>" .. xml.escape(e.id) .. ">";
   }
