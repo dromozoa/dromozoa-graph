@@ -65,9 +65,9 @@ function class:count_degree(start)
   return model:count_degree(uid, start)
 end
 
-function class:isolated()
+function class:is_isolated()
   local uid, model, props, graph = unpack_item(self)
-  return model:isolated(uid)
+  return model:is_isolated(uid)
 end
 
 function class:bfs(visitor, start)
