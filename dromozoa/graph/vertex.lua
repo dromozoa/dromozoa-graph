@@ -80,6 +80,27 @@ function class:dfs(visitor, start)
   dfs(graph, visitor, self, start)
 end
 
+function class:duplicate()
+  local uid, model, props, graph = unpack_item(self)
+  local map = {}
+  dfs(graph, {
+    discover_vertex = function (self, a)
+      local b = graph:create_vertex()
+      map[a.id] = b.id
+      for k, v in a:each_property() do
+        b[clone(k)] = clone(v)
+      end
+    end;
+    finish_edge = function (self, a)
+      local b = graph:create_edge(map[a.uid], map[a.vid])
+      for k, v in a:each_property() do
+        b[clone(k)] = clone(v)
+      end
+    end;
+  }, self)
+  return graph:get_vertex(map[uid])
+end
+
 local metatable = {}
 
 function metatable:__index(key)
