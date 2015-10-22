@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local pairs = require "dromozoa.commons.pairs"
 local graph = require "dromozoa.graph"
 
 local g = graph()
@@ -34,7 +35,12 @@ g:create_edge(v4, v2)
 g:create_edge(v1, v5)
 g:create_edge(v3, v5)
 
-local v6 = v2:duplicate()
+local v6, map = v2:duplicate()
+assert(map[v2.id] == v6.id)
+local d = v6.id - v2.id
+for k, v in pairs(map) do
+  assert(v - k == d)
+end
 g:create_edge(v1, v6)
 
 g:write_graphviz(assert(io.open("test.dot", "w"))):close()
