@@ -98,7 +98,7 @@ function class:duplicate()
       end
     end;
   }, self)
-  return graph:get_vertex(map[uid])
+  return graph:get_vertex(map[uid]), map
 end
 
 local metatable = {}
