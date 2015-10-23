@@ -26,6 +26,8 @@ local v3 = g:create_vertex()
 local v4 = g:create_vertex()
 local v5 = g:create_vertex()
 
+v5.foo = 42
+
 g:create_edge(v1, v2)
 g:create_edge(v2, v2)
 g:create_edge(v2, v3)
