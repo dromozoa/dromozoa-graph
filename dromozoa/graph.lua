@@ -120,6 +120,7 @@ function class:merge(that)
       b[clone(k)] = clone(v)
     end
   end
+  return map
 end
 
 function class:tsort(start)
