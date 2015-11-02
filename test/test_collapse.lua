@@ -66,3 +66,35 @@ for e in g:each_edge() do
   io.write("  ", e.uid, " -> ", e.vid, ";\n")
 end
 io.write "}\n"
+
+local g = graph()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+local v4 = g:create_vertex()
+
+local e1 = g:create_edge(v1, v4)
+local e2 = g:create_edge(v2, v4)
+local e3 = g:create_edge(v4, v3)
+e2:collapse()
+
+assert(e1.uid == v1.id)
+assert(e1.vid == v2.id)
+assert(e3.uid == v2.id)
+assert(e3.vid == v3.id)
+
+local g = graph()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+local v4 = g:create_vertex()
+
+local e1 = g:create_edge(v1, v2)
+local e2 = g:create_edge(v2, v4)
+local e3 = g:create_edge(v2, v3)
+e2:collapse("v")
+
+assert(e1.uid == v1.id)
+assert(e1.vid == v4.id)
+assert(e3.uid == v4.id)
+assert(e3.vid == v3.id)

@@ -23,9 +23,12 @@ local function unpack_item(self)
   return self[private_id], graph.model, graph.eprops, graph
 end
 
-local function collapse(self, u, v, start)
-  for _, e in v:each_adjacent_vertex(start) do
-    e[start] = u
+local function collapse(self, u, v)
+  for _, e in v:each_adjacent_vertex("u") do
+    e.u = u
+  end
+  for _, e in v:each_adjacent_vertex("v") do
+    e.v = u
   end
   self:remove()
   v:remove()
@@ -58,9 +61,9 @@ end
 
 function class:collapse(start)
   if start == "v" then
-    collapse(self, self.v, self.u, "v")
+    collapse(self, self.v, self.u)
   else
-    collapse(self, self.u, self.v, "u")
+    collapse(self, self.u, self.v)
   end
 end
 
