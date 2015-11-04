@@ -78,6 +78,7 @@ for u in g:each_vertex("start") do
   count = count + 1
 end
 assert(count == 1)
+assert(g:count_vertex("start") == 1)
 
 e1.color = 1
 e3.color = 3
@@ -87,6 +88,7 @@ for e in g:each_edge("color") do
   count = count + 1
 end
 assert(count == 2)
+assert(g:count_edge("color") == 2)
 
 assert(v1.start == true)
 g:clear_vertex_properties("start")
