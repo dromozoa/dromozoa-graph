@@ -126,6 +126,14 @@ function class:each_vertex()
   return pairs(self.ue)
 end
 
+function class:count_vertex()
+  local count = 0
+  for _ in pairs(self.ue) do
+    count = count + 1
+  end
+  return count
+end
+
 function class:create_edge(uid, vid)
   local eid = self.en + 1
   self.en = eid
@@ -157,6 +165,14 @@ end
 
 function class:each_edge()
   return pairs(self.eu)
+end
+
+function class:count_edge()
+  local count = 0
+  for _ in pairs(self.eu) do
+    count = count + 1
+  end
+  return count
 end
 
 function class:each_adjacent_vertex(uid, start)
