@@ -40,6 +40,9 @@ local e3 = g:create_edge(v2.id, v4.id)
 --   print(v, e)
 -- end
 
+assert(g:count_vertex() == 5)
+assert(g:count_edge() == 3)
+
 json.write(io.stdout, g):write("\n")
 -- g:remove_edge(e3)
 -- json.write(io.stdout, g):write("\n")

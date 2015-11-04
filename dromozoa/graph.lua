@@ -71,6 +71,14 @@ function class:each_vertex(key)
   end
 end
 
+function class:count_vertex(key)
+  if key == nil then
+    return self.model:count_vertex()
+  else
+    return self.vprops:count_item(key)
+  end
+end
+
 function class:clear_vertex_properties(key)
   self.vprops:clear(key)
 end
@@ -90,6 +98,14 @@ function class:each_edge(key)
     return each(self, class.get_edge, self.model:each_edge())
   else
     return each(self, class.get_edge, self.eprops:each_item(key))
+  end
+end
+
+function class:count_edge(key)
+  if key == nil then
+    return self.model:count_edge()
+  else
+    return self.eprops:count_item(key)
   end
 end
 
