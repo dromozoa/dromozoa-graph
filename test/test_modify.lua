@@ -35,3 +35,24 @@ g:create_edge(v1, v2)
 for v, e in v1:each_adjacent_vertex() do
   e:remove()
 end
+
+local g = graph()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex()
+local v3 = g:create_vertex()
+local v4 = g:create_vertex()
+local v5 = g:create_vertex()
+local v6 = g:create_vertex()
+local v7 = g:create_vertex()
+
+g:create_edge(v1, v2)
+g:create_edge(v1, v3)
+g:create_edge(v2, v4)
+g:create_edge(v2, v5)
+g:create_edge(v3, v6)
+g:create_edge(v3, v7)
+
+for u, e in v1:each_adjacent_vertex() do
+  e:collapse()
+end
+g:write_graphviz(assert(io.open("test.dot", "w"))):close()
