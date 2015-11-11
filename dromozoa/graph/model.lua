@@ -57,29 +57,32 @@ local function reset_edge(eid, uid, ue, eu, nu, pu)
   create_edge(eid, uid, ue, eu, nu, pu)
 end
 
-local function each_adjacent_vertex(uid, ue, ev, nu)
-  local start_eid = ue[uid]
-  if start_eid == 0 then
+local function each_adjacent_vertex(uid, ue, ev, nu, pu)
+  local eid = ue[uid]
+  if eid == 0 then
     return function () end
   else
+    local last_eid = pu[eid]
     return coroutine.wrap(function ()
-      local eid = start_eid
-      repeat
+      while true do
         local next_eid = nu[eid]
         coroutine.yield(ev[eid], eid)
+        if eid == last_eid then
+          break
+        end
         eid = next_eid
-      until eid == start_eid
+      end
     end)
   end
 end
 
 local function count_degree(uid, ue, nu)
-  local start_eid = ue[uid]
-  if start_eid == 0 then
+  local eid = ue[uid]
+  if eid == 0 then
     return 0
   else
     local count = 0
-    local eid = start_eid
+    local start_eid = eid
     repeat
       count = count + 1
       eid = nu[eid]
@@ -177,9 +180,9 @@ end
 
 function class:each_adjacent_vertex(uid, start)
   if start == "v" then
-    return each_adjacent_vertex(uid, self.ve, self.eu, self.nv)
+    return each_adjacent_vertex(uid, self.ve, self.eu, self.nv, self.pv)
   else
-    return each_adjacent_vertex(uid, self.ue, self.ev, self.nu)
+    return each_adjacent_vertex(uid, self.ue, self.ev, self.nu, self.pu)
   end
 end
 
