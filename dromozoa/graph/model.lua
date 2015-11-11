@@ -77,12 +77,12 @@ local function each_adjacent_vertex(uid, ue, ev, nu, pu)
 end
 
 local function count_degree(uid, ue, nu)
-  local start_eid = ue[uid]
-  if start_eid == 0 then
+  local eid = ue[uid]
+  if eid == 0 then
     return 0
   else
     local count = 0
-    local eid = start_eid
+    local start_eid = eid
     repeat
       count = count + 1
       eid = nu[eid]
