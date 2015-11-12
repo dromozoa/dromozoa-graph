@@ -142,10 +142,10 @@ end
 function class:tsort(start)
   local vertices = sequence()
   self:dfs({
-    back_edge = function (context, g, e, u, v)
+    back_edge = function (_, g, e, u, v)
       error("found back edge " .. e.id)
     end;
-    finish_vertex = function (context, g, u)
+    finish_vertex = function (_, g, u)
       vertices:push(u)
     end;
   }, start)
