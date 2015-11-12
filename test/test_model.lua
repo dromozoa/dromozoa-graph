@@ -71,13 +71,13 @@ end
 print("--")
 
 v1:dfs({
-  tree_edge = function (self, e, u, v)
+  tree_edge = function (_, e, u, v)
     print("tree_edge", u.id, v.id)
   end;
-  back_edge = function (self, e, u, v)
+  back_edge = function (_, e, u, v)
     print("back_edge", u.id, v.id)
   end;
-  forward_or_cross_edge = function (self, e, u, v)
+  forward_or_cross_edge = function (_, e, u, v)
     print("forward_or_cross_edge", u.id, v.id)
   end;
 })
