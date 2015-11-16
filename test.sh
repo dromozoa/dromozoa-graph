@@ -17,7 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+case x$1 in
+  x) lua=lua;;
+  *) lua=$1;;
+esac
+
 for i in test/test*.lua
 do
-  lua "$i"
+  "$lua" "$i"
 done
