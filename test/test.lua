@@ -139,3 +139,11 @@ assert(not v2:is_isolated())
 assert(v3:is_isolated())
 
 v1:graph():create_edge(v2, v3):graph():create_edge(v3, v1)
+
+local g = graph()
+local v1 = g:create_vertex()
+local v2 = g:create_vertex("foo", "bar", "baz")
+assert(v1[1] == nil)
+assert(v2[1] == "foo")
+assert(v2[2] == "bar")
+assert(v2[3] == "baz")
