@@ -17,6 +17,7 @@
 
 local clone = require "dromozoa.commons.clone"
 local property_map = require "dromozoa.commons.property_map"
+local push = require "dromozoa.commons.push"
 local sequence = require "dromozoa.commons.sequence"
 local dfs = require "dromozoa.graph.dfs"
 local edge = require "dromozoa.graph.edge"
@@ -55,8 +56,10 @@ function class:empty()
   return self.model:empty()
 end
 
-function class:create_vertex()
-  return vertex(self, self.model:create_vertex())
+function class:create_vertex(...)
+  local u = vertex(self, self.model:create_vertex())
+  push(u, 0, ...)
+  return u
 end
 
 function class:get_vertex(u)
@@ -142,10 +145,10 @@ end
 function class:tsort(start)
   local vertices = sequence()
   self:dfs({
-    back_edge = function (context, g, e, u, v)
+    back_edge = function (_, g, e, u, v)
       error("found back edge " .. e.id)
     end;
-    finish_vertex = function (context, g, u)
+    finish_vertex = function (_, g, u)
       vertices:push(u)
     end;
   }, start)
