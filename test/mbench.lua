@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,8 +16,8 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local gettimeofday = require "dromozoa.ubench.gettimeofday"
-local root = require "dromozoa.graph.root"
+-- local gettimeofday = require "dromozoa.ubench.gettimeofday"
+-- local root = require "dromozoa.graph.root"
 
 local vn = 0
 local en = 0
@@ -43,17 +43,17 @@ collectgarbage()
 collectgarbage()
 local memory1 = collectgarbage("count")
 
-local tv1 = gettimeofday()
+-- local tv1 = gettimeofday()
 local g = graph()
 append(g, g:create_vertex(), 7)
 vn = vn + 1
-local tv2 = gettimeofday()
+-- local tv2 = gettimeofday()
 
 collectgarbage()
 collectgarbage()
 local memory2 = collectgarbage("count")
 
 print(memory2 - memory1)
-print((tv2.tv_sec - tv1.tv_sec) + (tv2.tv_usec - tv1.tv_usec) * 0.000001)
+-- print((tv2.tv_sec - tv1.tv_sec) + (tv2.tv_usec - tv1.tv_usec) * 0.000001)
 
 print(vn, en, 28 * (vn * 2 + en * 4) / 1024)
