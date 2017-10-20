@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,24 +15,25 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs_visit = require "dromozoa.graph.dfs_visit"
+local undirected_dfs_visit = require "dromozoa.graph.undirected_dfs_visit"
 
 return function (g, visitor, uid)
   local start_vertex = visitor.start_vertex
-  local color = {}
+  local ucolor = {}
+  local ecolor = {}
   if uid then
     if start_vertex then
       start_vertex(visitor, uid)
     end
-    dfs_visit(g, visitor, uid, color)
+    undirected_dfs_visit(g, visitor, uid, ucolor, ecolor)
   end
   for uid in pairs(g.ue) do
-    if not color[uid] then
+    if not ucolor[uid] then
       if start_vertex then
         start_vertex(visitor, uid)
       end
-      dfs_visit(g, visitor, uid, color)
+      undirected_dfs_visit(g, visitor, uid, ucolor, ecolor)
     end
   end
-  return color
+  return ucolor, ecolor
 end
