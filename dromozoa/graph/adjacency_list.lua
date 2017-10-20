@@ -22,7 +22,7 @@ function class:add_vertex(uid)
   local ue = self.ue
   if ue[uid] == nil then
     ue[uid] = false
-    return true
+    return uid
   end
 end
 

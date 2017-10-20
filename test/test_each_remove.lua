@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,23 +15,28 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
+local bigraph = require "dromozoa.graph.bigraph"
+local digraph = require "dromozoa.graph.digraph"
 
-local g = graph()
+local function test(g)
+  local u1 = g:add_vertex()
+  local u2 = g:add_vertex()
+  local u3 = g:add_vertex()
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
+  local e1 = g:add_edge(u1, u2)
+  local e2 = g:add_edge(u1, u3)
 
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v1, v3)
-
-local n = 0
-for v, e in v1:each_adjacent_vertex(v1) do
-  print(v.id, e.id)
-  n = n + 1
-  e:remove()
+  local n = 0
+  for eid, vid in g:each_edge(u1) do
+    print(eid, vid)
+    n = n + 1
+    g:remove_edge(eid)
+  end
+  assert(n == 2)
 end
-assert(n == 2)
 
-g:write_graphviz(io.stdout)
+local g = bigraph()
+test(g)
+
+local g = bigraph()
+test(g)
