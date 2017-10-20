@@ -50,12 +50,12 @@ end
 
 function class:each_edge(uid)
   local uv = self.uv:each_edge(uid)
-  local vu = self.vu:each_edge(uid)
+  local vu = self.vu:each_edge(uid, true)
   return function (state, prev_eid)
     if uv then
       local eid, vid = uv(state, prev_eid)
       if eid then
-        return eid, vid
+        return eid, vid, false
       else
         uv = nil
         return vu(state)
@@ -65,9 +65,9 @@ function class:each_edge(uid)
   end
 end
 
-function class:reverse_push_edges(uid, n, eids, uids, vids, dirs)
-  n = self.vu:reverse_push_edges(uid, n, eids, uids, vids, dirs, false)
-  return self.uv:reverse_push_edges(uid, n, eids, uids, vids, dirs, true)
+function class:reverse_push_edges(uid, n, eids, uids, vids, invs)
+  n = self.vu:reverse_push_edges(uid, n, eids, uids, vids, invs, true)
+  return self.uv:reverse_push_edges(uid, n, eids, uids, vids, invs, false)
 end
 
 function class:degree(uid)

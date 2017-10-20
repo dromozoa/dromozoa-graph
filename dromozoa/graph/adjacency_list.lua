@@ -19,7 +19,12 @@ local class = {}
 local metatable = { __index = class }
 
 function class:add_vertex(uid)
-  self.ue[uid] = false
+  local ue = self.ue
+
+  if ue[uid] == nil then
+    ue[uid] = false
+    return true
+  end
 end
 
 function class:remove_vertex(uid)
@@ -69,7 +74,7 @@ function class:remove_edge(eid, uid)
   ev[eid] = nil
 end
 
-function class:each_edge(uid)
+function class:each_edge(uid, inv)
   local next_eid = self.ue[uid]
   if not next_eid then
     return function () end
@@ -81,13 +86,13 @@ function class:each_edge(uid)
       if prev_eid ~= tail_eid then
         local eid = next_eid
         next_eid = nu[eid]
-        return eid, ev[eid]
+        return eid, ev[eid], inv
       end
     end
   end
 end
 
-function class:reverse_push_edges(uid, n, eids, uids, vids, dirs, dir)
+function class:reverse_push_edges(uid, n, eids, uids, vids, invs, inv)
   local tail_eid = self.ue[uid]
   if tail_eid then
     local pu = self.pu
@@ -99,7 +104,7 @@ function class:reverse_push_edges(uid, n, eids, uids, vids, dirs, dir)
       eids[n] = eid
       uids[n] = uid
       vids[n] = ev[eid]
-      dirs[n] = dir
+      invs[n] = inv
     until eid == tail_eid
   end
   return n

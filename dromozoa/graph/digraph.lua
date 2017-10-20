@@ -50,8 +50,8 @@ function class:each_edge(uid)
   return self.uv:each_edge(uid)
 end
 
-function class:reverse_push_edges(uid, n, eids, uids, vids, dirs)
-  return self.uv:reverse_push_edges(uid, n, eids, uids, vids, dirs, true)
+function class:reverse_push_edges(uid, n, eids, uids, vids, invs)
+  return self.uv:reverse_push_edges(uid, n, eids, uids, vids, invs)
 end
 
 function class:degree(uid)
