@@ -20,7 +20,6 @@ local metatable = { __index = class }
 
 function class:add_vertex(uid)
   local ue = self.ue
-
   if ue[uid] == nil then
     ue[uid] = false
     return true
@@ -36,7 +35,6 @@ function class:add_edge(eid, uid, vid)
   local nu = self.nu
   local pu = self.pu
   local ev = self.ev
-
   local next_eid = ue[uid]
   if not next_eid then
     ue[uid] = eid
@@ -57,7 +55,6 @@ function class:remove_edge(eid, uid)
   local nu = self.nu
   local pu = self.pu
   local ev = self.ev
-
   local next_eid = nu[eid]
   if next_eid == eid then
     ue[uid] = false
