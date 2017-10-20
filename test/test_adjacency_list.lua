@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,25 +15,34 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
+local adjacency_list = require "dromozoa.graph.adjacency_list"
+local dfs = require "dromozoa.graph.dfs"
 
-local g = graph()
+local g = adjacency_list()
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
-local v4 = g:create_vertex()
-local v5 = g:create_vertex()
-local v6 = g:create_vertex()
+g:add_vertex(1)
+g:add_vertex(2)
+g:add_vertex(3)
+g:add_vertex(4)
+g:add_vertex(5)
+g:add_edge(1, 1, 2)
+g:add_edge(2, 2, 3)
+g:add_edge(3, 2, 4)
 
-g:create_edge(v1, v2)
-g:create_edge(v3, v5)
-g:create_edge(v3, v6)
-g:create_edge(v1, v4)
-g:create_edge(v2, v5)
-g:create_edge(v5, v4)
+assert(#g.ue == 5)
+assert(#g.ev == 3)
 
-local result = g:tsort("v")
-for i = 1, #result do
-  print(result[i].id)
+for eid, vid in g:each_edge(2) do
+  print(eid, vid)
 end
+
+assert(g:degree(2) == 2)
+
+dfs(g, {
+  tree_edge = function (_, eid, uid, vid)
+    print("tree_edge", uid, vid)
+  end;
+  finish_edge = function (_, eid, uid, vid)
+    print("finish_edge", uid, vid)
+  end;
+}, 1)

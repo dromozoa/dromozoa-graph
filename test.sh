@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
-# Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+# Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 #
 # This file is part of dromozoa-graph.
 #
@@ -26,4 +26,25 @@ for i in test/test*.lua
 do
   "$lua" "$i"
 done
-rm -f test*.dot
+
+(cd test && make)
+
+mkdir -p out
+
+for i in data/undirected*.txt
+do
+  name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
+  test/boost_graph undirected "$i" >"out/$name-boost.txt"
+  lua test/graph.lua undirected "$i" >"out/$name-ungraph.txt"
+  diff -u "out/$name-boost.txt" "out/$name-ungraph.txt"
+done
+
+for i in data/directed*.txt
+do
+  name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
+  test/boost_graph directed "$i" >"out/$name-boost.txt"
+  lua test/graph.lua bidirectional "$i" >"out/$name-bigraph.txt"
+  lua test/graph.lua directed "$i" >"out/$name-digraph.txt"
+  diff -u "out/$name-boost.txt" "out/$name-bigraph.txt"
+  diff -u "out/$name-boost.txt" "out/$name-digraph.txt"
+done

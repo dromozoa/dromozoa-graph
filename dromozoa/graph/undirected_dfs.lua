@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,21 +15,32 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
-local graph = require "dromozoa.graph"
+local undirected_dfs_visit = require "dromozoa.graph.undirected_dfs_visit"
 
-local g = graph()
+return function (g, that, uid, vcolor, ecolor)
+  if not vcolor then
+    vcolor = {}
+  end
+  if not ecolor then
+    ecolor = {}
+  end
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
+  local start_vertex = that.start_vertex
 
-v1.foo = 42
-v1.bar = false
-v2.foo = 69
+  if uid then
+    if start_vertex then
+      start_vertex(that, uid)
+    end
+    undirected_dfs_visit(g, that, uid, vcolor, ecolor)
+  end
+  for uid in pairs(g.ue) do
+    if not vcolor[uid] then
+      if start_vertex then
+        start_vertex(that, uid)
+      end
+      undirected_dfs_visit(g, that, uid, vcolor, ecolor)
+    end
+  end
 
-g:create_edge(v1, v2)
-g:create_edge(v2, v3)
-g:merge(clone(g))
-
-g:write_graphviz(assert(io.open("test.dot", "w"))):close()
+  return vcolor, ecolor
+end
