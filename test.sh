@@ -22,11 +22,10 @@ case x$1 in
   *) lua=$1;;
 esac
 
-# for i in test/test*.lua
-# do
-#   "$lua" "$i"
-# done
-# rm -f test*.dot
+for i in test/test*.lua
+do
+  "$lua" "$i"
+done
 
 (cd test && make)
 
