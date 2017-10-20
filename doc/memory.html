@@ -3,25 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Lua 5.3のメモリ</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
 </head>
 <body>
-<div>
+<div class="container">
 <h1>Lua 5.3のメモリ</h1>
-<h2>値のサイズ</h2>
-Cのデータモデルとアラインメントに依存するが、32ビット環境で8バイト、64ビット環境で16バイトを要すると考える。
-
-
-<p>64bit環境と32bit環境で異なる。</p>
-<table>
-  <tr><td>64bit環境</td></tr>
-</table>
-
-
+<h2>値</h2>
+<div>
+ほとんどの環境において、値のサイズ\(S_{v}\)は16バイトである。
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/umd/popper.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+<h2>空のテーブル</h2>
+<div>
+空のテーブルのサイズ\(S_{t}\)は、ILP32では32バイト、LP64/LLP64では56バイトである。
+</div>
+<h2>配列としてのテーブル</h2>
+<div>
+1以上の連続した整数だけをインデックスに使うとき、テーブルは配列のようにふるまう（あるいはC++のstd::vectorのようにふるまう）。
+倍々でメモリが確保されるので、要素数\(n\)のとき、およそ\(S_v 2^{\mathrm{ceil}(\log_2(n))}\)バイトが必要になる。
+</div>
+</div>
 <script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
 </body>
