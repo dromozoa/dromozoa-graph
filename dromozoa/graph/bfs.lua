@@ -15,19 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, visitor, uid, color)
+return function (g, that, uid, color)
   if not color then
     color = {}
   end
 
-  local discover_vertex = visitor.discover_vertex
-  local examine_vertex = visitor.examine_vertex
-  local examine_edge = visitor.examine_edge
-  local tree_edge = visitor.tree_edge
-  local non_tree_edge = visitor.non_tree_edge
-  local gray_target = visitor.gray_target
-  local black_target = visitor.black_target
-  local finish_vertex = visitor.finish_vertex
+  local discover_vertex = that.discover_vertex
+  local examine_vertex = that.examine_vertex
+  local examine_edge = that.examine_edge
+  local tree_edge = that.tree_edge
+  local non_tree_edge = that.non_tree_edge
+  local gray_target = that.gray_target
+  local black_target = that.black_target
+  local finish_vertex = that.finish_vertex
 
   local queue = { uid }
   local min = 1
@@ -35,7 +35,7 @@ return function (g, visitor, uid, color)
 
   color[uid] = 1
   if discover_vertex then
-    discover_vertex(visitor, uid)
+    discover_vertex(that, uid)
   end
 
   while min <= max do
@@ -43,16 +43,16 @@ return function (g, visitor, uid, color)
     queue[min] = nil
     min = min + 1
 
-    if not examine_vertex or examine_vertex(visitor, uid) ~= false then
+    if not examine_vertex or examine_vertex(that, uid) ~= false then
       for eid, vid in g:each_edge(uid) do
         if examine_edge then
-          examine_edge(visitor, eid, uid, vid)
+          examine_edge(that, eid, uid, vid)
         end
 
         local c = color[vid]
         if not c then
           if tree_edge then
-            tree_edge(visitor, eid, uid, vid)
+            tree_edge(that, eid, uid, vid)
           end
 
           max = max + 1
@@ -60,20 +60,20 @@ return function (g, visitor, uid, color)
 
           color[vid] = 1
           if discover_vertex then
-            discover_vertex(visitor, vid)
+            discover_vertex(that, vid)
           end
         else
           if non_tree_edge then
-            non_tree_edge(visitor, eid, uid, vid)
+            non_tree_edge(that, eid, uid, vid)
           end
 
           if c == 1 then
             if gray_target then
-              gray_target(visitor, eid, uid, vid)
+              gray_target(that, eid, uid, vid)
             end
           else
             if black_target then
-              black_target(visitor, eid, uid, vid)
+              black_target(that, eid, uid, vid)
             end
           end
         end
@@ -82,7 +82,7 @@ return function (g, visitor, uid, color)
 
     color[uid] = 0
     if finish_vertex then
-      finish_vertex(visitor, uid)
+      finish_vertex(that, uid)
     end
   end
 

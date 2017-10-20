@@ -17,22 +17,27 @@
 
 local dfs_visit = require "dromozoa.graph.dfs_visit"
 
-return function (g, visitor, uid)
-  local start_vertex = visitor.start_vertex
-  local color = {}
+return function (g, that, uid, color)
+  if not color then
+    color = {}
+  end
+
+  local start_vertex = that.start_vertex
+
   if uid then
     if start_vertex then
-      start_vertex(visitor, uid)
+      start_vertex(that, uid)
     end
-    dfs_visit(g, visitor, uid, color)
+    dfs_visit(g, that, uid, color)
   end
   for uid in pairs(g.ue) do
     if not color[uid] then
       if start_vertex then
-        start_vertex(visitor, uid)
+        start_vertex(that, uid)
       end
-      dfs_visit(g, visitor, uid, color)
+      dfs_visit(g, that, uid, color)
     end
   end
+
   return color
 end

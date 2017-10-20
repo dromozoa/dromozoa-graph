@@ -15,13 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, visitor, uid, ucolor, ecolor)
-  local discover_vertex = visitor.discover_vertex
-  local examine_edge = visitor.examine_edge
-  local tree_edge = visitor.tree_edge
-  local back_edge = visitor.back_edge
-  local finish_edge = visitor.finish_edge
-  local finish_vertex = visitor.finish_vertex
+return function (g, that, uid, vcolor, ecolor)
+  local discover_vertex = that.discover_vertex
+  local examine_edge = that.examine_edge
+  local tree_edge = that.tree_edge
+  local back_edge = that.back_edge
+  local finish_edge = that.finish_edge
+  local finish_vertex = that.finish_vertex
 
   local eid_stack1 = {}
   local uid_stack1 = {}
@@ -32,8 +32,8 @@ return function (g, visitor, uid, ucolor, ecolor)
   local n1 = 0
   local n2 = 0
 
-  ucolor[uid] = 1
-  if not discover_vertex or discover_vertex(visitor, uid) ~= false then
+  vcolor[uid] = 1
+  if not discover_vertex or discover_vertex(that, uid) ~= false then
     n1 = g:reverse_push_edges(uid, n1, eid_stack1, uid_stack1, vid_stack1, inv_stack1)
   end
 
@@ -42,11 +42,11 @@ return function (g, visitor, uid, ucolor, ecolor)
     local uid = uid_stack1[n1]
     local vid = vid_stack1[n1]
     local inv = inv_stack1[n1]
-    local vc = ucolor[vid]
+    local vc = vcolor[vid]
 
     if eid ~= eid_stack2[n2] or inv ~= inv_stack2[n2] then
       if examine_edge then
-        examine_edge(visitor, eid, uid, vid)
+        examine_edge(that, eid, uid, vid)
       end
 
       local ec = ecolor[eid]
@@ -54,19 +54,19 @@ return function (g, visitor, uid, ucolor, ecolor)
 
       if not vc then
         if tree_edge then
-          tree_edge(visitor, eid, uid, vid)
+          tree_edge(that, eid, uid, vid)
         end
-        ucolor[vid] = 1
-        if not discover_vertex or discover_vertex(visitor, vid) ~= false then
+        vcolor[vid] = 1
+        if not discover_vertex or discover_vertex(that, vid) ~= false then
           n1 = g:reverse_push_edges(vid, n1, eid_stack1, uid_stack1, vid_stack1, inv_stack1)
         end
       elseif vc > 0 then
         if not ec then
           if back_edge then
-            back_edge(visitor, eid, uid, vid)
+            back_edge(that, eid, uid, vid)
           end
         end
-        ucolor[vid] = vc + 1
+        vcolor[vid] = vc + 1
       end
 
       n2 = n2 + 1
@@ -84,22 +84,22 @@ return function (g, visitor, uid, ucolor, ecolor)
       n2 = n2 - 1
 
       if vc == 1 then
-        ucolor[vid] = 0
+        vcolor[vid] = 0
         if finish_vertex then
-          finish_vertex(visitor, vid)
+          finish_vertex(that, vid)
         end
       elseif vc > 1 then
-        ucolor[vid] = vc - 1
+        vcolor[vid] = vc - 1
       end
 
       if finish_edge then
-        finish_edge(visitor, eid, uid, vid)
+        finish_edge(that, eid, uid, vid)
       end
     end
   end
 
-  ucolor[uid] = 0
+  vcolor[uid] = 0
   if finish_vertex then
-    finish_vertex(visitor, uid)
+    finish_vertex(that, uid)
   end
 end

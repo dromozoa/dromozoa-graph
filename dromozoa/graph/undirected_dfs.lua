@@ -17,23 +17,30 @@
 
 local undirected_dfs_visit = require "dromozoa.graph.undirected_dfs_visit"
 
-return function (g, visitor, uid)
-  local start_vertex = visitor.start_vertex
-  local ucolor = {}
-  local ecolor = {}
+return function (g, that, uid, vcolor, ecolor)
+  if not vcolor then
+    vcolor = {}
+  end
+  if not ecolor then
+    ecolor = {}
+  end
+
+  local start_vertex = that.start_vertex
+
   if uid then
     if start_vertex then
-      start_vertex(visitor, uid)
+      start_vertex(that, uid)
     end
-    undirected_dfs_visit(g, visitor, uid, ucolor, ecolor)
+    undirected_dfs_visit(g, that, uid, vcolor, ecolor)
   end
   for uid in pairs(g.ue) do
-    if not ucolor[uid] then
+    if not vcolor[uid] then
       if start_vertex then
-        start_vertex(visitor, uid)
+        start_vertex(that, uid)
       end
-      undirected_dfs_visit(g, visitor, uid, ucolor, ecolor)
+      undirected_dfs_visit(g, that, uid, vcolor, ecolor)
     end
   end
-  return ucolor, ecolor
+
+  return vcolor, ecolor
 end
