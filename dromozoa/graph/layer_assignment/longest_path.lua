@@ -17,35 +17,45 @@
 
 return function (g, vp)
   local uv = g.uv
-  local ue = uv.ue
 
-  local layer = 1
-  local U = {}
-  local Z = {}
+  local uset = {}
+  local zset = {}
+  local layer = 2
 
-  repeat
-    local n = 0
+  for uid, eid in pairs(uv.ue) do
+    if eid then
+      uset[uid] = true
+    else
+      vp:put("layer", uid, 1)
+      zset[uid] = true
+    end
+  end
 
-    for uid in pairs(ue) do
-      if not U[uid] then
-        local assign = true
-        for eid, vid in uv:each_edge(uid) do
-          if not Z[vid] then
-            assign = false
-            break
-          end
+  while next(uset) ~= nil do
+    local znew = {}
+
+    for uid in pairs(uset) do
+      local assign = true
+      for eid, vid in uv:each_edge(uid) do
+        if not zset[vid] then
+          assign = false
+          break
         end
-        if assign then
-          vp:put("layer", uid, layer)
-          U[uid] = true
-          n = n + 1
-        end
+      end
+      if assign then
+        vp:put("layer", uid, layer)
+        znew[uid] = true
+        uset[uid] = nil
       end
     end
 
-    layer = layer + 1
-    for k, v in pairs(U) do
-      Z[k] = v
+    if next(znew) == nil then
+      break
     end
-  until n == 0
+
+    layer = layer + 1
+    for k, v in pairs(znew) do
+      zset[k] = v
+    end
+  end
 end

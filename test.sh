@@ -53,3 +53,8 @@ for i in data/cycle_removal*.txt
 do
   lua test/cycle_removal.lua "$i"
 done
+
+for i in data/layer_assignment*.txt
+do
+  lua test/layer_assignment.lua "$i"
+done
