@@ -16,7 +16,8 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local bigraph = require "dromozoa.graph.bigraph"
-local cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
+local cycle_removal = require "dromozoa.graph.cycle_removal.greedy"
+local property_map = require "dromozoa.graph.property_map"
 
 local filename = ...
 
@@ -46,4 +47,5 @@ function visitor:reverse_edge(eid, uid, vid)
   g:reverse_edge(eid)
 end
 
-cycle_removal(g, visitor)
+local ep = property_map()
+cycle_removal(g, ep)

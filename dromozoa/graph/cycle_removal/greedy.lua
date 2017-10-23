@@ -85,18 +85,17 @@ local function greedy_linear_ordering(g)
   return order
 end
 
-return function (g, that)
+return function (g, ep)
   local ev = g.ev
   local eu = g.eu
-
-  local reverse_edge = that.reverse_edge
 
   local order = greedy_linear_ordering(g:clone())
 
   for eid, vid in pairs(ev) do
     local uid = eu[eid]
-    if order[uid] > order[vid] then
-      reverse_edge(that, eid, uid, vid)
+    if order[eu[eid]] > order[vid] then
+      g:reverse_edge(eid)
+      ep:put("reversed", eid, true)
     end
   end
 end
