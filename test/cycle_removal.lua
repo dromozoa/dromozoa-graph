@@ -40,4 +40,10 @@ end
 
 handle:close()
 
-cycle_removal(g)
+local visitor = {}
+function visitor:reverse_edge(eid, uid, vid)
+  print("reverse_edge", eid, uid, vid)
+  g:reverse_edge(eid)
+end
+
+cycle_removal(g, visitor)

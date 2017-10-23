@@ -48,3 +48,8 @@ do
   diff -u "out/$name-boost.txt" "out/$name-bigraph.txt"
   diff -u "out/$name-boost.txt" "out/$name-digraph.txt"
 done
+
+for i in data/cycle_removal*.txt
+do
+  lua test/cycle_removal.lua "$i"
+done
