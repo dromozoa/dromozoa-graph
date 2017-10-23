@@ -70,6 +70,23 @@ local function test(graph, g)
 
   assert(#graph.eu == 0)
   assert(#graph.ev == 0)
+
+  local u1 = graph:add_vertex()
+  local u2 = graph:add_vertex()
+  local u3 = graph:add_vertex()
+  local e1 = graph:add_edge(u1, u2)
+  local e2 = graph:add_edge(u1, u3)
+  check(g, u1, { e1, e2 })
+  check(g, u2, {})
+  check(g, u3, {})
+  graph:reverse_edge(e1)
+  check(g, u1, { e2 })
+  check(g, u2, { e1 })
+  check(g, u3, {})
+  graph:reverse_edge(e2)
+  check(g, u1, {})
+  check(g, u2, { e1 })
+  check(g, u3, { e2 })
 end
 
 local g = digraph()

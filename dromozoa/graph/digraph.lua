@@ -71,6 +71,16 @@ function class:clone()
   }, metatable)
 end
 
+function class:reverse_edge(eid)
+  local uv = self.uv
+  local eu = self.eu
+  local uid = eu[eid]
+  local vid = self.ev[eid]
+  uv:remove_edge(eid, uid)
+  uv:add_edge(eid, vid, uid)
+  eu[eid] = vid
+end
+
 return setmetatable(class, {
   __call = function ()
     local uv = adjacency_list()
