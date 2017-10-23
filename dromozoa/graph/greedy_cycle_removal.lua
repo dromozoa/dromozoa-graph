@@ -22,6 +22,10 @@ return function (g)
   local sl = {}
   local sr = {}
 
+  local min = 1
+  local max = g.uid
+  local order = {}
+
   repeat
     -- each sink vertex
     repeat
