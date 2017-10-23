@@ -52,13 +52,19 @@
 
 <h2>13.2 Cycle Removeal</h2>
 
+<div>
+アルゴリズムの適用前に自己ループエッジと多重エッジは取りのぞく。
+</div>
+
 <ul>
   <li>feedback arc set (FAS) 取りのぞくと有向非巡回グラフになるようなエッジの集合。</li>
   <li>feedback set (FS) 向きを反転させると有向非巡回グラフになるようなエッジの集合。</li>
 </ul>
 
 <div>
-
+任意の頂点の線形順序は、エッジ集合をふたつの部分集合に分割する。
+湧点が沈点よりも前になるように整列されたエッジ集合と、湧点が沈点よりも後になるように整列されたエッジ集合である。
+ふたつの部分集合はどちらもFSである。
 </div>
 
 <script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
