@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -18,30 +18,26 @@
 local bigraph = require "dromozoa.graph.bigraph"
 local cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
 
+local filename = ...
+
 local g = bigraph()
-local u1 = g:add_vertex()
-local u2 = g:add_vertex()
-local u3 = g:add_vertex()
-local u4 = g:add_vertex()
 
---[[
-g:add_edge(u1, u2)
-g:add_edge(u1, u3)
-g:add_edge(u2, u4)
-g:add_edge(u3, u4)
-]]
+local handle = assert(io.open(filename))
 
---[[
-g:add_edge(u1, u2)
-g:add_edge(u2, u3)
-g:add_edge(u3, u4)
-g:add_edge(u4, u1)
-]]
+local n = handle:read("n")
+for i = 1, n do
+  g:add_vertex()
+end
 
-g:add_edge(u1, u2)
-g:add_edge(u2, u3)
-g:add_edge(u3, u1)
-g:add_edge(u3, u4)
-g:add_edge(u4, u2)
+while true do
+  local u = handle:read("n")
+  local v = handle:read("n")
+  if not v then
+    break
+  end
+  g:add_edge(u, v)
+end
+
+handle:close()
 
 cycle_removal(g)
