@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
+local clone = require "dromozoa.graph.clone"
 
 local class = {}
 local metatable = { __index = class }
@@ -56,6 +57,18 @@ end
 
 function class:degree(uid)
   return self.uv:degree(uid)
+end
+
+function class:clone()
+  local uv = self.uv:clone()
+  return setmetatable({
+    uid = self.uid;
+    eid = self.eid;
+    uv = uv;
+    ue = uv.ue;
+    ev = uv.ev;
+    eu = clone(self.eu);
+  }, metatable)
 end
 
 return setmetatable(class, {

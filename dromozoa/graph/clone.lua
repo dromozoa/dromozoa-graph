@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,33 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
-
-local g = bigraph()
-local u1 = g:add_vertex()
-local u2 = g:add_vertex()
-local u3 = g:add_vertex()
-local u4 = g:add_vertex()
-
---[[
-g:add_edge(u1, u2)
-g:add_edge(u1, u3)
-g:add_edge(u2, u4)
-g:add_edge(u3, u4)
-]]
-
---[[
-g:add_edge(u1, u2)
-g:add_edge(u2, u3)
-g:add_edge(u3, u4)
-g:add_edge(u4, u1)
-]]
-
-g:add_edge(u1, u2)
-g:add_edge(u2, u3)
-g:add_edge(u3, u1)
-g:add_edge(u3, u4)
-g:add_edge(u4, u2)
-
-cycle_removal(g)
+return function (source)
+  local result = {}
+  for k, v in pairs(source) do
+    result[k] = v
+  end
+  return result
+end

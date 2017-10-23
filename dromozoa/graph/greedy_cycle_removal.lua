@@ -15,12 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g)
+return function (source)
+  local g = source:clone()
   local uv = g.uv
   local vu = g.vu
-
-  local sl = {}
-  local sr = {}
 
   local min = 1
   local max = g.uid
@@ -29,7 +27,7 @@ return function (g)
   repeat
     -- each sink vertex
     repeat
-      local n = 0
+      local n = max
       for uid, eid in pairs(uv.ue) do
         if not eid then
           print("remove sink", uid)
@@ -37,15 +35,15 @@ return function (g)
             g:remove_edge(eid)
           end
           g:remove_vertex(uid)
-          sr[#sr + 1] = uid
-          n = n + 1
+          order[uid] = max
+          max = max - 1
         end
       end
-    until n == 0
+    until n == max
 
     -- each source vertex
     repeat
-      local n = 0
+      local n = min
       for uid, eid in pairs(vu.ue) do
         if not eid then
           print("remove source", uid)
@@ -53,15 +51,11 @@ return function (g)
             g:remove_edge(eid)
           end
           g:remove_vertex(uid)
-          sl[#sl + 1] = uid
-          n = n + 1
+          order[uid] = min
+          min = min + 1
         end
       end
-    until n == 0
-
-    if next(uv.ue) == nil then
-      break
-    end
+    until n == min
 
     local max_uid
     local max_value
@@ -82,9 +76,15 @@ return function (g)
         g:remove_edge(eid)
       end
       g:remove_vertex(max_uid)
-      sl[#sl + 1] = uid
-    else
-      break
+      order[max_uid] = min
+      min = min + 1
     end
-  until false
+  until not max_uid
+
+  for eid, vid in pairs(source.uv.ev) do
+    local uid = source.vu.ev[eid]
+    if order[uid] > order[vid] then
+      print(eid)
+    end
+  end
 end
