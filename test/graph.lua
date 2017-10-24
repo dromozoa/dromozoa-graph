@@ -21,6 +21,8 @@ local dfs = require "dromozoa.graph.dfs"
 local digraph = require "dromozoa.graph.digraph"
 local undirected_dfs = require "dromozoa.graph.undirected_dfs"
 
+local read = require "test.read"
+
 local directed, filename = ...
 
 local graph
@@ -30,23 +32,7 @@ else
   graph = bigraph()
 end
 
-local handle = assert(io.open(filename))
-
-local n = handle:read("n")
-for i = 1, n do
-  graph:add_vertex()
-end
-
-while true do
-  local u = handle:read("n")
-  local v = handle:read("n")
-  if not v then
-    break
-  end
-  graph:add_edge(u, v)
-end
-
-handle:close()
+local n = read(graph, filename)
 
 local bfs_visitor = {}
 function bfs_visitor:discover_vertex(u)
@@ -105,6 +91,7 @@ else
 end
 
 print("==== each_edge ====")
+
 for uid = 1, n do
   for eid, vid in g:each_edge(uid) do
     print("each_edge", eid, uid, vid)

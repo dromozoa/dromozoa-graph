@@ -18,27 +18,13 @@
 local bigraph = require "dromozoa.graph.bigraph"
 local tsort = require "dromozoa.graph.tsort"
 
+local read = require "test.read"
+
 local filename = ...
 
 local g = bigraph()
 
-local handle = assert(io.open(filename))
-
-local n = handle:read("n")
-for i = 1, n do
-  g:add_vertex()
-end
-
-while true do
-  local u = handle:read("n")
-  local v = handle:read("n")
-  if not v then
-    break
-  end
-  g:add_edge(u, v)
-end
-
-handle:close()
+read(g, filename)
 
 local order = tsort(g.uv)
 
