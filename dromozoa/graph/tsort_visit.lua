@@ -16,10 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local dfs_visit = require "dromozoa.graph.dfs_visit"
-local topological_sort_visitor = require "dromozoa.graph.topological_sort_visitor"
+local tsort_visitor = require "dromozoa.graph.tsort_visitor"
 
 return function (g, uid)
-  local visitor = topological_sort_visitor()
-  dfs_visit(g, visitor, uid, {})
-  return visitor
+  local that = tsort_visitor()
+  dfs_visit(g, that, uid, {})
+  return that
 end

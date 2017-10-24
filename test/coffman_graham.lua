@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local bigraph = require "dromozoa.graph.bigraph"
-local topological_sort = require "dromozoa.graph.topological_sort"
+local tsort = require "dromozoa.graph.tsort"
 
 local filename = ...
 
@@ -40,7 +40,7 @@ end
 
 handle:close()
 
-local order = topological_sort(g.uv)
+local order = tsort(g.uv)
 
 for i = #order, 1, -1 do
   print(order[i])
