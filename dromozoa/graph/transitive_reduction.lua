@@ -15,41 +15,34 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local layer_assignment = require "dromozoa.graph.layer_assignment.longest_path"
-local property_map = require "dromozoa.graph.property_map"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
-local filename = ...
+return function (g)
+  local uv = g.uv
+  local vu = g.vu
 
-local g = bigraph()
+  for uid, eid in pairs(uv.ue) do
+    if eid then
+      local distance = {}
 
-local handle = assert(io.open(filename))
+      local order = topological_sort(uv, uid)
+      for i = #order, 1, -1 do
+        local vid = order[i]
+        local value = 0
+        for _, uid in vu:each_edge(vid) do
+          local v = distance[uid]
+          if v and value < v then
+            value = v
+          end
+        end
+        distance[vid] = value + 1
+      end
 
-local n = handle:read("n")
-for i = 1, n do
-  g:add_vertex()
-end
-
-while true do
-  local u = handle:read("n")
-  local v = handle:read("n")
-  if not v then
-    break
+      for eid, vid in uv:each_edge(uid) do
+        if distance[vid] > 2 then
+          g:remove_edge(eid)
+        end
+      end
+    end
   end
-  g:add_edge(u, v)
-end
-
-handle:close()
-
-local visitor = {}
-function visitor:reverse_edge(eid, uid, vid)
-  print("reverse_edge", eid, uid, vid)
-  g:reverse_edge(eid)
-end
-
-local vp = property_map()
-layer_assignment(g, vp)
-
-for i = 1, n do
-  print(i, vp:get("layer", i))
 end

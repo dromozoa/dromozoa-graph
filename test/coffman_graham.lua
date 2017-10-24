@@ -16,8 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local bigraph = require "dromozoa.graph.bigraph"
-local layer_assignment = require "dromozoa.graph.layer_assignment.longest_path"
-local property_map = require "dromozoa.graph.property_map"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
 local filename = ...
 
@@ -41,15 +40,8 @@ end
 
 handle:close()
 
-local visitor = {}
-function visitor:reverse_edge(eid, uid, vid)
-  print("reverse_edge", eid, uid, vid)
-  g:reverse_edge(eid)
-end
+local order = topological_sort(g.uv)
 
-local vp = property_map()
-layer_assignment(g, vp)
-
-for i = 1, n do
-  print(i, vp:get("layer", i))
+for i = #order, 1, -1 do
+  print(order[i])
 end

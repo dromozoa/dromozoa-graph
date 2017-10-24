@@ -15,41 +15,26 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local layer_assignment = require "dromozoa.graph.layer_assignment.longest_path"
-local property_map = require "dromozoa.graph.property_map"
+local dfs = require "dromozoa.graph.dfs"
+local dfs_visit = require "dromozoa.graph.dfs_visit"
 
-local filename = ...
+local class = {}
+local metatable = { __index = class }
 
-local g = bigraph()
-
-local handle = assert(io.open(filename))
-
-local n = handle:read("n")
-for i = 1, n do
-  g:add_vertex()
+function class:back_edge()
+  error("not a dag")
 end
 
-while true do
-  local u = handle:read("n")
-  local v = handle:read("n")
-  if not v then
-    break
+function class:finish_vertex(uid)
+  self[#self + 1] = uid
+end
+
+return function (g, uid)
+  local that = {}
+  if uid then
+    dfs_visit(g, setmetatable(that, metatable), uid, {})
+  else
+    dfs(g, setmetatable(that, metatable))
   end
-  g:add_edge(u, v)
-end
-
-handle:close()
-
-local visitor = {}
-function visitor:reverse_edge(eid, uid, vid)
-  print("reverse_edge", eid, uid, vid)
-  g:reverse_edge(eid)
-end
-
-local vp = property_map()
-layer_assignment(g, vp)
-
-for i = 1, n do
-  print(i, vp:get("layer", i))
+  return that
 end
