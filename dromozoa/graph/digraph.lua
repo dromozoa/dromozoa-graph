@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
-local clone = require "dromozoa.graph.clone"
+local table_clone = require "dromozoa.graph.table_clone"
 
 local class = {}
 local metatable = { __index = class }
@@ -67,7 +67,7 @@ function class:clone()
     uv = uv;
     ue = uv.ue;
     ev = uv.ev;
-    eu = clone(self.eu);
+    eu = table_clone(self.eu);
   }, metatable)
 end
 
