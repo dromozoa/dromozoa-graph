@@ -16,25 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local dfs = require "dromozoa.graph.dfs"
-local dfs_visit = require "dromozoa.graph.dfs_visit"
-
-local class = {}
-local metatable = { __index = class }
-
-function class:back_edge()
-  error("not a dag")
-end
-
-function class:finish_vertex(uid)
-  self[#self + 1] = uid
-end
+local topological_sort_visitor = require "dromozoa.graph.topological_sort_visitor"
 
 return function (g, uid)
-  local that = {}
-  if uid then
-    dfs_visit(g, setmetatable(that, metatable), uid, {})
-  else
-    dfs(g, setmetatable(that, metatable))
-  end
-  return that
+  local visitor = topological_sort_visitor()
+  dfs(g, visitor, uid)
+  return visitor
 end
