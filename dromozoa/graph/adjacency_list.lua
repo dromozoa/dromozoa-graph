@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local clone = require "dromozoa.graph.clone"
+
 local class = {}
 local metatable = { __index = class }
 
@@ -122,6 +124,17 @@ function class:degree(uid)
     return n
   end
 end
+
+function class:clone()
+  return setmetatable({
+    ue = clone(self.ue);
+    nu = clone(self.nu);
+    pu = clone(self.pu);
+    ev = clone(self.ev);
+  }, metatable)
+end
+
+
 
 return setmetatable(class, {
   __call = function ()

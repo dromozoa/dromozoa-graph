@@ -74,6 +74,31 @@ function class:degree(uid)
   return self.uv:degree(uid) + self.vu:degree(uid)
 end
 
+function class:clone()
+  local uv = self.uv:clone()
+  local vu = self.vu:clone()
+  return setmetatable({
+    uid = self.uid;
+    eid = self.eid;
+    uv = uv;
+    vu = vu;
+    ue = uv.ue;
+    ev = uv.ev;
+    eu = vu.ev;
+  }, metatable)
+end
+
+function class:reverse_edge(eid)
+  local uv = self.uv
+  local vu = self.vu
+  local uid = self.eu[eid]
+  local vid = self.ev[eid]
+  uv:remove_edge(eid, uid)
+  vu:remove_edge(eid, vid)
+  uv:add_edge(eid, vid, uid)
+  vu:add_edge(eid, uid, vid)
+end
+
 return setmetatable(class, {
   __call = function ()
     local uv = adjacency_list()

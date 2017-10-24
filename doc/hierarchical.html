@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>グラフの階層的描画</title>
+</head>
+<body>
+
+<h1>グラフの階層的描画</h1>
+
+<div>
+状態遷移図を対象としたグラフの階層的描画の実装を目的とする。
+</div>
+
+<ol>
+  <li>Cycle Removeal</li>
+  <li>Layer Assignment</li>
+  <li>Edge Concenctration</li>
+  <li>Vertex Ordering</li>
+  <li>\(x\)-Coordinate Assignment</li>
+</ol>
+
+<ol>
+  <li>グラフの非閉路化</li>
+  <li>頂点集合の階層への分割</li>
+  <li>各階層上での頂点順序の決定</li>
+  <li>各頂点の座標の決定</li>
+</ol>
+
+<ul>
+  <li>論文・教科書
+    <ol>
+      <li><a href="https://cs.brown.edu/~rt/gdhandbook/chapters/hierarchical.pdf">Hierarchical Drawing Algorithms</a></li>
+      <li><a href="http://www.graphviz.org/Documentation/TSE93.pdf">A Technique for Drawing Directed Graph</a></li>
+      <li><a href="http://www.lib.kobe-u.ac.jp/repository/thesis2/d1/D1005931.pdf">階層グラフの描画アルゴリズムに関する研究</a></li>
+    </ol>
+  </li>
+  <li>スライド
+    <ol>
+      <li><a href="https://www.slideshare.net/nikolovn/gd-2001-ver2">How to Layer a Directed Acyclic Graph</a></li>
+    </ol>
+  </li>
+  <li>ウェブページ
+    <ol>
+      <li><a href="https://kaken.nii.ac.jp/ja/grant/KAKENHI-PROJECT-19500029/">有向グラフの階層的描画を求めるアルゴリズムの設計</a></li>
+      <li><a href="http://www2.kobe-u.ac.jp/~ky/labo/research/graph-drawing.htm">グラフ描画アルゴリズムの設計</a></li>
+      <li><a href="http://interprism.hatenablog.com/entry/layered_graph">有向グラフの階層表示</a></li>
+    </ol>
+  </li>
+  <li>Wikipedia
+    <ol>
+      <li><a href="https://en.wikipedia.org/wiki/Layered_graph_drawing">Layered graph drawing</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Transitive_reduction">Transitive reduction</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Coffman%E2%80%93Graham_algorithm">Coffman-Graham algorithm</a></li>
+    </ol>
+  </li>
+  <li>プログラム
+    <ol>
+      <li><a href="http://www.graphviz.org/">Graphviz</a></li>
+      <li><a href="https://github.com/cpettitt/dagre-d3">dagre-d3</a></li>
+    </ol>
+  </li>
+</ul>
+
+<h2>13.2 Cycle Removeal</h2>
+
+<div>
+アルゴリズムの適用前に自己ループエッジを取りのぞき、多重エッジをまとめる。
+</div>
+
+<ul>
+  <li>feedback arc set (FAS) 取りのぞくと有向非巡回グラフになるようなエッジの集合。</li>
+  <li>feedback set (FS) 向きを反転させると有向非巡回グラフになるようなエッジの集合。</li>
+  <li>FSはFASだが、逆は常に成りたつとは限らない。</li>
+</ul>
+
+<div>
+頂点の線形順序が与えられたら、エッジ集合をふたつの部分集合に分割できる。
+\(\mathrm{order}(v)\)が与えられているとき、エッジ集合\(E\)の要素\(e=(u,v)\)について、\(\mathrm{order}(u)\lt\mathrm{order}(v)\)を満たす集合と満たさない集合に分割する。
+ふたつの部分集合はどちらもFSである。
+</div>
+
+<h2>13.3 Layer Assignment</h2>
+
+<ul>
+  <li>The Longest-Path Algorithm</li>
+  <li>The Coffman-Graham Algorithm</li>
+  <li>Layering with the Minimum Width</li>
+  <li>Improvement by Promotion of Vertices</li>
+  <li>Network-Simplex Layering Algorithm</li>
+  <li>Healy-Nikolov's Branch-and-Cut Algorithm</li>
+</ul>
+
+<script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+</body>
+</html>
