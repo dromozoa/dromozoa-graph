@@ -19,7 +19,7 @@ local graph = require "dromozoa.graph"
 local breadth_first_search = require "dromozoa.graph.breadth_first_search"
 local depth_first_search = require "dromozoa.graph.depth_first_search"
 local tsort = require "dromozoa.graph.tsort"
-local undirected_dfs = require "dromozoa.graph.undirected_dfs"
+local undirected_depth_first_search = require "dromozoa.graph.undirected_depth_first_search"
 local read = require "test.read"
 
 local directed, filename = ...
@@ -100,7 +100,7 @@ depth_first_search(g, dfs_visitor, 1)
 
 if directed == "undirected" then
   print("==== undirected_dfs ====")
-  undirected_dfs(g, dfs_visitor, 1)
+  undirected_depth_first_search(g, dfs_visitor, 1)
 else
   print("==== tsort ====")
   local order = tsort(g)
