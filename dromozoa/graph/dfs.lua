@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs_visit = require "dromozoa.graph.dfs_visit"
+local depth_first_visit = require "dromozoa.graph.depth_first_visit"
 
 return function (g, that, uid, color)
   if not color then
@@ -28,7 +28,7 @@ return function (g, that, uid, color)
     if start_vertex then
       start_vertex(that, uid)
     end
-    dfs_visit(g, that, uid, color)
+    depth_first_visit(g, that, uid, color)
   end
 
   for uid in pairs(g.ue) do
@@ -36,7 +36,7 @@ return function (g, that, uid, color)
       if start_vertex then
         start_vertex(that, uid)
       end
-      dfs_visit(g, that, uid, color)
+      depth_first_visit(g, that, uid, color)
     end
   end
 
