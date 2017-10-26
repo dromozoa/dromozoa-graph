@@ -30,6 +30,7 @@ return function (g, that, uid, color)
     end
     dfs_visit(g, that, uid, color)
   end
+
   for uid in pairs(g.ue) do
     if not color[uid] then
       if start_vertex then

@@ -33,6 +33,7 @@ return function (g, that, uid, vcolor, ecolor)
     end
     undirected_dfs_visit(g, that, uid, vcolor, ecolor)
   end
+
   for uid in pairs(g.ue) do
     if not vcolor[uid] then
       if start_vertex then
