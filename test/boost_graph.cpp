@@ -19,10 +19,13 @@
 
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
+#include <vector>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <boost/graph/undirected_dfs.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -149,13 +152,20 @@ struct dfs_visitor : boost::dfs_visitor<> {
 };
 
 template <typename T>
-struct undirected_dfs {
+struct selector {
   template <typename G, typename V>
-  static void apply(G&, V) {}
+  static void apply(G& g, V) {
+    std::cout << "==== tsort ====\n";
+    std::vector<V> order;
+    boost::topological_sort(g, std::back_inserter(order));
+    for (const auto u : order) {
+      print_vertex("order", g, u);
+    }
+  }
 };
 
 template <>
-struct undirected_dfs<boost::undirected_tag> {
+struct selector<boost::undirected_tag> {
   template <typename G, typename V>
   static void apply(G& g, V root) {
     std::cout << "==== undirected_dfs ====\n";
@@ -215,7 +225,7 @@ inline int run(const char* filename) {
   std::cout << "==== dfs ====\n";
   boost::depth_first_search(g, boost::root_vertex(root).visitor(dfs_visitor()));
 
-  undirected_dfs<typename boost::graph_traits<G>::directed_category>::apply(g, root);
+  selector<typename boost::graph_traits<G>::directed_category>::apply(g, root);
 
   return 0;
 }

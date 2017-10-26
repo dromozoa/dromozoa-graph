@@ -18,6 +18,7 @@
 local graph = require "dromozoa.graph"
 local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
+local tsort = require "dromozoa.graph.tsort"
 local undirected_dfs = require "dromozoa.graph.undirected_dfs"
 local read = require "test.read"
 
@@ -100,4 +101,10 @@ dfs(g, dfs_visitor, 1)
 if directed == "undirected" then
   print("==== undirected_dfs ====")
   undirected_dfs(g, dfs_visitor, 1)
+else
+  print("==== tsort ====")
+  local order = tsort(g)
+  for i = 1, n do
+    print("order", order[i])
+  end
 end
