@@ -18,11 +18,14 @@
 local linked_list = require "dromozoa.graph.linked_list"
 
 local x = linked_list()
+assert(x.n == 0)
 local h1 = x:insert()
 local h2 = x:insert()
 local h3 = x:insert()
 local h4 = x:insert(h1)
+assert(x.n == 4)
 x:remove(h1)
+assert(x.n == 3)
 
 for h in x:each() do
   print(h)

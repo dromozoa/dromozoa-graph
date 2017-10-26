@@ -18,69 +18,69 @@
 local class = {}
 local metatable = { __index = class }
 
-function class:insert(prev_handle)
-  local n = self.n
-  local p = self.p
-  local next_handle
+function class:insert(prev_id)
+  local id = self.id + 1
+  self.id = id
+  self.n = self.n + 1
 
-  local handle = self.h + 1
-  self.h = handle
+  local next = self.next
+  local prev = self.prev
+  local next_id
 
-  if not prev_handle then
-    next_handle = self.f
-    if not next_handle then
-      self.f = handle
-      p[handle] = handle
-      n[handle] = handle
-      return handle
+  if not prev_id then
+    next_id = self.head
+    if not next_id then
+      self.head = id
+      prev[id] = id
+      next[id] = id
+      return id
     end
-    prev_handle = p[next_handle]
+    prev_id = prev[next_id]
   else
-    next_handle = n[prev_handle]
+    next_id = next[prev_id]
   end
 
-  n[prev_handle] = handle
-  n[handle] = next_handle
-  p[handle] = prev_handle
-  p[next_handle] = handle
-
-  return handle
+  next[prev_id] = id
+  next[id] = next_id
+  prev[id] = prev_id
+  prev[next_id] = id
+  return id
 end
 
-function class:remove(handle)
-  local n = self.n
-  local p = self.p
+function class:remove(id)
+  self.n = self.n - 1
 
-  local next_handle = n[handle]
+  local next = self.next
+  local prev = self.prev
+  local next_id = next[id]
 
-  if next_handle == handle then
-    self.f = nil
+  if next_id == id then
+    self.head = nil
   else
-    if self.f == handle then
-      self.f = next_handle
+    if self.head == id then
+      self.head = next_id
     end
-    local prev_handle = p[handle]
-    n[prev_handle] = next_handle
-    p[next_handle] = prev_handle
+    local prev_id = prev[id]
+    next[prev_id] = next_id
+    prev[next_id] = prev_id
   end
 
-  n[handle] = nil
-  p[handle] = nil
+  next[id] = nil
+  prev[id] = nil
 end
 
 function class:each()
-  local next_handle = self.f
-
-  if not next_handle then
+  local next_id = self.head
+  if not next_id then
     return function () end
   else
-    local n = self.n
-    local tail_handle = self.p[next_handle]
-    return function (_, prev_handle)
-      if prev_handle ~= tail_handle then
-        local handle = next_handle
-        next_handle = n[handle]
-        return handle
+    local next = self.next
+    local tail_id = self.prev[next_id]
+    return function (_, prev_id)
+      if prev_id ~= tail_id then
+        local id = next_id
+        next_id = next[id]
+        return id
       end
     end
   end
@@ -89,9 +89,10 @@ end
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
-      h = 0;
-      n = {};
-      p = {};
+      id = 0;
+      n = 0;
+      next = {};
+      prev = {};
     }, metatable)
   end
 })
