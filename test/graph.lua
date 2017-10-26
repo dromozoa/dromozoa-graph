@@ -17,7 +17,7 @@
 
 local graph = require "dromozoa.graph"
 local bfs = require "dromozoa.graph.bfs"
-local dfs = require "dromozoa.graph.dfs"
+local depth_first_search = require "dromozoa.graph.depth_first_search"
 local tsort = require "dromozoa.graph.tsort"
 local undirected_dfs = require "dromozoa.graph.undirected_dfs"
 local read = require "test.read"
@@ -96,7 +96,7 @@ print("==== bfs ====")
 bfs(g, bfs_visitor, 1)
 
 print("==== dfs ====")
-dfs(g, dfs_visitor, 1)
+depth_first_search(g, dfs_visitor, 1)
 
 if directed == "undirected" then
   print("==== undirected_dfs ====")

@@ -15,11 +15,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs = require "dromozoa.graph.dfs"
+local depth_first_search = require "dromozoa.graph.depth_first_search"
 local tsort_visitor = require "dromozoa.graph.tsort_visitor"
 
 return function (g, uid)
   local that = tsort_visitor()
-  dfs(g, that, uid)
+  depth_first_search(g, that, uid)
   return that
 end
