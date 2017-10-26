@@ -15,14 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local digraph = require "dromozoa.graph.digraph"
+local graph = require "dromozoa.graph"
 
 local function check(g, uid, expect)
   local n = #expect
 
   local result = {}
-  for eid, vid in g:each_edge(uid) do
+  for eid, vid in g.uv:each_edge(uid) do
     result[#result + 1] = eid
   end
   assert(n == #result)
@@ -31,71 +30,67 @@ local function check(g, uid, expect)
   end
 
   local result = {}
-  g:reverse_push_edges(uid, 0, result, {}, {}, {})
+  g.uv:reverse_push_edges(uid, 0, result, {}, {}, {})
   assert(n == #result)
   for i = 1, n do
     assert(result[i] == expect[n - i + 1])
   end
 end
 
-local function test(graph, g)
-  local u1 = graph:add_vertex()
-  local u2 = graph:add_vertex()
-  local u3 = graph:add_vertex()
-  local u4 = graph:add_vertex()
+local function test(g)
+  local u1 = g:add_vertex()
+  local u2 = g:add_vertex()
+  local u3 = g:add_vertex()
+  local u4 = g:add_vertex()
 
-  assert(#graph.eu == 0)
-  assert(#graph.ev == 0)
+  assert(#g.eu == 0)
+  assert(#g.ev == 0)
 
   check(g, u1, {})
-  local e1 = graph:add_edge(u1, u2)
+  local e1 = g:add_edge(u1, u2)
   check(g, u1, { e1 })
-  local e2 = graph:add_edge(u1, u3)
+  local e2 = g:add_edge(u1, u3)
   check(g, u1, { e1, e2 })
-  local e3 = graph:add_edge(u1, u4)
+  local e3 = g:add_edge(u1, u4)
   check(g, u1, { e1, e2, e3 })
 
-  assert(#graph.eu == 3)
-  assert(#graph.ev == 3)
+  assert(#g.eu == 3)
+  assert(#g.ev == 3)
 
-  graph:remove_edge(e1)
-  graph:remove_vertex(u2)
+  g:remove_edge(e1)
+  g:remove_vertex(u2)
   check(g, u1, { e2, e3 })
-  graph:remove_edge(e2)
-  graph:remove_vertex(u3)
+  g:remove_edge(e2)
+  g:remove_vertex(u3)
   check(g, u1, { e3 })
-  graph:remove_edge(e3)
-  graph:remove_vertex(u4)
+  g:remove_edge(e3)
+  g:remove_vertex(u4)
   check(g, u1, {})
 
-  assert(#graph.eu == 0)
-  assert(#graph.ev == 0)
+  assert(#g.eu == 0)
+  assert(#g.ev == 0)
 
-  local u1 = graph:add_vertex()
-  local u2 = graph:add_vertex()
-  local u3 = graph:add_vertex()
-  local e1 = graph:add_edge(u1, u2)
-  local e2 = graph:add_edge(u1, u3)
+  local u1 = g:add_vertex()
+  local u2 = g:add_vertex()
+  local u3 = g:add_vertex()
+  local e1 = g:add_edge(u1, u2)
+  local e2 = g:add_edge(u1, u3)
   check(g, u1, { e1, e2 })
   check(g, u2, {})
   check(g, u3, {})
-  graph:reverse_edge(e1)
+  g:reverse_edge(e1)
   check(g, u1, { e2 })
   check(g, u2, { e1 })
   check(g, u3, {})
-  graph:reverse_edge(e2)
+  g:reverse_edge(e2)
   check(g, u1, {})
   check(g, u2, { e1 })
   check(g, u3, { e2 })
 end
 
-local g = digraph()
-test(g, g)
+local g = graph()
 
-local g = bigraph()
-test(g, g.uv)
-
-local g = bigraph()
+local g = graph()
 local u1 = g:add_vertex()
 local u2 = g:add_vertex()
 local u3 = g:add_vertex()

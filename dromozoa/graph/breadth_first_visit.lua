@@ -16,10 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 return function (g, that, uid, color)
-  if not color then
-    color = {}
-  end
-
   local discover_vertex = that.discover_vertex
   local examine_vertex = that.examine_vertex
   local examine_edge = that.examine_edge

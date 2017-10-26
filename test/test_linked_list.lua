@@ -15,32 +15,18 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local undirected_dfs_visit = require "dromozoa.graph.undirected_dfs_visit"
+local linked_list = require "dromozoa.graph.linked_list"
 
-return function (g, that, uid, vcolor, ecolor)
-  if not vcolor then
-    vcolor = {}
-  end
-  if not ecolor then
-    ecolor = {}
-  end
+local x = linked_list()
+assert(x.n == 0)
+local h1 = x:insert()
+local h2 = x:insert()
+local h3 = x:insert()
+local h4 = x:insert(h1)
+assert(x.n == 4)
+x:remove(h1)
+assert(x.n == 3)
 
-  local start_vertex = that.start_vertex
-
-  if uid then
-    if start_vertex then
-      start_vertex(that, uid)
-    end
-    undirected_dfs_visit(g, that, uid, vcolor, ecolor)
-  end
-  for uid in pairs(g.ue) do
-    if not vcolor[uid] then
-      if start_vertex then
-        start_vertex(that, uid)
-      end
-      undirected_dfs_visit(g, that, uid, vcolor, ecolor)
-    end
-  end
-
-  return vcolor, ecolor
+for h in x:each() do
+  print(h)
 end

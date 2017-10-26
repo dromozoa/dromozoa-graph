@@ -15,10 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (source)
-  local result = {}
-  for k, v in pairs(source) do
-    result[k] = v
+local function clone(source)
+  -- not check recursion
+  if type(source) == "table" then
+    local result = {}
+    -- avoid __pairs metamethod
+    for k, v in next, source do
+      rawset(result, clone(k), clone(v))
+    end
+    -- not clone metatable
+    return setmetatable(result, getmetatable(source))
+  else
+    return source
   end
-  return result
 end
+
+return clone

@@ -134,8 +134,6 @@ function class:clone()
   }, metatable)
 end
 
-
-
 return setmetatable(class, {
   __call = function ()
     return setmetatable({

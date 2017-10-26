@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
-local dfs = require "dromozoa.graph.dfs"
+local depth_first_search = require "dromozoa.graph.depth_first_search"
 
 local g = adjacency_list()
 
@@ -38,7 +38,7 @@ end
 
 assert(g:degree(2) == 2)
 
-dfs(g, {
+depth_first_search(g, {
   tree_edge = function (_, eid, uid, vid)
     print("tree_edge", uid, vid)
   end;

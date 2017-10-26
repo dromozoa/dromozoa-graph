@@ -15,24 +15,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bfs = require "dromozoa.graph.bfs"
-local bigraph = require "dromozoa.graph.bigraph"
-local dfs = require "dromozoa.graph.dfs"
-local digraph = require "dromozoa.graph.digraph"
-local undirected_dfs = require "dromozoa.graph.undirected_dfs"
-
+local graph = require "dromozoa.graph"
+local breadth_first_search = require "dromozoa.graph.breadth_first_search"
+local depth_first_search = require "dromozoa.graph.depth_first_search"
+local topological_sort = require "dromozoa.graph.topological_sort"
+local undirected_depth_first_search = require "dromozoa.graph.undirected_depth_first_search"
 local read = require "test.read"
 
 local directed, filename = ...
-
-local graph
-if directed == "directional" then
-  graph = digraph()
-else
-  graph = bigraph()
-end
-
-local n = read(graph, filename)
 
 local bfs_visitor = {}
 function bfs_visitor:discover_vertex(u)
@@ -83,15 +73,14 @@ function dfs_visitor:finish_vertex(u)
   print("finish_vertex", u)
 end
 
-local g
-if directed == "undirected" then
-  g = graph
-else
-  g = graph.uv
+local g = graph()
+local n = read(g, filename)
+
+if directed ~= "undirected" then
+  g = g.uv
 end
 
 print("==== each_edge ====")
-
 for uid = 1, n do
   for eid, vid in g:each_edge(uid) do
     print("each_edge", eid, uid, vid)
@@ -104,12 +93,18 @@ for uid = 1, n do
 end
 
 print("==== bfs ====")
-bfs(g, bfs_visitor, 1)
+breadth_first_search(g, bfs_visitor, 1)
 
 print("==== dfs ====")
-dfs(g, dfs_visitor, 1)
+depth_first_search(g, dfs_visitor, 1)
 
 if directed == "undirected" then
   print("==== undirected_dfs ====")
-  undirected_dfs(g, dfs_visitor, 1)
+  undirected_depth_first_search(g, dfs_visitor, 1)
+else
+  print("==== tsort ====")
+  local order = topological_sort(g)
+  for i = 1, n do
+    print("order", order[i])
+  end
 end

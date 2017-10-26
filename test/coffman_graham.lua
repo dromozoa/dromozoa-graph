@@ -15,18 +15,18 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local tsort = require "dromozoa.graph.tsort"
+local graph = require "dromozoa.graph"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
 local read = require "test.read"
 
 local filename = ...
 
-local g = bigraph()
+local g = graph()
 
 read(g, filename)
 
-local order = tsort(g.uv)
+local order = topological_sort(g.uv)
 
 for i = #order, 1, -1 do
   print(order[i])

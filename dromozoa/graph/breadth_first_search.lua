@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,11 +15,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dfs_visit = require "dromozoa.graph.dfs_visit"
-local tsort_visitor = require "dromozoa.graph.tsort_visitor"
+local breadth_first_visit = require "dromozoa.graph.breadth_first_visit"
 
-return function (g, uid)
-  local that = tsort_visitor()
-  dfs_visit(g, that, uid, {})
-  return that
+return function (g, that, uid, color)
+  if not color then
+    color = {}
+  end
+
+  breadth_first_visit(g, that, uid, color)
+
+  return color
 end

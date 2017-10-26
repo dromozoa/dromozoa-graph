@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
+local graph = require "dromozoa.graph"
 local cycle_removal = require "dromozoa.graph.cycle_removal.greedy"
 local property_map = require "dromozoa.graph.property_map"
 
@@ -23,7 +23,7 @@ local read = require "test.read"
 
 local filename = ...
 
-local g = bigraph()
+local g = graph()
 read(g, filename)
 
 local ep = property_map()

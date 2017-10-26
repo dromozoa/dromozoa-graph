@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,19 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local class = {}
-local metatable = { __index = class }
+local depth_first_visit = require "dromozoa.graph.depth_first_visit"
 
-function class:back_edge()
-  error("not a dag")
+return function (g, that, uid, color)
+  if not color then
+    color = {}
+  end
+
+  local start_vertex = that.start_vertex
+
+  if uid then
+    if start_vertex then
+      start_vertex(that, uid)
+    end
+    depth_first_visit(g, that, uid, color)
+  end
+
+  for uid in pairs(g.ue) do
+    if not color[uid] then
+      if start_vertex then
+        start_vertex(that, uid)
+      end
+      depth_first_visit(g, that, uid, color)
+    end
+  end
+
+  return color
 end
-
-function class:finish_vertex(uid)
-  self[#self + 1] = uid
-end
-
-return setmetatable(class, {
-  __call = function ()
-    return setmetatable({}, metatable)
-  end;
-})
