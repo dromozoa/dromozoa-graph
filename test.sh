@@ -35,17 +35,16 @@ for i in data/undirected*.txt
 do
   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
   test/boost_graph undirected "$i" >"out/$name-boost.txt"
-  lua test/graph.lua undirected "$i" >"out/$name-ungraph.txt"
-  diff -u "out/$name-boost.txt" "out/$name-ungraph.txt"
+  lua test/graph.lua undirected "$i" >"out/$name-dromozoa.txt"
+  diff -u "out/$name-boost.txt" "out/$name-dromozoa.txt"
 done
 
 for i in data/directed*.txt
 do
   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
   test/boost_graph directed "$i" >"out/$name-boost.txt"
-  lua test/graph.lua directed "$i" >"out/$name-digraph.txt"
-  diff -u "out/$name-boost.txt" "out/$name-bigraph.txt"
-  diff -u "out/$name-boost.txt" "out/$name-digraph.txt"
+  lua test/graph.lua directed "$i" >"out/$name-dromozoa.txt"
+  diff -u "out/$name-boost.txt" "out/$name-dromozoa.txt"
 done
 
 for i in data/cycle_removal*.txt
@@ -62,3 +61,5 @@ for i in data/transitive_reduction*.txt
 do
   lua test/transitive_reduction.lua "$i"
 done
+
+rm -f -r out

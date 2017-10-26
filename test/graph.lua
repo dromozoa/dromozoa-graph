@@ -15,18 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local graph = require "dromozoa.graph"
 local bfs = require "dromozoa.graph.bfs"
 local dfs = require "dromozoa.graph.dfs"
-local graph = require "dromozoa.graph"
 local undirected_dfs = require "dromozoa.graph.undirected_dfs"
-
 local read = require "test.read"
 
 local directed, filename = ...
-
-local g = graph()
-
-local n = read(g, filename)
 
 local bfs_visitor = {}
 function bfs_visitor:discover_vertex(u)
@@ -77,33 +72,32 @@ function dfs_visitor:finish_vertex(u)
   print("finish_vertex", u)
 end
 
-local gv
-if directed == "undirected" then
-  gv = g
-else
-  gv = g.uv
+local g = graph()
+local n = read(g, filename)
+
+if directed ~= "undirected" then
+  g = g.uv
 end
 
 print("==== each_edge ====")
-
 for uid = 1, n do
-  for eid, vid in gv:each_edge(uid) do
+  for eid, vid in g:each_edge(uid) do
     print("each_edge", eid, uid, vid)
   end
 end
 
 print("==== degree ====")
 for uid = 1, n do
-  print("degree", gv:degree(uid))
+  print("degree", g:degree(uid))
 end
 
 print("==== bfs ====")
-bfs(gv, bfs_visitor, 1)
+bfs(g, bfs_visitor, 1)
 
 print("==== dfs ====")
-dfs(gv, dfs_visitor, 1)
+dfs(g, dfs_visitor, 1)
 
 if directed == "undirected" then
   print("==== undirected_dfs ====")
-  undirected_dfs(gv, dfs_visitor, 1)
+  undirected_dfs(g, dfs_visitor, 1)
 end

@@ -239,8 +239,6 @@ int main(int argc, char* argv[]) {
   const char* filename = argv[2];
   if (directed == "directed") {
     return run<graph_t<boost::directedS> >(filename);
-  } else if (directed == "bidirectional") {
-    return run<graph_t<boost::bidirectionalS> >(filename);
   } else if (directed == "undirected") {
     return run<graph_t<boost::undirectedS> >(filename);
   }
