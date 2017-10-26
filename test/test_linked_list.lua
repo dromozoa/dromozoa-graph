@@ -29,24 +29,23 @@ end
 local x = linked_list()
 check(x, {})
 
-assert(x:push_back() == 1)
+assert(x:add() == 1)
 check(x, { 1 })
 
-assert(x:push_back() == 2)
+assert(x:add() == 2)
 check(x, { 1, 2 })
 
-assert(x:push_front() == 3)
+assert(x:insert(1) == 3)
 check(x, { 3, 1, 2 })
 
 assert(x:insert(3) == 4)
-check(x, { 3, 4, 1, 2 })
+check(x, { 4, 3, 1, 2 })
 
 assert(x:insert(2) == 5)
-check(x, { 3, 4, 1, 2, 5 })
+check(x, { 4, 3, 1, 5, 2 })
 
 for id in x:each() do
   x:remove(id)
 end
 assert(x.id == 5)
 assert(x.n == 0)
-

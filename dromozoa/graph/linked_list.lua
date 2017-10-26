@@ -18,7 +18,7 @@
 local class = {}
 local metatable = { __index = class }
 
-function class:push_back()
+function class:add()
   local id = self.id + 1
   self.id = id
   self.n = self.n + 1
@@ -26,9 +26,9 @@ function class:push_back()
   local next = self.next
   local prev = self.prev
 
-  local next_id = self.front
+  local next_id = self.first
   if not next_id then
-    self.front = id
+    self.first = id
     next[id] = id
     prev[id] = id
   else
@@ -42,39 +42,18 @@ function class:push_back()
   return id
 end
 
-function class:push_front()
+function class:insert(next_id)
   local id = self.id + 1
   self.id = id
   self.n = self.n + 1
 
   local next = self.next
   local prev = self.prev
+  local prev_id = prev[next_id]
 
-  local next_id = self.front
-  if not next_id then
-    self.front = id
-    next[id] = id
-    prev[id] = id
-  else
-    local prev_id = prev[next_id]
-    self.front = id
-    next[prev_id] = id
-    next[id] = next_id
-    prev[id] = prev_id
-    prev[next_id] = id
+  if self.first == next_id then
+    self.first = id
   end
-
-  return id
-end
-
-function class:insert(prev_id)
-  local id = self.id + 1
-  self.id = id
-  self.n = self.n + 1
-
-  local next = self.next
-  local prev = self.prev
-  local next_id = next[prev_id]
 
   next[prev_id] = id
   next[id] = next_id
@@ -92,10 +71,10 @@ function class:remove(id)
   local next_id = next[id]
 
   if next_id == id then
-    self.front = nil
+    self.first = nil
   else
-    if self.front == id then
-      self.front = next_id
+    if self.first == id then
+      self.first = next_id
     end
     local prev_id = prev[id]
     next[prev_id] = next_id
@@ -107,7 +86,7 @@ function class:remove(id)
 end
 
 function class:each()
-  local next_id = self.front
+  local next_id = self.first
   if not next_id then
     return function () end
   else
