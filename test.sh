@@ -43,7 +43,6 @@ for i in data/directed*.txt
 do
   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
   test/boost_graph directed "$i" >"out/$name-boost.txt"
-  lua test/graph.lua bidirectional "$i" >"out/$name-bigraph.txt"
   lua test/graph.lua directed "$i" >"out/$name-digraph.txt"
   diff -u "out/$name-boost.txt" "out/$name-bigraph.txt"
   diff -u "out/$name-boost.txt" "out/$name-digraph.txt"

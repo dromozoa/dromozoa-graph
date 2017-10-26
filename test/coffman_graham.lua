@@ -15,14 +15,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
+local graph = require "dromozoa.graph"
 local tsort = require "dromozoa.graph.tsort"
 
 local read = require "test.read"
 
 local filename = ...
 
-local g = bigraph()
+local g = graph()
 
 read(g, filename)
 

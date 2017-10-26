@@ -15,8 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local bigraph = require "dromozoa.graph.bigraph"
-local digraph = require "dromozoa.graph.digraph"
+local graph = require "dromozoa.graph"
 
 local function test(g)
   local u1 = g:add_vertex()
@@ -35,8 +34,5 @@ local function test(g)
   assert(n == 2)
 end
 
-local g = bigraph()
-test(g)
-
-local g = bigraph()
+local g = graph()
 test(g)
