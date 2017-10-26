@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local table_clone = require "dromozoa.graph.table_clone"
+local clone = require "dromozoa.graph.clone"
 
 local class = {}
 local metatable = { __index = class }
@@ -127,10 +127,10 @@ end
 
 function class:clone()
   return setmetatable({
-    ue = table_clone(self.ue);
-    nu = table_clone(self.nu);
-    pu = table_clone(self.pu);
-    ev = table_clone(self.ev);
+    ue = clone(self.ue);
+    nu = clone(self.nu);
+    pu = clone(self.pu);
+    ev = clone(self.ev);
   }, metatable)
 end
 

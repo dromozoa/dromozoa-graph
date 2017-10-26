@@ -57,9 +57,9 @@ do
   lua test/layer_assignment.lua "$i"
 done
 
-for i in data/transitive_reduction*.txt
-do
-  lua test/transitive_reduction.lua "$i"
-done
+#for i in data/transitive_reduction*.txt
+#do
+#  lua test/transitive_reduction.lua "$i"
+#done
 
 rm -f -r out

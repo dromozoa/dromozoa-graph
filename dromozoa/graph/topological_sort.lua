@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local depth_first_search = require "dromozoa.graph.depth_first_search"
-local depth_first_visit = require "dromozoa.graph.depth_first_visit"
 
 local class = {}
 local metatable = { __index = class }
@@ -29,12 +28,8 @@ function class:finish_vertex(uid)
   self[#self + 1] = uid
 end
 
-return function (g, uid)
+return function (g)
   local that = setmetatable({}, metatable)
-  if uid then
-    depth_first_visit(g, that, uid, {})
-  else
-    depth_first_search(g, that)
-  end
+  depth_first_search(g, that)
   return that
 end
