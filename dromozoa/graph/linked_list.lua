@@ -18,6 +18,55 @@
 local class = {}
 local metatable = { __index = class }
 
+function class:push_back()
+  local id = self.id + 1
+  self.id = id
+  self.n = self.n + 1
+
+  local next = self.next
+  local prev = self.prev
+
+  local next_id = self.front
+  if not next_id then
+    self.front = id
+    next[id] = id
+    prev[id] = id
+  else
+    local prev_id = prev[next_id]
+    next[prev_id] = id
+    next[id] = next_id
+    prev[id] = prev_id
+    prev[next_id] = id
+  end
+
+  return id
+end
+
+function class:push_front()
+  local id = self.id + 1
+  self.id = id
+  self.n = self.n + 1
+
+  local next = self.next
+  local prev = self.prev
+
+  local next_id = self.front
+  if not next_id then
+    self.front = id
+    next[id] = id
+    prev[id] = id
+  else
+    local prev_id = prev[next_id]
+    self.front = id
+    next[prev_id] = id
+    next[id] = next_id
+    prev[id] = prev_id
+    prev[next_id] = id
+  end
+
+  return id
+end
+
 function class:insert(prev_id)
   local id = self.id + 1
   self.id = id
@@ -25,25 +74,13 @@ function class:insert(prev_id)
 
   local next = self.next
   local prev = self.prev
-  local next_id
-
-  if not prev_id then
-    next_id = self.head
-    if not next_id then
-      self.head = id
-      prev[id] = id
-      next[id] = id
-      return id
-    end
-    prev_id = prev[next_id]
-  else
-    next_id = next[prev_id]
-  end
+  local next_id = next[prev_id]
 
   next[prev_id] = id
   next[id] = next_id
   prev[id] = prev_id
   prev[next_id] = id
+
   return id
 end
 
@@ -55,10 +92,10 @@ function class:remove(id)
   local next_id = next[id]
 
   if next_id == id then
-    self.head = nil
+    self.front = nil
   else
-    if self.head == id then
-      self.head = next_id
+    if self.front == id then
+      self.front = next_id
     end
     local prev_id = prev[id]
     next[prev_id] = next_id
@@ -70,7 +107,7 @@ function class:remove(id)
 end
 
 function class:each()
-  local next_id = self.head
+  local next_id = self.front
   if not next_id then
     return function () end
   else
