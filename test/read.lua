@@ -18,14 +18,14 @@
 return function (g, filename)
   local handle = assert(io.open(filename))
 
-  local n = handle:read("n")
+  local n = handle:read("*n")
   for i = 1, n do
     g:add_vertex()
   end
 
   while true do
-    local uid = handle:read("n")
-    local vid = handle:read("n")
+    local uid = handle:read("*n")
+    local vid = handle:read("*n")
     if not vid then
       break
     end
