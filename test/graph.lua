@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local bfs = require "dromozoa.graph.bfs"
+local breadth_first_search = require "dromozoa.graph.breadth_first_search"
 local depth_first_search = require "dromozoa.graph.depth_first_search"
 local tsort = require "dromozoa.graph.tsort"
 local undirected_dfs = require "dromozoa.graph.undirected_dfs"
@@ -93,7 +93,7 @@ for uid = 1, n do
 end
 
 print("==== bfs ====")
-bfs(g, bfs_visitor, 1)
+breadth_first_search(g, bfs_visitor, 1)
 
 print("==== dfs ====")
 depth_first_search(g, dfs_visitor, 1)
