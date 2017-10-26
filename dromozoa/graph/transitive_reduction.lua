@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local tsort_visit = require "dromozoa.graph.tsort_visit"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
 return function (g)
   local uv = g.uv
@@ -25,7 +25,7 @@ return function (g)
     if eid then
       local distance = {}
 
-      local order = tsort_visit(uv, uid)
+      local order = topological_sort(uv, uid)
       for i = #order, 1, -1 do
         local vid = order[i]
         local value = 0

@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local breadth_first_search = require "dromozoa.graph.breadth_first_search"
 local depth_first_search = require "dromozoa.graph.depth_first_search"
-local tsort = require "dromozoa.graph.tsort"
+local topological_sort = require "dromozoa.graph.topological_sort"
 local undirected_depth_first_search = require "dromozoa.graph.undirected_depth_first_search"
 local read = require "test.read"
 
@@ -103,7 +103,7 @@ if directed == "undirected" then
   undirected_depth_first_search(g, dfs_visitor, 1)
 else
   print("==== tsort ====")
-  local order = tsort(g)
+  local order = topological_sort(g)
   for i = 1, n do
     print("order", order[i])
   end
