@@ -15,37 +15,47 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local linked_list = require "dromozoa.graph.linked_list"
+local dumper = require "dromozoa.commons.dumper"
+local forward_list = require "dromozoa.graph.forward_list"
 
-local function check(source, expect)
-  local i = 0
-  assert(source.n == #expect)
-  for id in source:each() do
-    i = i + 1
-    assert(id == expect[i])
+local x = forward_list()
+x:add_first() -- 1
+x:add_first() -- 2,1
+x:insert_after(2) -- 2,3,1
+x:insert_after(1) -- 2,3,1,4
+x:add() -- 2,3,1,4,5
+
+x:remove_after(2) -- 2,1,4,5
+x:remove_after(4) -- 2,1,4
+x:remove_first() -- 1,4
+x:remove_first() -- 4
+x:remove_first() -- {}
+
+print(dumper.encode(x, { stable = true }))
+
+x:add()
+x:add()
+x:add()
+x:add()
+x:add() -- 6,7,8,9,10
+
+local prev_id
+local id = x.head
+repeat
+  print(id)
+
+  if id == 8 then
+    id = x:remove_after(prev_id)
+  else
+    prev_id = id
+    id = x[id]
   end
-end
+until not id
 
-local x = linked_list()
-check(x, {})
+print("--")
 
-assert(x:add() == 1)
-check(x, { 1 })
-
-assert(x:add() == 2)
-check(x, { 1, 2 })
-
-assert(x:insert(1) == 3)
-check(x, { 3, 1, 2 })
-
-assert(x:insert(3) == 4)
-check(x, { 4, 3, 1, 2 })
-
-assert(x:insert(2) == 5)
-check(x, { 4, 3, 1, 5, 2 })
-
-for id in x:each() do
-  x:remove(id)
-end
-assert(x.id == 5)
-assert(x.n == 0)
+local id = x.head
+repeat
+  print(id)
+  id = x[id]
+until not id

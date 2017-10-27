@@ -20,18 +20,6 @@ local clone = require "dromozoa.graph.clone"
 local class = {}
 local metatable = { __index = class }
 
-function class:add_vertex(uid)
-  local ue = self.ue
-  if ue[uid] == nil then
-    ue[uid] = false
-    return uid
-  end
-end
-
-function class:remove_vertex(uid)
-  self.ue[uid] = nil
-end
-
 function class:add_edge(eid, uid, vid)
   local ue = self.ue
   local nu = self.nu
@@ -59,7 +47,7 @@ function class:remove_edge(eid, uid)
   local ev = self.ev
   local next_eid = nu[eid]
   if next_eid == eid then
-    ue[uid] = false
+    ue[uid] = nil
   else
     if ue[uid] == eid then
       ue[uid] = next_eid
@@ -126,12 +114,7 @@ function class:degree(uid)
 end
 
 function class:clone()
-  return setmetatable({
-    ue = clone(self.ue);
-    nu = clone(self.nu);
-    pu = clone(self.pu);
-    ev = clone(self.ev);
-  }, metatable)
+  return clone(self)
 end
 
 return setmetatable(class, {

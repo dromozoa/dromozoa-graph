@@ -16,32 +16,33 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
+local clone = require "dromozoa.graph.clone"
+local linked_list = require "dromozoa.graph.linked_list"
 
 local class = {}
 local metatable = { __index = class }
 
 function class:add_vertex()
-  local uid = self.uid + 1
-  self.uid = uid
-  self.uv:add_vertex(uid)
-  self.vu:add_vertex(uid)
-  return uid
+  return self.u:add()
 end
 
 function class:remove_vertex(uid)
-  self.uv:remove_vertex(uid)
-  self.vu:remove_vertex(uid)
+  self.u:remove(uid)
 end
 
 function class:add_edge(uid, vid)
-  local eid = self.eid + 1
-  self.eid = eid
+  local e = self.e
+  local eid = e.id + 1
+  e.id = eid
+  e.n = e.n + 1
   self.uv:add_edge(eid, uid, vid)
   self.vu:add_edge(eid, vid, uid)
   return eid
 end
 
 function class:remove_edge(eid)
+  local e = self.e
+  e.n = e.n - 1
   local uid = self.eu[eid]
   local vid = self.ev[eid]
   self.uv:remove_edge(eid, uid)
@@ -78,8 +79,8 @@ function class:clone()
   local uv = self.uv:clone()
   local vu = self.vu:clone()
   return setmetatable({
-    uid = self.uid;
-    eid = self.eid;
+    u = clone(self.u);
+    e = clone(self.e);
     uv = uv;
     vu = vu;
     ue = uv.ue;
@@ -104,8 +105,9 @@ return setmetatable(class, {
     local uv = adjacency_list()
     local vu = adjacency_list()
     return setmetatable({
-      uid = 0;
-      eid = 0;
+      u = linked_list();
+      e = { id = 0, n = 0 };
+
       uv = uv;
       vu = vu;
       ue = uv.ue;

@@ -38,10 +38,12 @@ local function check(g, uid, expect)
 end
 
 local function test(g)
+  assert(g.u.n == 1)
   local u1 = g:add_vertex()
   local u2 = g:add_vertex()
   local u3 = g:add_vertex()
   local u4 = g:add_vertex()
+  assert(g.u.n == 4)
 
   assert(#g.eu == 0)
   assert(#g.ev == 0)
@@ -87,8 +89,6 @@ local function test(g)
   check(g, u2, { e1 })
   check(g, u3, { e2 })
 end
-
-local g = graph()
 
 local g = graph()
 local u1 = g:add_vertex()
