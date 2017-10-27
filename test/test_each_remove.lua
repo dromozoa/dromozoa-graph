@@ -17,22 +17,32 @@
 
 local graph = require "dromozoa.graph"
 
-local function test(g)
-  local u1 = g:add_vertex()
-  local u2 = g:add_vertex()
-  local u3 = g:add_vertex()
-
-  local e1 = g:add_edge(u1, u2)
-  local e2 = g:add_edge(u1, u3)
-
-  local n = 0
-  for eid, vid in g:each_edge(u1) do
-    print(eid, vid)
-    n = n + 1
-    g:remove_edge(eid)
-  end
-  assert(n == 2)
-end
-
 local g = graph()
-test(g)
+
+assert(g.u.n == 0)
+assert(g.e.n == 0)
+
+local u1 = g:add_vertex()
+local u2 = g:add_vertex()
+local u3 = g:add_vertex()
+
+assert(g.u.n == 3)
+assert(g.e.n == 0)
+
+local e1 = g:add_edge(u1, u2)
+local e2 = g:add_edge(u1, u3)
+
+assert(g.u.n == 3)
+assert(g.e.n == 2)
+
+local n = 0
+for eid, vid in g:each_edge(u1) do
+  print(eid, vid)
+  n = n + 1
+  g:remove_edge(eid)
+  g:remove_vertex(vid)
+end
+assert(n == 2)
+
+assert(g.u.n == 1)
+assert(g.e.n == 0)
