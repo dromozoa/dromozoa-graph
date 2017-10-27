@@ -17,6 +17,7 @@
 
 local forward_list = require "dromozoa.graph.forward_list"
 local linked_list = require "dromozoa.graph.linked_list"
+local linked_list2 = require "dromozoa.graph.linked_list2"
 
 -- local n = 10000
 local n = 3000
@@ -63,10 +64,20 @@ local function l2()
   return x
 end
 
+local function l3()
+  local x = linked_list2()
+  local v = {}
+  for i = 1, n do
+    v[x:add()] = i
+  end
+  return x
+end
+
 return {
   t1 = { t1 };
   t2 = { t2 };
   t3 = { t3 };
   l1 = { l1 };
   l2 = { l2 };
+  l3 = { l3 };
 }

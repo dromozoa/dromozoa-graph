@@ -17,6 +17,7 @@
 
 local forward_list = require "dromozoa.graph.forward_list"
 local linked_list = require "dromozoa.graph.linked_list"
+local linked_list2 = require "dromozoa.graph.linked_list2"
 
 -- local n = 10000
 local n = 3000
@@ -36,6 +37,12 @@ local f = forward_list()
 local fm = {}
 for i = 1, n do
   fm[f:add()] = i
+end
+
+local L = linked_list2()
+local Lm = {}
+for i = 1, n do
+  Lm[L:add()] = i
 end
 
 local function t1(x)
@@ -80,10 +87,31 @@ local function l2(x)
   return x, v
 end
 
+local function l3(x)
+  local v = 0
+  local Lnext = L.next
+  local id = Lnext[1]
+  repeat
+    v = v + Lm[id]
+    id = Lnext[id]
+  until id == 1
+  return x, v
+end
+
+local function l4(x)
+  local v = 0
+  for id in L.next_impl, L do
+    v = v + Lm[id]
+  end
+  return x, v
+end
+
 return {
   t1 = { t1, t };
   t2 = { t2, t };
   t3 = { t3, t };
   l1 = { l1, l };
   l2 = { l2, f };
+  l3 = { l3, l2 };
+  l4 = { l4, l2 };
 }
