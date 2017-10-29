@@ -20,22 +20,13 @@ local depth_first_search = require "dromozoa.graph.depth_first_search"
 
 local g = adjacency_list()
 
-g:add_vertex(1)
-g:add_vertex(2)
-g:add_vertex(3)
-g:add_vertex(4)
-g:add_vertex(5)
 g:add_edge(1, 1, 2)
 g:add_edge(2, 2, 3)
 g:add_edge(3, 2, 4)
 
-assert(#g.ue == 5)
-assert(#g.ev == 3)
-
 for eid, vid in g:each_edge(2) do
   print(eid, vid)
 end
-
 assert(g:degree(2) == 2)
 
 depth_first_search(g, {

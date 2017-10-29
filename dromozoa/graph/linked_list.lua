@@ -110,5 +110,5 @@ return setmetatable(class, {
       next = {};
       prev = {};
     }, metatable)
-  end
+  end;
 })
