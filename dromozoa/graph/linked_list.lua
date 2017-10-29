@@ -31,14 +31,14 @@ function class:add()
     self.first = id
     next[id] = id
     prev[id] = id
-  else
-    local prev_id = prev[next_id]
-    next[prev_id] = id
-    next[id] = next_id
-    prev[id] = prev_id
-    prev[next_id] = id
+    return id
   end
 
+  local prev_id = prev[next_id]
+  next[prev_id] = id
+  next[id] = next_id
+  prev[id] = prev_id
+  prev[next_id] = id
   return id
 end
 
