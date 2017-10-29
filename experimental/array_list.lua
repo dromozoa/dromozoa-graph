@@ -36,6 +36,13 @@ function class:each(i)
   end
 end
 
+function class:each_bench(v)
+  for i = 1, self.n do
+    v = v + self[i]
+  end
+  return v
+end
+
 return setmetatable(class, {
   __call = function ()
     return setmetatable({

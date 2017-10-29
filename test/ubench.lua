@@ -37,6 +37,11 @@ local function each(x)
   return x, v
 end
 
+local function each_bench(x)
+  local v = x:each_bench(0)
+  return x, v
+end
+
 local classes = {
   array_list;
   linked_list;
@@ -55,15 +60,20 @@ for i = 1, #classes do
 
   collectgarbage() collectgarbage() local count1 = collectgarbage "count"
   local _, data = construct(class)
-  local _, value = each(data)
   collectgarbage() collectgarbage() local count2 = collectgarbage "count"
   assert(data.n == N)
+
+  local _, value = each(data)
+  assert(value == expect_value)
+
+  local _, value = each_bench(data)
   assert(value == expect_value)
 
   io.stderr:write(("%02d\t%d\n"):format(i, (count2 - count1) * 1024))
 
   benchmarks[("C%02d"):format(i)] = { construct, class }
   benchmarks[("E%02d"):format(i)] = { each, data }
+  benchmarks[("B%02d"):format(i)] = { each_bench, data }
 end
 
 return benchmarks
