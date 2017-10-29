@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,25 +15,31 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
-local depth_first_search = require "dromozoa.graph.depth_first_search"
+local class = {}
+local metatable = { __index = class }
 
-local g = adjacency_list()
-
-g:add_edge(1, 1, 2)
-g:add_edge(2, 2, 3)
-g:add_edge(3, 2, 4)
-
-for eid, vid in g:each_edge(2) do
-  print(eid, vid)
+function class:add(value)
+  local n = self.n + 1
+  self.n = n
+  self[n] = value
+  return n
 end
-assert(g:degree(2) == 2)
 
-depth_first_search(g, {
-  tree_edge = function (_, eid, uid, vid)
-    print("tree_edge", uid, vid)
+function class:each(i)
+  if not i then
+    return 1, self[1]
+  end
+
+  i = i + 1
+  if i <= self.n then
+    return i, self[i]
+  end
+end
+
+return setmetatable(class, {
+  __call = function ()
+    return setmetatable({
+      n = 0;
+    }, metatable)
   end;
-  finish_edge = function (_, eid, uid, vid)
-    print("finish_edge", uid, vid)
-  end;
-}, 1)
+})
