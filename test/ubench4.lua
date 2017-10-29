@@ -19,14 +19,14 @@ local array_list = require "experimental.array_list"
 local linked_list = require "experimental.linked_list"
 local naive_linked_list = require "experimental.naive_linked_list"
 
-local N = 10000
+local N = 3000
 
 local function construct(class)
   local x = class()
   for i = 1, N do
     x:add(i * i)
   end
-  return x
+  return class, x
 end
 
 local function each(x)
@@ -43,7 +43,7 @@ local classes = {
   naive_linked_list;
 }
 
-local bench = {}
+local benchmarks = {}
 
 local expect_value = 0
 for i = 1, N do
@@ -54,15 +54,16 @@ for i = 1, #classes do
   local class = classes[i]
 
   collectgarbage() collectgarbage() local count1 = collectgarbage "count"
-  local data, value = each(construct(class))
+  local _, data = construct(class)
+  local _, value = each(data)
   collectgarbage() collectgarbage() local count2 = collectgarbage "count"
   assert(data.n == N)
   assert(value == expect_value)
 
   io.stderr:write(("%02d\t%d\n"):format(i, (count2 - count1) * 1024))
 
-  bench[("C%02d"):format(i)] = { construct, classe }
-  bench[("E%02d"):format(i)] = { each, data }
+  benchmarks[("C%02d"):format(i)] = { construct, class }
+  benchmarks[("E%02d"):format(i)] = { each, data }
 end
 
-return bench
+return benchmarks
