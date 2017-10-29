@@ -15,60 +15,55 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local linked_list = require "dromozoa.graph.linked_list"
+local array_list = require "experimental.array_list"
+local linked_list = require "experimental.linked_list"
+local naive_linked_list = require "experimental.naive_linked_list"
 
--- local n = 10000
-local n = 3000
+local N = 3000
 
-local function table_insert()
-  local x = {}
-  for i = 1, n do
-    -- table.insert(x, i)
-    x[i] = i
+local function construct(class)
+  local x = class()
+  for i = 1, N do
+    x:add(i * i)
   end
-  return x
+  return class, x
 end
 
-local function table_insert_remove()
-  local x = {}
-  for i = 1, n do
-    -- table.insert(x, i)
-    x[i] = i
+local function each(x)
+  local v = 0
+  for _, value in x.each, x do
+    v = v + value
   end
-  for i = 1, n do
-    table.remove(x, i)
-  end
-  return x
+  return x, v
 end
 
-local function list1_insert()
-  local x = linked_list()
-  local v = {}
-  for i = 1, n do
-    v[x:insert()] = i
-  end
-  return x
-end
-
-local function list1_insert_remove()
-  local x = linked_list()
-  local v = {}
-  for i = 1, n do
-    v[x:insert()] = i
-  end
-  for i in x:each() do
-    v[i] = nil
-    x:remove(i)
-  end
-  return x
-end
-
-local class = {}
-local metatable = { __index = class }
-
-return {
-  table_insert = { table_insert };
-  table_insert_remove = { table_insert_remove };
-  list1_insert = { list1_insert };
-  list1_insert_remove = { list1_insert_remove };
+local classes = {
+  array_list;
+  linked_list;
+  naive_linked_list;
 }
+
+local benchmarks = {}
+
+local expect_value = 0
+for i = 1, N do
+  expect_value = expect_value + i * i
+end
+
+for i = 1, #classes do
+  local class = classes[i]
+
+  collectgarbage() collectgarbage() local count1 = collectgarbage "count"
+  local _, data = construct(class)
+  local _, value = each(data)
+  collectgarbage() collectgarbage() local count2 = collectgarbage "count"
+  assert(data.n == N)
+  assert(value == expect_value)
+
+  io.stderr:write(("%02d\t%d\n"):format(i, (count2 - count1) * 1024))
+
+  benchmarks[("C%02d"):format(i)] = { construct, class }
+  benchmarks[("E%02d"):format(i)] = { each, data }
+end
+
+return benchmarks
