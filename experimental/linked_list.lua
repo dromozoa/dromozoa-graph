@@ -52,6 +52,17 @@ function class:each(prev_id)
   end
 end
 
+function class:each_bench(v)
+  local id = self.first
+  local next = self.next
+  local value = self.value
+  repeat
+    v = v + value[id]
+    id = next[id]
+  until not id
+  return v
+end
+
 return setmetatable(class, {
   __call = function ()
     return setmetatable({

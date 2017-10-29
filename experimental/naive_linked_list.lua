@@ -53,6 +53,15 @@ function class:each(prev_node)
   end
 end
 
+function class:each_bench(v)
+  local node = self.first
+  repeat
+    v = v + node[1]
+    node = node[3]
+  until not node
+  return v
+end
+
 return setmetatable(class, {
   __call = function ()
     return setmetatable({ n = 0 }, metatable)
