@@ -23,39 +23,28 @@ function class:add()
   self.id = id
   self.n = self.n + 1
 
-  local prev = self.prev
-
-  local first_id = self.first
-  if not first_id then
-    self.first = id
-    prev[id] = id
-    return id
-  end
-
   local next = self.next
+  local prev = self.prev
+  local next_id = 1
+  local prev_id = prev[next_id]
 
-  local last_id = prev[first_id]
-  prev[first_id] = id
-  prev[id] = last_id
-  next[last_id] = id
+  next[prev_id] = id
+  next[id] = next_id
+  prev[id] = prev_id
+  prev[next_id] = id
 
   return id
 end
 
 function class:next_impl(prev_id)
   if not prev_id then
-    return self.first
+    prev_id = 1
   end
-  return self.next[prev_id]
-end
 
-function class:each(f)
-  local next = self.next
-  local id = self.first
-  repeat
-    f(id)
-    id = next[id]
-  until not id
+  local id = self.next[prev_id]
+  if id ~= 1 then
+    return id
+  end
 end
 
 return setmetatable(class, {

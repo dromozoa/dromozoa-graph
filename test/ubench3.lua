@@ -69,6 +69,18 @@ local function t3(x)
   return x, v
 end
 
+local function l0(x)
+  local v = 0
+  local next = l.next
+  local first = l.first
+  local id = first
+  repeat
+    v = v + lm[id]
+    id = next[id]
+  until id == first
+  return x, v
+end
+
 local function l1(x)
   local v = 0
   for id in l:each() do
@@ -90,11 +102,11 @@ end
 local function l3(x)
   local v = 0
   local Lnext = L.next
-  local id = Lnext[1]
+  local id = L.first
   repeat
     v = v + Lm[id]
     id = Lnext[id]
-  until id == 1
+  until not id
   return x, v
 end
 
@@ -106,12 +118,23 @@ local function l4(x)
   return x, v
 end
 
+local function l5(x)
+  local v = 0
+  L:each(function (id)
+    v = v + Lm[id]
+  end)
+  return x, v
+end
+
+
 return {
   t1 = { t1, t };
   t2 = { t2, t };
   t3 = { t3, t };
+  l0 = { l0, l };
   l1 = { l1, l };
   l2 = { l2, f };
-  l3 = { l3, l2 };
-  l4 = { l4, l2 };
+  l3 = { l3, L };
+  l4 = { l4, L };
+  l5 = { l5, L };
 }
