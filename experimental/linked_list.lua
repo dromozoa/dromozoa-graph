@@ -18,53 +18,47 @@
 local class = {}
 local metatable = { __index = class }
 
-function class:add()
-  local id = self.id + 1
-  self.id = id
-  self.n = self.n + 1
+function class:add(value)
+  local prev_id = self.last
 
-  local prev = self.prev
-
-  local first_id = self.first
-  if not first_id then
-    self.first = id
-    prev[id] = id
-    return id
+  if not prev_id then
+    self.id = 1
+    self.n = 1
+    self.first = 1
+    self.last = 1
+    self.value[1] = value
+  else
+    local id = self.id + 1
+    self.id = id
+    self.n = self.n + 1
+    self.last = id
+    self.next[prev_id] = id
+    self.prev[id] = prev_id
+    self.value[id] = value
   end
-
-  local next = self.next
-
-  local last_id = prev[first_id]
-  prev[first_id] = id
-  prev[id] = last_id
-  next[last_id] = id
 
   return id
 end
 
-function class:next_impl(prev_id)
+function class:each(prev_id)
   if not prev_id then
-    return self.first
+    local id = self.first
+    return id, self.value[id]
   end
-  return self.next[prev_id]
-end
 
-function class:each(f)
-  local next = self.next
-  local id = self.first
-  repeat
-    f(id)
-    id = next[id]
-  until not id
+  local id = self.next[prev_id]
+  if id then
+    return id, self.value[id]
+  end
 end
 
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
-      id = 1;
       n = 0;
-      next = { [1] = 1 };
-      prev = { [1] = 1 };
+      next = {};
+      prev = {};
+      value = {};
     }, metatable)
   end;
 })
