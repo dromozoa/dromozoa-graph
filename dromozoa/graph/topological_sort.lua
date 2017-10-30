@@ -15,21 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local depth_first_search = require "dromozoa.graph.depth_first_search"
+local function visit(first, after, target, order, color, uid)
+  color[uid] = 1
 
-local class = {}
-local metatable = { __index = class }
-
-function class:back_edge()
-  error("not a dag")
+  color[uid] = 2
+  order[#order + 1] = uid
 end
 
-function class:finish_vertex(uid)
-  self[#self + 1] = uid
-end
+return function (u, uv)
+  local u_after = u.after
 
-return function (g)
-  local that = setmetatable({}, metatable)
-  depth_first_search(g, that)
-  return that
+  local uv_first = uv.first
+  local uv_after = uv.after
+  local uv_target = uv.target
+
+  local order = {}
+  local color = {}
+
+  local uid = u.first
+  while uid do
+    if not color[uid] then
+      visit(uv_first, uv_after, uv_target, order, color, uid)
+    end
+    uid = u_after[uid]
+  end
+
+  return order
 end
