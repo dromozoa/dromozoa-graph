@@ -30,29 +30,44 @@ function class:remove_vertex(uid)
 end
 
 function class:add_edge(uid, vid)
-  local e = self.e
-  local eid = e.id + 1
-  e.id = eid
-  e.n = e.n + 1
+  local eid = self.eid + 1
+  self.eid = eid
   self.uv:add_edge(eid, uid, vid)
   self.vu:add_edge(eid, vid, uid)
   return eid
 end
 
 function class:remove_edge(eid)
-  local e = self.e
-  e.n = e.n - 1
   local uid = self.vu.target[eid]
   local vid = self.uv.target[eid]
   self.uv:remove_edge(eid, uid)
   self.vu:remove_edge(eid, vid)
 end
 
+function class:remove_edges(uid)
+  local uv = self.uv
+  local uv_target = uv.target
+  local vu = self.vu
+  local vu_target = vu.target
+
+  local eid = uv.first[uid]
+  while eid do
+    vu:remove_edge(eid, uv_target[eid])
+    eid = uv:remove_edge(eid, uid)
+  end
+
+  local eid = vu.first[uid]
+  while eid do
+    uv:remove_edge(eid, vu_target[eid])
+    eid = vu:remove_edge(eid, uid)
+  end
+end
+
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
       u = linked_list();
-      e = { id = 0, n = 0 };
+      eid = 0;
       uv = adjacency_list();
       vu = adjacency_list();
     }, metatable)
