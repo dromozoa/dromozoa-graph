@@ -22,11 +22,11 @@ local class = {}
 local metatable = { __index = class }
 
 function class:add_vertex()
-  return self.v:add()
+  return self.u:add()
 end
 
 function class:remove_vertex(uid)
-  self.v:remove(uid)
+  self.u:remove(uid)
 end
 
 function class:add_edge(uid, vid)
@@ -42,8 +42,8 @@ end
 function class:remove_edge(eid)
   local e = self.e
   e.n = e.n - 1
-  local uid = self.eu[eid]
-  local vid = self.ev[eid]
+  local uid = self.vu.target[eid]
+  local vid = self.uv.target[eid]
   self.uv:remove_edge(eid, uid)
   self.vu:remove_edge(eid, vid)
 end
