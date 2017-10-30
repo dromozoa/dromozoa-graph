@@ -87,7 +87,26 @@ local function greedy_linear_ordering(g)
   return order
 end
 
-return function (g, reversed)
+return function (g)
   local order = greedy_linear_ordering(clone(g))
+
+  local e = g.e
+  local eid_after = e.after
+  local source = g.vu.target
+  local target = g.uv.target
+
+  local reverse = {}
+
+  local eid = e.first
+  while eid do
+    local uid = source[eid]
+    local vid = target[eid]
+    if order[uid] > order[vid] then
+      reverse[#reverse + 1] = eid
+      print("reverse", uid, vid, eid)
+    end
+    eid = eid_after[eid]
+  end
+  return reverse
   -- print(table.concat(order, " "))
 end
