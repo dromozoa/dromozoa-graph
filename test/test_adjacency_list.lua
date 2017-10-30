@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
-local depth_first_search = require "dromozoa.graph.depth_first_search"
+-- local depth_first_search = require "dromozoa.graph.depth_first_search"
 
 local g = adjacency_list()
 
@@ -24,16 +24,40 @@ g:add_edge(1, 1, 2)
 g:add_edge(2, 2, 3)
 g:add_edge(3, 2, 4)
 
-for eid, vid in g:each_edge(2) do
-  print(eid, vid)
-end
-assert(g:degree(2) == 2)
+local eid = g.first[2]
+assert(eid == 2)
+assert(g.target[eid] == 3)
+local eid = g.after[eid]
+assert(eid == 3)
+assert(g.target[eid] == 4)
+local eid = g.after[eid]
+assert(eid == nil)
+assert(g.target[eid] == nil)
 
-depth_first_search(g, {
-  tree_edge = function (_, eid, uid, vid)
-    print("tree_edge", uid, vid)
-  end;
-  finish_edge = function (_, eid, uid, vid)
-    print("finish_edge", uid, vid)
-  end;
-}, 1)
+assert(g:degree(1) == 1)
+assert(g:degree(2) == 2)
+assert(g:degree(3) == 0)
+
+local eid = g.first[2]
+while eid do
+  eid = g:remove_edge(eid, 2)
+end
+
+assert(g:degree(1) == 1)
+assert(g:degree(2) == 0)
+assert(g:degree(3) == 0)
+
+g:remove_edge(1, 1)
+
+assert(g:degree(1) == 0)
+assert(g:degree(2) == 0)
+assert(g:degree(3) == 0)
+
+-- depth_first_search(g, {
+--   tree_edge = function (_, eid, uid, vid)
+--     print("tree_edge", uid, vid)
+--   end;
+--   finish_edge = function (_, eid, uid, vid)
+--     print("finish_edge", uid, vid)
+--   end;
+-- }, 1)
