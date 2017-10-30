@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,33 +16,28 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local greedy = require "experimental.cycle_removal.greedy"
+
+local N = 5000
 
 local g = graph()
-
-assert(g.u.n == 0)
-assert(g.e.n == 0)
-
-local u1 = g:add_vertex()
-local u2 = g:add_vertex()
-local u3 = g:add_vertex()
-
-assert(g.u.n == 3)
-assert(g.e.n == 0)
-
-local e1 = g:add_edge(u1, u2)
-local e2 = g:add_edge(u1, u3)
-
-assert(g.u.n == 3)
-assert(g.e.n == 2)
-
-local n = 0
-for eid, vid in g:each_edge(u1) do
-  print(eid, vid)
-  n = n + 1
-  g:remove_edge(eid)
-  g:remove_vertex(vid)
+local u = g:add_vertex()
+local v = g:add_vertex()
+g:add_edge(u, v)
+for i = 1, N do
+  local w = g:add_vertex()
+  g:add_edge(v, w)
+  g:add_edge(w, u)
+  u = v
+  v = w
 end
-assert(n == 2)
 
-assert(g.u.n == 1)
-assert(g.e.n == 0)
+local algorithms = {
+  greedy;
+}
+
+local benchmarks = {}
+
+for i = 1, #algorithms do
+  benchmarks[("%02d"):format(i)] = { algorithms[i], g }
+end

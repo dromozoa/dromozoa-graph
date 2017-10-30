@@ -15,87 +15,98 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function greedy_linear_ordering(g)
-  local uv = g.uv
-  local vu = g.vu
-  local ue = uv.ue
-  local ve = vu.ue
+local clone = require "dromozoa.graph.clone"
 
-  local min = 1
-  local max = g.uid
+local function greedy_linear_ordering(g)
   local order = {}
 
-  while next(ue) ~= nil do
-    -- each sink vertex
+  local u = g.u
+  local uid_after = u.after
+  local uv = g.uv
+  local uv_first = uv.first
+  local vu = g.vu
+  local vu_first = vu.first
+
+  local min = 1
+  local max = u.n
+
+  while u.first do
     repeat
       local n = max
-      for vid, eid in pairs(ue) do
-        if not eid then
-          for eid in vu:each_edge(vid) do
-            g:remove_edge(eid)
-          end
-          g:remove_vertex(vid)
-          order[vid] = max
+      local uid = u.first
+      while uid do
+        if not uv_first[uid] then -- sink
+          order[uid] = max
           max = max - 1
+          g:remove_edges(uid)
+          uid = g:remove_vertex(uid)
+        else
+          uid = uid_after[uid]
         end
       end
     until n == max
 
-    -- each source vertex
     repeat
       local n = min
-      for uid, eid in pairs(ve) do
-        if not eid then
-          for eid in uv:each_edge(uid) do
-            g:remove_edge(eid)
-          end
-          g:remove_vertex(uid)
+      local uid = u.first
+      while uid do
+        if not vu_first[uid] then -- source
           order[uid] = min
           min = min + 1
+          g:remove_edges(uid)
+          uid = g:remove_vertex(uid)
+        else
+          uid = uid_after[uid]
         end
       end
     until n == min
 
-    if next(ue) == nil then
+    local wid
+    local value
+
+    local uid = u.first
+    if not uid then
       break
     end
 
-    -- choose vertex w such that \(d^+(w) - d^-(w)\) is maximum
-    local wid
-    local value
-    for uid in pairs(ue) do
+    while uid do
       local v = uv:degree(uid) - vu:degree(uid)
       if not value or value < v then
         wid = uid
         value = v
       end
+      uid = uid_after[uid]
     end
 
-    for eid in uv:each_edge(wid) do
-      g:remove_edge(eid)
-    end
-    for eid in vu:each_edge(wid) do
-      g:remove_edge(eid)
-    end
-    g:remove_vertex(wid)
     order[wid] = min
     min = min + 1
+    g:remove_edges(wid)
+    g:remove_vertex(wid)
   end
 
   return order
 end
 
-return function (g, ep)
-  local ev = g.ev
-  local eu = g.eu
+return function (g)
+  local order = greedy_linear_ordering(clone(g))
 
-  local order = greedy_linear_ordering(g:clone())
+  local e = g.e
+  local eid_after = e.after
+  local source = g.vu.target
+  local target = g.uv.target
 
-  for eid, vid in pairs(ev) do
-    local uid = eu[eid]
-    if order[eu[eid]] > order[vid] then
-      g:reverse_edge(eid)
-      ep:put("reversed", eid, true)
+  local reverse = {}
+
+  local eid = e.first
+  while eid do
+    local uid = source[eid]
+    local vid = target[eid]
+    if order[uid] > order[vid] then
+      reverse[#reverse + 1] = eid
+      print("reverse", uid, vid, eid)
     end
+    eid = eid_after[eid]
   end
+  return reverse
+  -- print(table.concat(order, " "))
 end

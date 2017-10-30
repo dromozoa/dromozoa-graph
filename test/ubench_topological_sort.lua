@@ -22,7 +22,7 @@ local topological_sort_recursive3 = require "experimental.topological_sort_recur
 local topological_sort_recursive4 = require "experimental.topological_sort_recursive4"
 local topological_sort_stack = require "experimental.topological_sort_stack"
 
-local layer, count, mode = ...
+local layer, count = ...
 local layer = tonumber(layer or 6) -- 6 or 14
 local count = tonumber(count or 4) -- 4 or 2
 
