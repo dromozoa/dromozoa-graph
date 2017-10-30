@@ -18,11 +18,14 @@
 local linked_list = require "dromozoa.graph.linked_list"
 
 local function check(source, expect)
-  local i = 0
   assert(source.n == #expect)
-  for id in source:each() do
+  local i = 0
+  local id = source.first
+  local after = source.after
+  while id do
     i = i + 1
     assert(id == expect[i])
+    id = after[id]
   end
 end
 
@@ -38,14 +41,19 @@ check(x, { 1, 2 })
 assert(x:insert(1) == 3)
 check(x, { 3, 1, 2 })
 
-assert(x:insert(3) == 4)
-check(x, { 4, 3, 1, 2 })
+assert(x:insert(2) == 4)
+check(x, { 3, 1, 4, 2 })
 
-assert(x:insert(2) == 5)
-check(x, { 4, 3, 1, 5, 2 })
-
-for id in x:each() do
-  x:remove(id)
+local id = x.first
+while id do
+  id = x:remove(id)
 end
-assert(x.id == 5)
+
+assert(x.id == 4)
 assert(x.n == 0)
+
+assert(x:add() == 5)
+check(x, { 5 })
+
+assert(x:add() == 6)
+check(x, { 5, 6 })

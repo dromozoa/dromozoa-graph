@@ -15,115 +15,67 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.graph.clone"
-
 local class = {}
 local metatable = { __index = class }
 
 function class:add_edge(eid, uid, vid)
-  local ue = self.ue
-  local nu = self.nu
-  local pu = self.pu
-  local ev = self.ev
-  local next_eid = ue[uid]
-  if not next_eid then
-    ue[uid] = eid
-    nu[eid] = eid
-    pu[eid] = eid
+  local prev_eid = self.last[uid]
+  if not prev_eid then
+    self.first[uid] = eid
   else
-    local prev_eid = pu[next_eid]
-    nu[prev_eid] = eid
-    nu[eid] = next_eid
-    pu[eid] = prev_eid
-    pu[next_eid] = eid
+    self.before[eid] = prev_eid
+    self.after[prev_eid] = eid
   end
-  ev[eid] = vid
+
+  self.last[uid] = eid
+  self.target[eid] = vid
 end
 
 function class:remove_edge(eid, uid)
-  local ue = self.ue
-  local nu = self.nu
-  local pu = self.pu
-  local ev = self.ev
-  local next_eid = nu[eid]
-  if next_eid == eid then
-    ue[uid] = nil
-  else
-    if ue[uid] == eid then
-      ue[uid] = next_eid
-    end
-    local prev_eid = pu[eid]
-    nu[prev_eid] = next_eid
-    pu[next_eid] = prev_eid
-  end
-  nu[eid] = nil
-  pu[eid] = nil
-  ev[eid] = nil
-end
+  local before = self.before
+  local after = self.after
 
-function class:each_edge(uid, inv)
-  local next_eid = self.ue[uid]
+  local prev_eid = before[eid]
+  local next_eid = after[eid]
+  if not prev_eid then
+    self.first[uid] = next_eid
+  else
+    after[prev_eid] = next_eid
+  end
   if not next_eid then
-    return function () end
+    self.last[uid] = prev_eid
   else
-    local nu = self.nu
-    local ev = self.ev
-    local tail_eid = self.pu[next_eid]
-    return function (_, prev_eid)
-      if prev_eid ~= tail_eid then
-        local eid = next_eid
-        next_eid = nu[eid]
-        return eid, ev[eid], inv
-      end
-    end
+    before[next_eid] = prev_eid
   end
-end
 
-function class:reverse_push_edges(uid, n, eids, uids, vids, invs, inv)
-  local tail_eid = self.ue[uid]
-  if tail_eid then
-    local pu = self.pu
-    local ev = self.ev
-    local eid = tail_eid
-    repeat
-      eid = pu[eid]
-      n = n + 1
-      eids[n] = eid
-      uids[n] = uid
-      vids[n] = ev[eid]
-      invs[n] = inv
-    until eid == tail_eid
-  end
-  return n
+  before[eid] = nil
+  after[eid] = nil
+  self.target[eid] = nil
+
+  return next_eid
 end
 
 function class:degree(uid)
-  local tail_eid = self.ue[uid]
-  if not tail_eid then
-    return 0
-  else
-    local pu = self.pu
-    local n = 0
-    local eid = tail_eid
-    repeat
-      n = n + 1
-      eid = pu[eid]
-    until eid == tail_eid
-    return n
-  end
-end
+  local after = self.after
 
-function class:clone()
-  return clone(self)
+  local result = 0
+  local eid = self.first[uid]
+  while eid do
+    result = result + 1
+    eid = after[eid]
+  end
+
+  return result
 end
 
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
-      ue = {};
-      nu = {};
-      pu = {};
-      ev = {};
+      first = {};
+      last = {};
+      before = {};
+      after = {};
+      target = {};
     }, metatable)
   end;
 })

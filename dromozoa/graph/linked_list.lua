@@ -23,22 +23,16 @@ function class:add()
   self.id = id
   self.n = self.n + 1
 
-  local next = self.next
-  local prev = self.prev
-
-  local next_id = self.first
-  if not next_id then
+  local prev_id = self.last
+  if not prev_id then
     self.first = id
-    next[id] = id
-    prev[id] = id
-    return id
+  else
+    self.before[id] = prev_id
+    self.after[prev_id] = id
   end
 
-  local prev_id = prev[next_id]
-  next[prev_id] = id
-  next[id] = next_id
-  prev[id] = prev_id
-  prev[next_id] = id
+  self.last = id
+
   return id
 end
 
@@ -47,18 +41,19 @@ function class:insert(next_id)
   self.id = id
   self.n = self.n + 1
 
-  local next = self.next
-  local prev = self.prev
-  local prev_id = prev[next_id]
+  local before = self.before
+  local after = self.after
 
-  if self.first == next_id then
+  local prev_id = before[next_id]
+  if not prev_id then
     self.first = id
+  else
+    before[id] = prev_id
+    after[prev_id] = id
   end
 
-  next[prev_id] = id
-  next[id] = next_id
-  prev[id] = prev_id
-  prev[next_id] = id
+  before[next_id] = id
+  after[id] = next_id
 
   return id
 end
@@ -66,40 +61,26 @@ end
 function class:remove(id)
   self.n = self.n - 1
 
-  local next = self.next
-  local prev = self.prev
-  local next_id = next[id]
+  local before = self.before
+  local after = self.after
 
-  if next_id == id then
-    self.first = nil
+  local prev_id = before[id]
+  local next_id = after[id]
+  if not prev_id then
+    self.first = next_id
   else
-    if self.first == id then
-      self.first = next_id
-    end
-    local prev_id = prev[id]
-    next[prev_id] = next_id
-    prev[next_id] = prev_id
+    after[prev_id] = next_id
   end
-
-  next[id] = nil
-  prev[id] = nil
-end
-
-function class:each()
-  local next_id = self.first
   if not next_id then
-    return function () end
+    self.last = prev_id
   else
-    local next = self.next
-    local tail_id = self.prev[next_id]
-    return function (_, prev_id)
-      if prev_id ~= tail_id then
-        local id = next_id
-        next_id = next[id]
-        return id
-      end
-    end
+    before[next_id] = prev_id
   end
+
+  before[id] = nil
+  after[id] = nil
+
+  return next_id
 end
 
 return setmetatable(class, {
@@ -107,8 +88,8 @@ return setmetatable(class, {
     return setmetatable({
       id = 0;
       n = 0;
-      next = {};
-      prev = {};
+      before = {};
+      after = {};
     }, metatable)
   end;
 })
