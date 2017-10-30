@@ -27,11 +27,11 @@ function class:add()
   if not prev_id then
     self.first = id
   else
+    self.before[id] = prev_id
     self.after[prev_id] = id
   end
 
   self.last = id
-  self.before[id] = prev_id
 
   return id
 end
@@ -48,10 +48,10 @@ function class:insert(next_id)
   if not prev_id then
     self.first = id
   else
+    before[id] = prev_id
     after[prev_id] = id
   end
 
-  before[id] = prev_id
   before[next_id] = id
   after[id] = next_id
 
