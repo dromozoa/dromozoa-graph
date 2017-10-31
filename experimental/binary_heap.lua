@@ -16,56 +16,54 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function up_heap(heap, key, value, n, vid, v)
-  local result = false
   while n > 1 do
     local m = (n - n % 2) / 2
     local uid = heap[m]
-    local u = value[uid]
-    if u < v then
+    if value[uid] < v then
       heap[m] = vid
       heap[n] = uid
-      key[uid] = n
       key[vid] = m
+      key[uid] = n
       n = m
-      result = true
     else
-      return result
+      return
     end
   end
 end
 
-local function down_heap(heap, key, value, m, uid, u)
-  local result = false
-  while true do
-    local n = m * 2
-    local vid = heap[n]
-    if vid then
-      local v = value[vid]
+local function down_heap(heap, key, value, i, uid, u)
+  local result
 
-      local n2 = n + 1
-      local vid2 = heap[n2]
-      if vid2 then
-        local v2 = value[vid2]
-        if v < v2 then
-          n = n2
-          vid = vid2
-          v = v2
-        end
-      end
+  local j = i * 2
+  local vid = heap[j]
+  while vid do
+    local v = value[vid]
 
-      if u < v then
-        heap[m] = vid
-        heap[n] = uid
-        key[uid] = n
-        key[vid] = m
-        m = n
-        result = true
-      else
-        return result
+    local k = j + 1
+    local wid = heap[k]
+    if wid then
+      local w = value[wid]
+      if v < w then
+        j = k
+        vid = wid
+        v = w
       end
-    else
+    end
+
+    if not (u < v) then
       return result
     end
+
+    result = true
+
+    heap[i] = vid
+    heap[j] = uid
+    key[uid] = j
+    key[vid] = i
+
+    i = j
+    j = i * 2
+    vid = heap[j]
   end
 end
 
