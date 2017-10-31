@@ -15,36 +15,31 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function greedy_linear_ordering(g)
---[[
-color 削除済みかどうか
-sink
-source
-heap: out_degree - in_degreeを最大化するようなヒープ
+local binary_heap = require "experimental.binary_heap"
 
-for each vertex v do
-  if v is sink vertex then
-    add to sink
-  elseif v is source vertex then
-    add to source
-  else
-    add to heap
-  end
-end
+local x = binary_heap()
+x:add(3)
+print(table.concat(x.tree, " "))
+x:add(4)
+print(table.concat(x.tree, " "))
+x:add(5)
+print(table.concat(x.tree, " "))
+x:add(8)
+print(table.concat(x.tree, " "))
+x:add(11)
+print(table.concat(x.tree, " "))
+x:add(15)
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
+print(x:pop())
+print(table.concat(x.tree, " "))
 
-
-
-
-
-
-]]
-
-
-
-
-
-end
-
-return function (g)
-  local order = greedy_linear_ordering(g)
-end
