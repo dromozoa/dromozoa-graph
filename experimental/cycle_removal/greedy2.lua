@@ -15,36 +15,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
-local greedy = require "experimental.cycle_removal.greedy"
+local function greedy_linear_ordering(g)
 
-local N = 500
 
-local function run(f, g)
-  local reverse = f(g)
-  return f, g, reverse
+
+
+
 end
 
-local g = graph()
-local u = g:add_vertex()
-local v = g:add_vertex()
-g:add_edge(u, v)
-for i = 1, N do
-  local w = g:add_vertex()
-  g:add_edge(v, w)
-  g:add_edge(w, u)
-  u = v
-  v = w
+return function (g)
+  local order = greedy_linear_ordering(g)
 end
-
-local algorithms = {
-  greedy;
-}
-
-local benchmarks = {}
-
-for i = 1, #algorithms do
-  benchmarks[("%02d"):format(i)] = { run, algorithms[i], g }
-end
-
-return benchmarks
