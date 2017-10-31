@@ -17,29 +17,59 @@
 
 local binary_heap = require "experimental.binary_heap"
 
-local x = binary_heap()
-x:add(3)
-print(table.concat(x.tree, " "))
-x:add(4)
-print(table.concat(x.tree, " "))
-x:add(5)
-print(table.concat(x.tree, " "))
-x:add(8)
-print(table.concat(x.tree, " "))
-x:add(11)
-print(table.concat(x.tree, " "))
-x:add(15)
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
-print(x:pop())
-print(table.concat(x.tree, " "))
+local function check(x, expect)
+  local n = #expect
+  assert(n == x.n)
+  assert(n == #x.heap)
+  for i = 1, n do
+    assert(x.heap[i] == expect[i])
+  end
+end
 
+local x = binary_heap()
+x:push(5, 1)
+check(x, { 5 })
+x:push(4, 2)
+check(x, { 4, 5 })
+x:push(3, 3)
+check(x, { 3, 5, 4 })
+x:push(2, 4)
+check(x, { 2, 3, 4, 5 })
+x:push(1, 5)
+check(x, { 1, 2, 4, 5, 3 })
+
+assert(x:pop() == 1)
+assert(x:pop() == 2)
+assert(x:pop() == 3)
+assert(x:pop() == 4)
+assert(x:pop() == 5)
+
+local x = binary_heap()
+x:push(1, 100)
+x:push(2, 200)
+x:push(3, 300)
+x:push(4, 400)
+x:push(5, 500)
+check(x, { 5, 4, 2, 1, 3 })
+
+x:remove(3)
+check(x, { 5, 4, 2, 1 })
+
+x:push(6, 600)
+x:push(7, 700)
+check(x, { 7, 5, 6, 1, 4, 2 })
+
+x:remove(5)
+check(x, { 7, 4, 6, 1, 2 })
+
+x:push(5, 500)
+check(x, { 7, 4, 6, 1, 2, 5 })
+
+x:remove(2)
+check(x, { 7, 5, 6, 1, 4 })
+
+x:update(5, 0)
+check(x, { 7, 4, 6, 1, 5 })
+
+x:update(1, 1000)
+check(x, { 1, 7, 6, 4, 5 })
