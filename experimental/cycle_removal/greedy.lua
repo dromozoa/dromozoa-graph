@@ -103,10 +103,8 @@ return function (g)
     local vid = target[eid]
     if order[uid] > order[vid] then
       reverse[#reverse + 1] = eid
-      print("reverse", uid, vid, eid)
     end
     eid = eid_after[eid]
   end
   return reverse
-  -- print(table.concat(order, " "))
 end
