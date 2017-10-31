@@ -16,6 +16,28 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function greedy_linear_ordering(g)
+--[[
+color 削除済みかどうか
+sink
+source
+heap: out_degree - in_degreeを最大化するようなヒープ
+
+for each vertex v do
+  if v is sink vertex then
+    add to sink
+  elseif v is source vertex then
+    add to source
+  else
+    add to heap
+  end
+end
+
+
+
+
+
+
+]]
 
 
 
