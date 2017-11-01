@@ -15,36 +15,180 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local dumper = require "dromozoa.commons.dumper"
+local binary_heap = require "dromozoa.graph.binary_heap"
+
 local function greedy_linear_ordering(g)
---[[
-color 削除済みかどうか
-sink
-source
-heap: out_degree - in_degreeを最大化するようなヒープ
+  local u = g.u
+  local u_after = u.after
+  local uv = g.uv
+  local uv_first = uv.first
+  local uv_after = uv.after
+  local uv_target = uv.target
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
 
-for each vertex v do
-  if v is sink vertex then
-    add to sink
-  elseif v is source vertex then
-    add to source
-  else
-    add to heap
+  local odeg = {}
+  local ideg = {}
+
+  local sink_queue = {}
+  local sink_min = 0
+  local sink_max = 0
+
+  local source_queue = {}
+  local source_min = 0
+  local source_max = 0
+
+  local queue = binary_heap()
+  local order = {}
+  local order_min = 1
+  local order_max = u.n
+
+  local uid = u.first
+  while uid do
+    if not uv_first[uid] then
+      sink_max = sink_max + 1
+      sink_queue[sink_max] = uid
+    elseif not vu_first[uid] then
+      source_max = source_max + 1
+      source_queue[source_max] = uid
+    else
+      local o = uv:degree(uid)
+      local i = vu:degree(uid)
+      odeg[uid] = o
+      ideg[uid] = i
+      queue:push(uid, o - i)
+    end
+    uid = u_after[uid]
   end
-end
 
+  while true do
+    while sink_min < sink_max do
+      sink_min = sink_min + 1
+      local uid = sink_queue[sink_min]
 
+      order[uid] = order_max
+      order_max = order_max - 1
 
+      local eid = vu_first[uid]
+      while eid do
+        local vid = vu_target[eid]
+        local o = odeg[vid]
+        if o then
+          if o == 1 then
+            odeg[vid] = nil
+            ideg[vid] = nil
+            sink_max = sink_max + 1
+            sink_queue[sink_max] = vid
+            queue:remove(vid)
+          else
+            odeg[vid] = o - 1
+            queue:decrease(vid, 1)
+          end
+        end
+        eid = vu_after[eid]
+      end
+    end
 
+    while source_min < source_max do
+      source_min = source_min + 1
+      local uid = source_queue[source_min]
 
+      order[uid] = order_min
+      order_min = order_min + 1
 
-]]
+      local eid = uv_first[uid]
+      while eid do
+        local vid = uv_target[eid]
+        local i = ideg[vid]
+        if i then
+          if i == 1 then
+            odeg[vid] = nil
+            ideg[vid] = nil
+            source_max = source_max + 1
+            source_queue[source_max] = vid
+            queue:remove(vid)
+          else
+            ideg[vid] = i - 1
+            queue:increase(vid, 1)
+          end
+        end
+        eid = uv_after[eid]
+      end
+    end
 
+    local uid = queue:pop()
+    if not uid then
+      break
+    end
+    odeg[uid] = nil
+    ideg[uid] = nil
 
+    order[uid] = order_min
+    order_min = order_min + 1
 
+    local eid = vu_first[uid]
+    while eid do
+      local vid = vu_target[eid]
+      local o = odeg[vid]
+      if o then
+        if o == 1 then
+          odeg[vid] = nil
+          ideg[vid] = nil
+          sink_max = sink_max + 1
+          sink_queue[sink_max] = vid
+          queue:remove(vid)
+        else
+          odeg[vid] = o - 1
+          queue:decrease(vid, 1)
+        end
+      end
+      eid = vu_after[eid]
+    end
 
+    local eid = uv_first[uid]
+    while eid do
+      local vid = uv_target[eid]
+      local i = ideg[vid]
+      if i then
+        if i == 1 then
+          odeg[vid] = nil
+          ideg[vid] = nil
+          source_max = source_max + 1
+          source_queue[source_max] = vid
+          queue:remove(vid)
+        else
+          ideg[vid] = i - 1
+          queue:increase(vid, 1)
+        end
+      end
+      eid = uv_after[eid]
+    end
+  end
 
+  return order
 end
 
 return function (g)
   local order = greedy_linear_ordering(g)
+
+  local e = g.e
+  local eid_after = e.after
+  local source = g.vu.target
+  local target = g.uv.target
+
+  local reverse = {}
+
+  local eid = e.first
+  while eid do
+    local uid = source[eid]
+    local vid = target[eid]
+    if order[uid] > order[vid] then
+      reverse[#reverse + 1] = eid
+    end
+    eid = eid_after[eid]
+  end
+  return reverse
 end

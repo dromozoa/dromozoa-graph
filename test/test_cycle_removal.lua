@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local greedy = require "experimental.cycle_removal.greedy"
+local greedy = require "experimental.cycle_removal.greedy2"
 
 local N = ...
 local N = tonumber(N or 6)
@@ -65,15 +65,15 @@ else
   end
 end
 
-io.write("digraph {\n")
-local uid = g.u.first
-while uid do
-  local eid = g.uv.first[uid]
-  while eid do
-    local vid = g.uv.target[eid]
-    io.write(uid, "->", vid, ";\n")
-    eid = g.uv.after[eid]
-  end
-  uid = g.u.after[uid]
-end
-io.write("}\n")
+-- io.write("digraph {\n")
+-- local uid = g.u.first
+-- while uid do
+--   local eid = g.uv.first[uid]
+--   while eid do
+--     local vid = g.uv.target[eid]
+--     io.write(uid, "->", vid, ";\n")
+--     eid = g.uv.after[eid]
+--   end
+--   uid = g.u.after[uid]
+-- end
+-- io.write("}\n")

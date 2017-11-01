@@ -158,6 +158,28 @@ function class:update(uid, u)
   end
 end
 
+function class:increase(uid, u)
+  local heap = self.heap
+  local key = self.key
+  local value = self.value
+
+  local i = key[uid]
+  local u = value[uid] + u
+  value[uid] = u
+  up_heap(heap, key, value, uid, u, i)
+end
+
+function class:decrease(uid, u)
+  local heap = self.heap
+  local key = self.key
+  local value = self.value
+
+  local i = key[uid]
+  local u = value[uid] - u
+  value[uid] = u
+  down_heap(heap, key, value, uid, u, i)
+end
+
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
