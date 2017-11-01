@@ -16,9 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local greedy = require "experimental.cycle_removal.greedy"
+local greedy2 = require "experimental.cycle_removal.greedy2"
+local greedy3 = require "dromozoa.graph.greedy_cycle_removal"
 
-local N = 500
+local N = 1000
 
 local function run(f, g)
   local reverse = f(g)
@@ -38,7 +39,8 @@ for i = 1, N do
 end
 
 local algorithms = {
-  greedy;
+  greedy2;
+  greedy3;
 }
 
 local benchmarks = {}

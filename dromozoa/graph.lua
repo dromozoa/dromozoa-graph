@@ -44,28 +44,6 @@ function class:remove_edge(eid)
   self.vu:remove_edge(eid, vid)
 end
 
-function class:remove_edges(uid)
-  local e = self.e
-  local uv = self.uv
-  local uv_target = uv.target
-  local vu = self.vu
-  local vu_target = vu.target
-
-  local eid = uv.first[uid]
-  while eid do
-    e:remove(eid)
-    vu:remove_edge(eid, uv_target[eid])
-    eid = uv:remove_edge(eid, uid)
-  end
-
-  local eid = vu.first[uid]
-  while eid do
-    e:remove(eid)
-    uv:remove_edge(eid, vu_target[eid])
-    eid = vu:remove_edge(eid, uid)
-  end
-end
-
 return setmetatable(class, {
   __call = function ()
     return setmetatable({
