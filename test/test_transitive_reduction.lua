@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local transitive_reduction = require "experimental.transitive_reduction3"
+local transitive_reduction = require "experimental.transitive_reduction4"
 
 local g = graph()
 local u1 = g:add_vertex()
