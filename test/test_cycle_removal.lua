@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local greedy = require "experimental.cycle_removal.greedy2"
+local greedy = require "experimental.cycle_removal.greedy3"
 
 local N = ...
 local N = tonumber(N or 6)
