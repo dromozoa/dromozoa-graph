@@ -44,7 +44,7 @@ local function greedy_linear_ordering(g)
 
   local queue = binary_heap()
 
-  local order = {}
+  local order_map = {}
   local order_min = 1
   local order_max = u.n
 
@@ -72,7 +72,7 @@ local function greedy_linear_ordering(g)
       local uid = sink_queue[sink_min]
       sink_queue[sink_min] = nil
 
-      order[uid] = order_max
+      order_map[uid] = order_max
       order_max = order_max - 1
 
       local eid = vu_first[uid]
@@ -100,7 +100,7 @@ local function greedy_linear_ordering(g)
       local uid = source_queue[source_min]
       source_queue[source_min] = nil
 
-      order[uid] = order_min
+      order_map[uid] = order_min
       order_min = order_min + 1
 
       local eid = uv_first[uid]
@@ -131,7 +131,7 @@ local function greedy_linear_ordering(g)
     odeg[uid] = nil
     ideg[uid] = nil
 
-    order[uid] = order_min
+    order_map[uid] = order_min
     order_min = order_min + 1
 
     local eid = vu_first[uid]
@@ -173,11 +173,11 @@ local function greedy_linear_ordering(g)
     end
   end
 
-  return order
+  return order_map
 end
 
 return function (g)
-  local order = greedy_linear_ordering(g)
+  local order_map = greedy_linear_ordering(g)
 
   local e = g.e
   local e_after = e.after
@@ -189,12 +189,12 @@ return function (g)
 
   local eid = e.first
   while eid do
-    if order[source[eid]] > order[target[eid]] then
+    if order_map[source[eid]] > order_map[target[eid]] then
       n = n + 1
       reverse[n] = eid
     end
     eid = e_after[eid]
   end
 
-  return reverse, order
+  return reverse
 end

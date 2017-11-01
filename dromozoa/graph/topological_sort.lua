@@ -37,7 +37,13 @@ local function visit(first, after, target, order, color, uid, n)
   return n
 end
 
-return function (u, uv)
+return function (u, uv, uid)
+  if uid then
+    local order = {}
+    visit(uv.first, uv.after, uv.target, order, {}, uid, 0)
+    return order
+  end
+
   local u_after = u.after
 
   local uv_first = uv.first
