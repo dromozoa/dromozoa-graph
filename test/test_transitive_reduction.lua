@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local transitive_reduction = require "experimental.transitive_reduction"
+local transitive_reduction = require "experimental.transitive_reduction3"
 
 local g = graph()
 local u1 = g:add_vertex()
@@ -28,6 +28,7 @@ local e2 = g:add_edge(u2, u3)
 local e3 = g:add_edge(u3, u4)
 local e4 = g:add_edge(u1, u4)
 local remove = transitive_reduction(g)
+print(table.concat(remove, " "))
 assert(#remove == 1)
 assert(remove[1] == e4)
 
@@ -41,9 +42,11 @@ local e2 = g:add_edge(u1, u2)
 local e3 = g:add_edge(u2, u3)
 local e4 = g:add_edge(u3, u4)
 local remove = transitive_reduction(g)
+print(table.concat(remove, " "))
 assert(#remove == 1)
 assert(remove[1] == e1)
 
+-- https://jp.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/32723/versions/3/screenshot.png
 local g = graph()
 for i = 1, 10 do
   g:add_vertex()
@@ -66,7 +69,9 @@ g:add_edge(7, 10)
 g:add_edge(8, 10)
 
 local remove = transitive_reduction(g)
-assert(#remove == 3)
-assert(remove[1] == 2)
-assert(remove[2] == 12)
-assert(remove[3] == 14)
+print(table.concat(remove, " "))
+assert(#remove == 4)
+assert(remove[1] == 2) -- 1,10
+assert(remove[2] == 9) -- 3,10
+assert(remove[3] == 12) -- 5,10
+assert(remove[4] == 14) -- 6,10
