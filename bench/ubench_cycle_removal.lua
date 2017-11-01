@@ -17,7 +17,7 @@
 
 local graph = require "dromozoa.graph"
 local greedy2 = require "experimental.cycle_removal.greedy2"
-local greedy3 = require "experimental.cycle_removal.greedy3"
+local greedy3 = require "dromozoa.graph.greedy_cycle_removal"
 
 local N = 1000
 

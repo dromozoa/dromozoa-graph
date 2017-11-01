@@ -38,7 +38,8 @@ local function visit(first, after, target, order, color, uid, n)
 end
 
 return function (u, uv)
-  local uid_after = u.after
+  local u_after = u.after
+
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
@@ -52,7 +53,7 @@ return function (u, uv)
     if not color[uid] then
       n = visit(uv_first, uv_after, uv_target, order, color, uid, n)
     end
-    uid = uid_after[uid]
+    uid = u_after[uid]
   end
 
   return order

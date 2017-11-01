@@ -15,7 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local dumper = require "dromozoa.commons.dumper"
 local binary_heap = require "dromozoa.graph.binary_heap"
 
 local function greedy_linear_ordering(g)
@@ -197,5 +196,5 @@ return function (g)
     eid = e_after[eid]
   end
 
-  return reverse
+  return reverse, order
 end

@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local greedy = require "experimental.cycle_removal.greedy3"
+local greedy_cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
 
 local N = ...
 local N = tonumber(N or 6)
@@ -32,7 +32,7 @@ local e3 = g:add_edge(u3, u1)
 local e4 = g:add_edge(u3, u4)
 local e5 = g:add_edge(u4, u2)
 
-local reverse = greedy(g)
+local reverse = greedy_cycle_removal(g)
 assert(#reverse == 1)
 assert(reverse[1] == e2)
 
@@ -48,7 +48,7 @@ for i = 1, N do
   v = w
 end
 
-local reverse = greedy(g)
+local reverse = greedy_cycle_removal(g)
 
 if N % 2 == 0 then
   local n = N / 2
