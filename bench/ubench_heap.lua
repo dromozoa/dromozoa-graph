@@ -17,7 +17,7 @@
 
 local binary_heap = require "experimental.binary_heap"
 local binary_heap2 = require "experimental.binary_heap2"
-local binary_heap3 = require "experimental.binary_heap3"
+local binary_heap3 = require "dromozoa.graph.binary_heap"
 
 local N = 1000
 
