@@ -15,23 +15,23 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function up_heap(heap, key, value, n, vid, v)
-  while n > 1 do
-    local m = (n - n % 2) / 2
-    local uid = heap[m]
-    if value[uid] < v then
-      heap[m] = vid
-      heap[n] = uid
-      key[vid] = m
-      key[uid] = n
-      n = m
+local function up_heap(heap, key, value, uid, u, i)
+  while i > 1 do
+    local j = (i - i % 2) / 2
+    local vid = heap[j]
+    if value[vid] < u then
+      heap[i] = vid
+      heap[j] = uid
+      key[vid] = i
+      key[uid] = j
+      i = j
     else
-      return
+      break
     end
   end
 end
 
-local function down_heap(heap, key, value, i, uid, u)
+local function down_heap(heap, key, value, uid, u, i)
   local result
 
   local j = i * 2
@@ -50,108 +50,111 @@ local function down_heap(heap, key, value, i, uid, u)
       end
     end
 
-    if not (u < v) then
-      return result
+    if u < v then
+      result = true
+      heap[i] = vid
+      heap[j] = uid
+      key[vid] = i
+      key[uid] = j
+
+      i = j
+      j = i * 2
+      vid = heap[j]
+    else
+      break
     end
-
-    result = true
-
-    heap[i] = vid
-    heap[j] = uid
-    key[uid] = j
-    key[vid] = i
-
-    i = j
-    j = i * 2
-    vid = heap[j]
   end
+
+  return result
 end
 
 local class = {}
 local metatable = { __index = class }
 
-function class:push(id, priority)
-  local n = self.n + 1
-  self.n = n
-
+function class:push(uid, u)
   local heap = self.heap
   local key = self.key
   local value = self.value
 
-  heap[n] = id
-  key[id] = n
-  value[id] = priority
+  local i = self.n + 1
+  self.n = i
 
-  up_heap(heap, key, value, n, id, priority)
+  heap[i] = uid
+  key[uid] = i
+  value[uid] = u
+
+  return up_heap(heap, key, value, uid, u, i)
 end
 
 function class:pop()
-  local n = self.n
-  self.n = n - 1
-
   local heap = self.heap
-  local key = self.key
-  local value = self.value
 
-  local uid = heap[1]
-  if not uid then
-    return nil
+  local i = 1
+  local uid = heap[i]
+
+  if uid then
+    local key = self.key
+    local value = self.value
+
+    local j = self.n
+    self.n = j - 1
+    local vid = heap[j]
+
+    heap[i] = vid
+    heap[j] = nil
+    key[uid] = nil
+    key[vid] = i
+    value[uid] = nil
+
+    down_heap(heap, key, value, vid, value[vid], i)
   end
-
-  local vid = heap[n]
-
-  heap[1] = vid
-  heap[n] = nil
-  key[uid] = nil
-  key[vid] = 1
-  value[uid] = nil
-
-  down_heap(heap, key, value, 1, vid, value[vid])
 
   return uid
 end
 
 function class:remove(uid)
-  local n = self.n
-  self.n = n - 1
-
   local heap = self.heap
   local key = self.key
   local value = self.value
 
-  local m = key[uid]
-  if m == n then
-    heap[n] = nil
+  local i = key[uid]
+  local j = self.n
+  self.n = j - 1
+
+  if i == j then
+    heap[i] = nil
     key[uid] = nil
     value[uid] = nil
   else
-    local vid = heap[n]
+    local vid = heap[j]
+    local v = value[vid]
 
-    heap[m] = vid
-    heap[n] = nil
+    heap[i] = vid
+    heap[j] = nil
     key[uid] = nil
-    key[vid] = m
+    key[vid] = i
     value[uid] = nil
 
-    local v = value[vid]
-    if not down_heap(heap, key, value, m, vid, v) then
-      up_heap(heap, key, value, m, vid, v)
+    if not down_heap(heap, key, value, vid, v, i) then
+      up_heap(heap, key, value, vid, v, i)
     end
   end
 end
 
-function class:update(uid, priority)
+function class:update(uid, u)
   local heap = self.heap
   local key = self.key
   local value = self.value
 
-  local m = key[uid]
+  local i = key[uid]
   local v = value[uid]
+
   value[uid] = v
-  if v < priority then
-    up_heap(heap, key, value, m, uid, priority)
+
+  if v < u then
+    up_heap(heap, key, value, uid, u, i)
   else
-    down_heap(heap, key, value, m, uid, priority)
+    down_heap(heap, key, value, uid, u, i)
   end
 end
 

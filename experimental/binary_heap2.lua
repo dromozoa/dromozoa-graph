@@ -15,18 +15,35 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function up_heap(heap, key, value, n, vid, v)
-  while n > 1 do
-    local m = (n - n % 2) / 2
-    local uid = heap[m]
-    if value[uid] < v then
-      heap[m] = vid
-      heap[n] = uid
-      key[vid] = m
-      key[uid] = n
-      n = m
+local function up_heap(heap, key, value, uid, u, i)
+  repeat
+    local j = (i - i % 2) / 2
+    local vid = heap[j]
+    if value[vid] < u then
+      heap[i] = vid
+      heap[j] = uid
+      key[vid] = i
+      key[uid] = j
+      if j == 1 then
+        break
+      end
+      i = j
     else
-      return
+      break
+    end
+  until false
+end
+
+local function up_heap_(heap, key, value, uid, u, i)
+  if i > 1 then
+    local j = (i - i % 2) / 2
+    local vid = heap[j]
+    if value[vid] < u then
+      heap[i] = vid
+      heap[j] = uid
+      key[vid] = i
+      key[uid] = j
+      return up_heap(heap, key, value, uid, u, j)
     end
   end
 end
@@ -70,19 +87,79 @@ end
 local class = {}
 local metatable = { __index = class }
 
-function class:push(id, priority)
-  local n = self.n + 1
-  self.n = n
+function class:push(uid, u)
+  local i = self.n + 1
+  self.n = i
 
   local heap = self.heap
   local key = self.key
   local value = self.value
 
-  heap[n] = id
-  key[id] = n
-  value[id] = priority
+  value[uid] = u
 
-  up_heap(heap, key, value, n, id, priority)
+  if i == 1 then
+    heap[i] = uid
+    key[uid] = i
+    return
+  end
+
+  local j = (i - i % 2) / 2
+  local vid = heap[j]
+  local v = value[vid]
+
+  repeat
+    if u <= v then
+      heap[i] = uid
+      key[uid] = i
+      return
+    end
+
+    heap[i] = vid
+    key[vid] = i
+
+    if j == 1 then
+      heap[j] = uid
+      key[uid] = j
+      return
+    end
+
+    local k = (j - j % 2) / 2
+    local wid = heap[k]
+    local w = value[wid]
+
+    if u <= w then
+      heap[j] = uid
+      key[uid] = j
+      return
+    end
+
+    i = j
+    j = k
+    vid = wid
+    v = w
+
+  until false
+
+  -- v < w < u
+  -- w < ? < ?
+
+
+  -- repeat
+  --   local j = (i - i % 2) / 2
+  --   local vid = heap[j]
+  --   if value[vid] < u then
+  --     heap[i] = vid
+  --     heap[j] = uid
+  --     key[vid] = i
+  --     key[uid] = j
+  --     if j == 1 then
+  --       break
+  --     end
+  --     i = j
+  --   else
+  --     break
+  --   end
+  -- until false
 end
 
 function class:pop()
@@ -135,7 +212,7 @@ function class:remove(uid)
 
     local v = value[vid]
     if not down_heap(heap, key, value, m, vid, v) then
-      up_heap(heap, key, value, m, vid, v)
+      up_heap(heap, key, value, vid, v, m)
     end
   end
 end
@@ -149,7 +226,7 @@ function class:update(uid, priority)
   local v = value[uid]
   value[uid] = v
   if v < priority then
-    up_heap(heap, key, value, m, uid, priority)
+    up_heap(heap, key, value, uid, priority, m)
   else
     down_heap(heap, key, value, m, uid, priority)
   end

@@ -15,9 +15,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local binary_heap = require "experimental.binary_heap"
+local binary_heap = require "experimental.binary_heap3"
 
 local function check(x, expect)
+  -- print("result", table.concat(x.heap, " "))
+  -- print("expect", table.concat(expect, " "))
   local n = #expect
   assert(n == x.n)
   assert(n == #x.heap)
@@ -73,3 +75,11 @@ check(x, { 7, 4, 6, 1, 5 })
 
 x:update(1, 1000)
 check(x, { 1, 7, 6, 4, 5 })
+
+local x = binary_heap()
+x:push(1, 1)
+assert(x.n == 1)
+assert(x:pop() == 1)
+assert(x.n == 0)
+assert(x:pop() == nil)
+assert(x.n == 0)
