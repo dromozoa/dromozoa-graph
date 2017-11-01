@@ -196,5 +196,5 @@ return function (g)
     eid = e_after[eid]
   end
 
-  return reverse, order
+  return reverse
 end

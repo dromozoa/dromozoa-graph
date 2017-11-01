@@ -16,13 +16,57 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local transitive_reduction = require "dromozoa.graph.transitive_reduction"
-
-local read = require "test.read"
-
-local filename = ...
+local transitive_reduction = require "experimental.transitive_reduction"
 
 local g = graph()
-read(g, filename)
+local u1 = g:add_vertex()
+local u2 = g:add_vertex()
+local u3 = g:add_vertex()
+local u4 = g:add_vertex()
+local e1 = g:add_edge(u1, u2)
+local e2 = g:add_edge(u2, u3)
+local e3 = g:add_edge(u3, u4)
+local e4 = g:add_edge(u1, u4)
+local remove = transitive_reduction(g)
+assert(#remove == 1)
+assert(remove[1] == e4)
 
-transitive_reduction(g)
+local g = graph()
+local u1 = g:add_vertex()
+local u2 = g:add_vertex()
+local u3 = g:add_vertex()
+local u4 = g:add_vertex()
+local e1 = g:add_edge(u1, u4)
+local e2 = g:add_edge(u1, u2)
+local e3 = g:add_edge(u2, u3)
+local e4 = g:add_edge(u3, u4)
+local remove = transitive_reduction(g)
+assert(#remove == 1)
+assert(remove[1] == e1)
+
+local g = graph()
+for i = 1, 10 do
+  g:add_vertex()
+end
+g:add_edge(1, 5)
+g:add_edge(1, 10)
+g:add_edge(2, 4)
+g:add_edge(2, 5)
+g:add_edge(2, 7)
+g:add_edge(2, 9)
+g:add_edge(3, 7)
+g:add_edge(3, 8)
+g:add_edge(3, 10)
+g:add_edge(4, 10)
+g:add_edge(5, 6)
+g:add_edge(5, 10)
+g:add_edge(6, 8)
+g:add_edge(6, 10)
+g:add_edge(7, 10)
+g:add_edge(8, 10)
+
+local remove = transitive_reduction(g)
+assert(#remove == 3)
+assert(remove[1] == 2)
+assert(remove[2] == 12)
+assert(remove[3] == 14)
