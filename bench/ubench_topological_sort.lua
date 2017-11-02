@@ -19,7 +19,7 @@ local graph = require "dromozoa.graph"
 local topological_sort = require "dromozoa.graph.topological_sort"
 local topological_sort2 = require "experimental.topological_sort_recursive5"
 
-local layer, count = ...
+local layer, count, do_check = ...
 local layer = tonumber(layer or 6) -- 6 or 14
 local count = tonumber(count or 4) -- 4 or 2
 
@@ -84,8 +84,10 @@ local algorithms = {
   topological_sort2;
 }
 
-for i = 1, #algorithms do
-  check(algorithms[i], g)
+if do_check and do_check ~= "false" then
+  for i = 1, #algorithms do
+    check(algorithms[i], g)
+  end
 end
 
 local benchmarks = {}

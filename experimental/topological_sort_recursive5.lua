@@ -32,7 +32,7 @@ local function visit(first, after, target, order, color, uid, n)
 
   color[uid] = 2
 
-  n = n + 1
+  n = n - 1
   order[n] = uid
   return n
 end
@@ -46,7 +46,11 @@ return function (u, uv)
 
   local order = {}
   local color = {}
-  local n = 0
+  local n = u.n
+
+  for i = 1, n do
+    order[i] = 0
+  end
 
   local uid = u.first
   while uid do
