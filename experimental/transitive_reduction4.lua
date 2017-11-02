@@ -47,9 +47,9 @@ return function (g)
       local order_max = order_map[uid] - 1
       local order_min = order_max
       repeat
-        local o = order_map[uv_target[eid]]
-        if order_min > o then
-          order_min = o
+        local i = order_map[uv_target[eid]]
+        if order_min > i then
+          order_min = i
         end
         eid = uv_after[eid]
       until not eid
