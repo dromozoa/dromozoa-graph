@@ -16,8 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local transitive_reduction = require "experimental.transitive_reduction3"
 local transitive_reduction2 = require "experimental.transitive_reduction2"
+local transitive_reduction3 = require "experimental.transitive_reduction3"
+local transitive_reduction4 = require "experimental.transitive_reduction4"
 
 local N, exec = ...
 local N = tonumber(N or 16)
@@ -54,8 +55,8 @@ for j = 1, N - 1 do
 end
 
 local algorithms = {
-  transitive_reduction;
   transitive_reduction2;
+  transitive_reduction4;
 }
 
 if exec then
