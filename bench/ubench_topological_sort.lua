@@ -15,18 +15,15 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
-local topological_sort_recursive = require "experimental.topological_sort_recursive"
-local topological_sort_recursive2 = require "experimental.topological_sort_recursive2"
-local topological_sort_recursive3 = require "experimental.topological_sort_recursive3"
-local topological_sort_recursive4 = require "experimental.topological_sort_recursive4"
-local topological_sort_stack = require "experimental.topological_sort_stack"
+local graph = require "dromozoa.graph"
+local topological_sort = require "dromozoa.graph.topological_sort"
+local topological_sort2 = require "experimental.topological_sort_recursive5"
 
 local layer, count = ...
 local layer = tonumber(layer or 6) -- 6 or 14
 local count = tonumber(count or 4) -- 4 or 2
 
-local g = adjacency_list()
+local g = graph()
 local vn = 0
 local eid = 0
 
@@ -37,8 +34,15 @@ local function make(g, l)
     local uid = vid_last + 1
     vn = uid
     for vid = vid_first, vid_last do
+      local new_vid = g:add_vertex()
+      assert(vid == new_vid)
+    end
+    local new_uid = g:add_vertex()
+    assert(uid == new_uid)
+    for vid = vid_first, vid_last do
       eid = eid + 1
-      g:add_edge(eid, uid, vid)
+      local new_eid = g:add_edge(uid, vid)
+      assert(eid == new_eid)
     end
     return uid
   else
@@ -48,48 +52,46 @@ local function make(g, l)
     end
     local uid = vn + 1
     vn = uid
+    local new_uid = g:add_vertex()
+    assert(uid == new_uid)
     for i = 1, count do
       eid = eid + 1
-      g:add_edge(eid, uid, vids[i])
+      local new_eid = g:add_edge(uid, vids[i])
+      assert(eid == new_eid)
     end
     return uid
   end
 end
 
-local sid = make(g, layer)
+make(g, layer)
 
-local function run(f, g, sid)
-  local order = {}
-  f(g, sid, {}, order)
-  return f, g, sid, order
+local function run(f, g)
+  local order = f(g.u, g.uv)
+  return f, g, order
 end
 
-local function check(f, g, sid)
-  local order = {}
-  f(g, sid, {}, order)
-  for i = 1, sid do
+local function check(f, g)
+  local order = f(g.u, g.uv)
+  for i = 1, g.u.n do
     assert(order[i] == i)
   end
 end
 
+io.stderr:write(g.u.n, "\n")
+
 local algorithms = {
-  topological_sort_recursive;
-  topological_sort_recursive2;
-  topological_sort_recursive3;
-  topological_sort_recursive4;
-  topological_sort_stack;
+  topological_sort;
+  topological_sort2;
 }
 
 for i = 1, #algorithms do
-  check(algorithms[i], g, sid)
+  check(algorithms[i], g)
 end
-
-io.stderr:write(sid, "\n")
 
 local benchmarks = {}
 
 for i = 1, #algorithms do
-  benchmarks[("%02d"):format(i)] = { run, algorithms[i], g, sid }
+  benchmarks[("%02d"):format(i)] = { run, algorithms[i], g }
 end
 
 return benchmarks
