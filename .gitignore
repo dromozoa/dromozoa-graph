@@ -1,3 +1,4 @@
 .*.swp
 /out
 /test/boost_graph
+/ubench_result*

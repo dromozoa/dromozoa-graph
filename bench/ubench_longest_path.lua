@@ -17,12 +17,14 @@
 
 local graph = require "dromozoa.graph"
 local longest_path = require "experimental.longest_path"
+local longest_path2 = require "experimental.longest_path2"
+local longest_path3 = require "experimental.longest_path3"
 
-local N = 1000
+local N = 200
 
 local function run(f, g)
-  local reverse = f(g)
-  return f, g, reverse
+  local result = f(g)
+  return f, g, result
 end
 
 local g = graph()
@@ -41,7 +43,9 @@ for i = 1, N do
 end
 
 local algorithms = {
-  longest_path;
+  -- longest_path;
+  longest_path2;
+  longest_path3;
 }
 
 local benchmarks = {}
