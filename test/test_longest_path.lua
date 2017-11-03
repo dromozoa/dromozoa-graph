@@ -16,7 +16,8 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local longest_path = require "experimental.longest_path"
+local longest_path = require "experimental.longest_path3"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
 -- https://www.slideshare.net/nikolovn/gd-2001-ver2
 local g = graph()
@@ -47,6 +48,8 @@ g:add_edge(20,  7)
 g:add_edge(21,  7)
 g:add_edge(21, 10)
 g:add_edge(21, 12)
+
+-- print(table.concat(topological_sort(g), " "))
 
 local expect_layering = {
   { 5, 6, 7, 10, 14 };
