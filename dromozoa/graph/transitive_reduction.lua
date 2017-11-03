@@ -34,7 +34,7 @@ return function (g)
   local remove = {}
   local n = 0
 
-  local order = topological_sort(u, uv)
+  local order = topological_sort(g)
   local order_map = {}
   for i = 1, #order do
     order_map[order[i]] = i

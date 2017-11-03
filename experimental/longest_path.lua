@@ -15,28 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function visit(first, after, target, order, color, uid, n)
-  color[uid] = 1
-
-  local eid = first[uid]
-  while eid do
-    local vid = target[eid]
-    local c = color[vid]
-    if not c then
-      n = visit(first, after, target, order, color, vid, n)
-    elseif c == 1 then
-      error "not a dag"
-    end
-    eid = after[eid]
-  end
-
-  color[uid] = 2
-
-  n = n + 1
-  order[n] = uid
-  return n
-end
-
 return function (g)
   local u = g.u
   local u_after = u.after
@@ -46,17 +24,57 @@ return function (g)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local order = {}
-  local color = {}
-  local n = 0
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
+
+  local uset = {}
+  local zset = {}
+  local result = {}
 
   local uid = u.first
   while uid do
-    if not color[uid] then
-      n = visit(uv_first, uv_after, uv_target, order, color, uid, n)
+    if not uv_first[uid] then
+      result[uid] = 1
+      zset[uid] = true
+    else
+      uset[uid] = true
     end
     uid = u_after[uid]
   end
 
-  return order
+  local layer = 2
+  while next(uset) ~= nil do
+    local znew = {}
+
+    for uid in pairs(uset) do
+      local assign = true
+      local eid = uv_first[uid]
+      while eid do
+        local vid = uv_target[eid]
+        if not zset[vid] then
+          assign = false
+          break
+        end
+        eid = uv_after[eid]
+      end
+      if assign then
+        result[uid] = layer
+        znew[uid] = true
+        uset[uid] = nil
+      end
+    end
+
+    if next(znew) == nil then
+      break
+    end
+
+    layer = layer + 1
+    for uid in pairs(znew) do
+      zset[uid] = uid
+    end
+  end
+
+  return result
 end
