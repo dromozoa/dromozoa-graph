@@ -19,7 +19,6 @@ local topological_sort = require "dromozoa.graph.topological_sort"
 
 return function (g)
   local u = g.u
-  local u_n = u.n
   local u_after = u.after
 
   local uv = g.uv
@@ -37,7 +36,7 @@ return function (g)
 
   local order = topological_sort(u, uv)
   local order_map = {}
-  for i = 1, u_n do
+  for i = 1, #order do
     order_map[order[i]] = i
   end
 
@@ -45,45 +44,40 @@ return function (g)
   while uid do
     local eid = uv_first[uid]
     if eid then
-      local distance = { [uid] = 0 }
-
       local order_max = order_map[uid] - 1
       local order_min = order_max
-      do
-        local eid = eid
-        repeat
-          local x = order_map[uv_target[eid]]
-          if order_min > x then
-            order_min = x
-          end
-          eid = uv_after[eid]
-        until not eid
-      end
+      repeat
+        local i = order_map[uv_target[eid]]
+        if order_min > i then
+          order_min = i
+        end
+        eid = uv_after[eid]
+      until not eid
 
+      local distance = { [uid] = 0 }
       for i = order_max, order_min, -1 do
         local vid = order[i]
-        local value
+        local v
 
         local eid = vu_first[vid]
         while eid do
-          local wid = vu_target[eid]
-          local v = distance[wid]
-          if v then
-            if not value or value < v then
-              value = v
+          local w = distance[vu_target[eid]]
+          if w then
+            if not v or v < w then
+              v = w
             end
           end
           eid = vu_after[eid]
         end
 
-        if value then
-          distance[vid] = value + 1
+        if v then
+          distance[vid] = v + 1
         end
       end
 
+      local eid = uv_first[uid]
       repeat
-        local vid = uv_target[eid]
-        if distance[vid] > 1 then
+        if distance[uv_target[eid]] > 1 then
           n = n + 1
           remove[n] = eid
         end
