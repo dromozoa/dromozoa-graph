@@ -114,6 +114,19 @@ Coffman-Grahamアルゴリズムはふたつのステップからなる。
 このとき、階層内の頂点数を上限\(W\)以内に保つ。
 </div>
 
+<h3>The Coffman-Graham Algorithm (Wikipedia)</h3>
+
+<div>
+\(G\)のトポロジカルな順序付けを構築する。
+頂点を、それらの入力近傍の位置集合について辞書順に並べる。
+このような順序付けを行うためには、
+次の条件を満たす頂点\(v\)を択び、ひとつずつ頂点を順序に加える。
+まず、\(v\)の入力近傍がすべて既に半順序に加えられていること。
+このような頂点の候補は複数存在しえるので、それらの入力近傍で一番最近追加された入力近傍がもっともearlierであること。
+ふたつの頂点の候補が同じ入力近傍を共有している場合、二番めに最近追加された入力近傍がearlierであるほうを択ぶ。
+以下、この条件を続ける。
+</div>
+
 <script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
 </body>
