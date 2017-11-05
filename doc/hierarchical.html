@@ -91,6 +91,42 @@
   <li>Healy-Nikolov's Branch-and-Cut Algorithm</li>
 </ul>
 
+<h3>The Coffman-Graham Algorithm</h3>
+
+<div>
+Coffman-Grahamアルゴリズムはふたつのステップからなる。
+最初のステップで\(G\)の全頂点に一意なラベル\(\lambda : V \to \mathbb{N}\)を計算する。
+第二ステップで頂点を階層に配置する際、ラベルを優先順位として用いる。
+最初のステップのラベルの計算は、下記に定義される頂点集合同士の比較を伴う。
+下記が成り立つとき、ふたつの頂点集合\(U_1\)と\(U_2\)は\(U_1 \lt U_2\)である。
+</div>
+
+<ul>
+  <li>\(U_1 = \varnothing\)かつ\(U_2 \ne \varnothing\)。または、</li>
+  <li>\(U_1 \ne \varnothing, U_2 \ne \varnothing\)かつ\(\max\{\lambda(v) : v \in U_1\} \lt \max\{\lambda(v) : v \in U_2\}\)。または、</li>
+  <li>
+    \(U_1 \ne \varnothing, U_2 \ne \varnothing, \max\{\lambda(v) : v \in U_1\} = \max\{\lambda(v) : v \in U_2\}\)かつ
+    \(U_1 \setminus \{v : \lambda(v) = \max\{\lambda(v) : v \in U_1\}\} \lt U_2 \setminus \{v : \lambda(v) = \max\{\lambda(v) : v \in U_2\}\}\)。</li>
+</ul>
+
+<div>
+第二ステップで、下層から上層に向かって各頂点に階層を配置する。
+このとき、階層内の頂点数を上限\(W\)以内に保つ。
+</div>
+
+<h3>The Coffman-Graham Algorithm (Wikipedia)</h3>
+
+<div>
+\(G\)のトポロジカルな順序付けを構築する。
+頂点を、それらの入力近傍の位置集合について辞書順に並べる。
+このような順序付けを行うためには、
+次の条件を満たす頂点\(v\)を択び、ひとつずつ頂点を順序に加える。
+まず、\(v\)の入力近傍がすべて既に半順序に加えられていること。
+このような頂点の候補は複数存在しえるので、それらの入力近傍で一番最近追加された入力近傍がもっともearlierであること。
+ふたつの頂点の候補が同じ入力近傍を共有している場合、二番めに最近追加された入力近傍がearlierであるほうを択ぶ。
+以下、この条件を続ける。
+</div>
+
 <script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
 </body>

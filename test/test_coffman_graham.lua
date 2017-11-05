@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local longest_path = require "dromozoa.graph.longest_path"
+local coffman_graham = require "experimental.coffman_graham"
 
 -- https://www.slideshare.net/nikolovn/gd-2001-ver2
 local g = graph()
@@ -49,15 +49,54 @@ g:add_edge(21, 10)
 g:add_edge(21, 12)
 
 local expect_layering = {
-  { 5, 6, 7, 10, 14 };
-  { 1, 3, 15, 16, 17, 18, 20 };
-  { 22, 9, 11, 13, 19 };
-  { 2, 4, 8 };
-  { 12 };
-  { 21 };
+  { 5, 7 };
+  { 6, 18, 20 };
+  { 9, 10, 13 };
+  { 3, 4, 16 };
+  { 22, 11, 12, 14, 17 };
+  { 2, 8, 15, 19, 21 };
+  { 1 };
 }
 
-local result = longest_path(g)
+local result = coffman_graham(g, 5)
+-- print(table.concat(result, " "))
+
+for layer = 1, #expect_layering do
+  local layering = expect_layering[layer]
+  for i = 1, #layering do
+    local uid = layering[i]
+    -- print(uid, layer, result[uid])
+    assert(result[uid] == layer)
+  end
+end
+
+-- http://slidesplayer.net/slide/11273019/
+local g = graph()
+for i = 1, 9 do
+  g:add_vertex()
+end
+g:add_edge(1, 4)
+g:add_edge(2, 4)
+g:add_edge(2, 5)
+g:add_edge(3, 4)
+g:add_edge(3, 5)
+g:add_edge(3, 6)
+g:add_edge(4, 7)
+g:add_edge(5, 7)
+g:add_edge(5, 8)
+g:add_edge(6, 7)
+g:add_edge(6, 8)
+g:add_edge(7, 9)
+g:add_edge(8, 9)
+
+local expect_layering = {
+  { 9 };
+  { 7, 8 };
+  { 4, 5, 6 };
+  { 1, 2, 3 };
+}
+
+local result = coffman_graham(g)
 -- print(table.concat(result, " "))
 
 for layer = 1, #expect_layering do
