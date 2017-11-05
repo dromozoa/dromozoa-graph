@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, max_width)
+return function (g, width_max)
   local u = g.u
   local u_after = u.after
 
@@ -116,9 +116,13 @@ return function (g, max_width)
     end
   end
 
+  if not width_max then
+    width_max = u.n
+  end
+
+  local width = width_max
   local layer = {}
   local layer_max = 1
-  local width = max_width
 
   for i = order_max, 1, -1 do
     local uid = order[i]
@@ -132,7 +136,7 @@ return function (g, max_width)
       eid = uv_after[eid]
     end
     if width == 1 or layer_max <= u then
-      width = max_width
+      width = width_max
       layer_max = layer_max + 1
     else
       width = width - 1

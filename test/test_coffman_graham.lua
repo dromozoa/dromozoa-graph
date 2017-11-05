@@ -69,3 +69,41 @@ for layer = 1, #expect_layering do
     assert(result[uid] == layer)
   end
 end
+
+-- http://slidesplayer.net/slide/11273019/
+local g = graph()
+for i = 1, 9 do
+  g:add_vertex()
+end
+g:add_edge(1, 4)
+g:add_edge(2, 4)
+g:add_edge(2, 5)
+g:add_edge(3, 4)
+g:add_edge(3, 5)
+g:add_edge(3, 6)
+g:add_edge(4, 7)
+g:add_edge(5, 7)
+g:add_edge(5, 8)
+g:add_edge(6, 7)
+g:add_edge(6, 8)
+g:add_edge(7, 9)
+g:add_edge(8, 9)
+
+local expect_layering = {
+  { 9 };
+  { 7, 8 };
+  { 4, 5, 6 };
+  { 1, 2, 3 };
+}
+
+local result = coffman_graham(g)
+-- print(table.concat(result, " "))
+
+for layer = 1, #expect_layering do
+  local layering = expect_layering[layer]
+  for i = 1, #layering do
+    local uid = layering[i]
+    -- print(uid, layer, result[uid])
+    assert(result[uid] == layer)
+  end
+end
