@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local coffman_graham = require "experimental.coffman_graham4"
+local coffman_graham = require "dromozoa.graph.coffman_graham"
 
 -- https://www.slideshare.net/nikolovn/gd-2001-ver2
 local g = graph()
