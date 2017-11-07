@@ -15,30 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local topological_sort = require "dromozoa.graph.topological_sort"
+return function (g, layer_map)
+  local e = g.e
+  local e_after = e.after
 
-return function (g)
-  local uv = g.uv
-  local uv_first = uv.first
-  local uv_after = uv.after
-  local uv_target = uv.target
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
-  local layer_map = {}
+  local dummy_map = {}
 
-  local order = topological_sort(g)
-  for i = 1, #order do
-    local uid = order[i]
-    local u = 0
-    local eid = uv_first[uid]
-    while eid do
-      local v = layer_map[uv_target[eid]]
-      if u < v then
-        u = v
+  local eid = e.first
+  while eid do
+    local w_max = layer_map[vu_target[eid]] - 1
+    local w_min = layer_map[uv_target[eid]] + 1
+    do
+      local eid = eid
+      for w = w_max, w_min, -1 do
+        local wid = g:add_vertex()
+        layer_map[wid] = w
+        dummy_map[wid] = true
+        eid = g:subdivide_edge(eid, wid)
       end
-      eid = uv_after[eid]
     end
-    layer_map[uid] = u + 1
+    eid = e_after[eid]
   end
 
-  return layer_map
+  return dummy_map
 end

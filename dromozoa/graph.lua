@@ -51,10 +51,38 @@ function class:reverse_edge(eid)
   local vu = self.vu
   local uid = vu.target[eid]
   local vid = uv.target[eid]
+
   uv:remove_edge(eid, uid)
-  vu:remove_edge(eid, vid)
   uv:add_edge(eid, vid, uid)
+
+  vu:remove_edge(eid, vid)
   vu:add_edge(eid, uid, vid)
+end
+
+function class:subdivide_edge(eid, wid)
+  local uv = self.uv
+  local vu = self.vu
+  local uid = vu.target[eid]
+  local vid = uv.target[eid]
+  local new_eid = self.e:add()
+
+  local next_eid = uv:remove_edge(eid, uid)
+  if not next_eid then
+    uv:add_edge(eid, uid, wid)
+  else
+    uv:insert_edge(next_eid, eid, uid, wid)
+  end
+  uv:add_edge(new_eid, wid, vid)
+
+  local next_eid = vu:remove_edge(eid, vid)
+  if not next_eid then
+    vu:add_edge(new_eid, vid, wid)
+  else
+    vu:insert_edge(next_eid, new_eid, vid, wid)
+  end
+  vu:add_edge(eid, wid, uid)
+
+  return new_eid
 end
 
 return setmetatable(class, {

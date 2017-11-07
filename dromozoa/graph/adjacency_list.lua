@@ -31,6 +31,23 @@ function class:add_edge(eid, uid, vid)
   self.target[eid] = vid
 end
 
+function class:insert_edge(next_eid, eid, uid, vid)
+  local before = self.before
+  local after = self.after
+
+  local prev_eid = before[next_eid]
+  if not prev_eid then
+    self.first[uid] = eid
+  else
+    before[eid] = prev_eid
+    after[prev_eid] = eid
+  end
+
+  before[next_eid] = eid
+  after[eid] = next_eid
+  self.target[eid] = vid
+end
+
 function class:remove_edge(eid, uid)
   local before = self.before
   local after = self.after

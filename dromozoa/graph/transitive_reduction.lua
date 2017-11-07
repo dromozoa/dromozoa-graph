@@ -46,13 +46,16 @@ return function (g)
     if eid then
       local order_max = order_map[uid] - 1
       local order_min = order_max
-      repeat
-        local i = order_map[uv_target[eid]]
-        if order_min > i then
-          order_min = i
-        end
-        eid = uv_after[eid]
-      until not eid
+      do
+        local eid = eid
+        repeat
+          local i = order_map[uv_target[eid]]
+          if order_min > i then
+            order_min = i
+          end
+          eid = uv_after[eid]
+        until not eid
+      end
 
       local distance = { [uid] = 0 }
       for i = order_max, order_min, -1 do
@@ -75,7 +78,6 @@ return function (g)
         end
       end
 
-      local eid = uv_first[uid]
       repeat
         if distance[uv_target[eid]] > 1 then
           n = n + 1
