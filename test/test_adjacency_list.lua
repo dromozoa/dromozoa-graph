@@ -53,11 +53,32 @@ assert(g:degree(1) == 0)
 assert(g:degree(2) == 0)
 assert(g:degree(3) == 0)
 
--- depth_first_search(g, {
---   tree_edge = function (_, eid, uid, vid)
---     print("tree_edge", uid, vid)
---   end;
---   finish_edge = function (_, eid, uid, vid)
---     print("finish_edge", uid, vid)
---   end;
--- }, 1)
+local g = adjacency_list()
+
+g:add_edge(1, 1, 2)
+assert(g:remove_edge(1, 1) == nil)
+
+g:add_edge(1, 1, 2)
+g:add_edge(2, 1, 3)
+assert(g:remove_edge(1, 1) == 2)
+assert(g:remove_edge(2, 1) == nil)
+
+g:add_edge(1, 1, 2)
+g:add_edge(2, 1, 3)
+assert(g:remove_edge(2, 1) == nil)
+assert(g:remove_edge(1, 1) == nil)
+
+g:add_edge(1, 1, 2)
+g:insert_edge(1, 2, 1, 3)
+g:insert_edge(1, 3, 1, 4)
+assert(g.first[1] == 2)
+assert(g.after[2] == 3)
+assert(g.after[3] == 1)
+assert(g.after[1] == nil)
+assert(g.last[1] == 1)
+assert(g.before[1] == 3)
+assert(g.before[3] == 2)
+assert(g.before[2] == nil)
+assert(g.target[1] == 2)
+assert(g.target[2] == 3)
+assert(g.target[3] == 4)
