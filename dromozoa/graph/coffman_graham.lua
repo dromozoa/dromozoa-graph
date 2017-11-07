@@ -47,7 +47,7 @@ return function (g, width_max)
   local candidates = {}
 
   local width = width_max
-  local layer = {}
+  local layer_map = {}
   local layer_max = 1
 
   local compare = function (uid1, uid2)
@@ -152,7 +152,7 @@ return function (g, width_max)
     local u = 0
     local eid = uv_first[uid]
     while eid do
-      local v = layer[uv_target[eid]]
+      local v = layer_map[uv_target[eid]]
       if u < v then
         u = v
       end
@@ -164,8 +164,8 @@ return function (g, width_max)
     else
       width = width - 1
     end
-    layer[uid] = layer_max
+    layer_map[uid] = layer_max
   end
 
-  return layer
+  return layer_map
 end

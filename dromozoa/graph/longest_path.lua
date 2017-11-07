@@ -23,7 +23,7 @@ return function (g)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local layer = {}
+  local layer_map = {}
 
   local order = topological_sort(g)
   for i = 1, #order do
@@ -31,14 +31,14 @@ return function (g)
     local u = 0
     local eid = uv_first[uid]
     while eid do
-      local v = layer[uv_target[eid]]
+      local v = layer_map[uv_target[eid]]
       if u < v then
         u = v
       end
       eid = uv_after[eid]
     end
-    layer[uid] = u + 1
+    layer_map[uid] = u + 1
   end
 
-  return layer
+  return layer_map
 end
