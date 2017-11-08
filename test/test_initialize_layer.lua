@@ -16,9 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local initialize_layer = require "experimental.initialize_layer"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
+local initialize_layer = require "experimental.initialize_layer2"
 
 local g = graph()
 
