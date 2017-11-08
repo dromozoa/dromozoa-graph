@@ -16,36 +16,30 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local initialize_layer = require "experimental.initialize_layer"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
 
 local g = graph()
 
-local u1 = g:add_vertex()
-local u2 = g:add_vertex()
-local u3 = g:add_vertex()
-local u4 = g:add_vertex()
-local u5 = g:add_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
 
-g:add_edge(u1, u2)
-g:add_edge(u2, u3)
-g:add_edge(u3, u5)
-g:add_edge(u1, u4)
-g:add_edge(u4, u5)
-g:add_edge(u1, u5)
+g:add_edge(1, 2)
+g:add_edge(2, 3)
+g:add_edge(3, 5)
+g:add_edge(1, 4)
+g:add_edge(4, 5)
+g:add_edge(1, 5)
 
 local layer_map = longest_path(g)
-assert(layer_map[u1] == 4)
-assert(layer_map[u2] == 3)
-assert(layer_map[u3] == 2)
-assert(layer_map[u4] == 2)
-assert(layer_map[u5] == 1)
-
 local dummy_min = introduce_dummy_vertices(g, layer_map)
+local layer = initialize_layer(g, layer_map)
 
-assert(dummy_min == 6)
-assert(g.u.last == 8)
-
-assert(layer_map[6] == 3)
-assert(layer_map[7] == 3)
-assert(layer_map[8] == 2)
+assert(table.concat(layer[4], " ") == "1")
+assert(table.concat(layer[3], " ") == "2 6 7")
+assert(table.concat(layer[2], " ") == "3 4 8")
+assert(table.concat(layer[1], " ") == "5")
