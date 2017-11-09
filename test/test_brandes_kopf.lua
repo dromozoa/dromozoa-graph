@@ -16,9 +16,14 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
+local initialize_layer = require "dromozoa.graph.initialize_layer"
 local brandes_kopf = require "experimental.brandes_kopf"
 
 local g = graph()
+
+-- example 1
+--[====[
 for i = 1, 26 do
   g:add_vertex()
 end
@@ -54,16 +59,6 @@ g:add_edge(25, 16)
 g:add_edge(13, 16)
 g:add_edge(26, 16)
 
--- io.write("digraph {\n")
--- local eid = g.e.first
--- while eid do
---   local uid = g.vu.target[eid]
---   local vid = g.uv.target[eid]
---   io.write(uid, "->", vid, ";\n")
---   eid = g.e.after[eid]
--- end
--- io.write("}\n")
-
 local dummy_uid = 17
 
 local layer = {
@@ -71,6 +66,59 @@ local layer = {
   { 11, 12, 23, 24, 25, 13, 26 };
   { 8, 9, 20, 21, 22, 10 };
   { 3, 4, 17, 5, 18, 19, 6, 7 };
+  { 1, 2 };
+}
+]====]
+
+for i = 1, 23 do
+  g:add_vertex()
+end
+
+g:add_edge(1, 13)
+g:add_edge(1, 21)
+g:add_edge(1, 4)
+g:add_edge(1, 3)
+g:add_edge(2, 3)
+g:add_edge(2, 20)
+g:add_edge(3, 4)
+g:add_edge(3, 5)
+g:add_edge(3, 23)
+g:add_edge(4, 6)
+g:add_edge(5, 7)
+g:add_edge(6, 8)
+g:add_edge(6, 16)
+g:add_edge(6, 23)
+g:add_edge(7, 9)
+g:add_edge(8, 10)
+g:add_edge(8, 11)
+g:add_edge(9, 12)
+g:add_edge(10, 13)
+g:add_edge(10, 14)
+g:add_edge(10, 15)
+g:add_edge(11, 15)
+g:add_edge(11, 16)
+g:add_edge(12, 20)
+g:add_edge(13, 17)
+g:add_edge(14, 17)
+g:add_edge(14, 18)
+g:add_edge(16, 18)
+g:add_edge(16, 19)
+g:add_edge(16, 20)
+g:add_edge(18, 21)
+g:add_edge(19, 22)
+g:add_edge(21, 23)
+g:add_edge(22, 23)
+
+local layer = {
+  { 23 };
+  { 21, 22 };
+  { 17, 18, 19, 20 };
+  { 13, 14, 15, 16 };
+  { 10, 11, 12 };
+  { 8, 9 };
+  { 6, 7 };
+  { 4, 5 };
+  { 3 };
   { 1, 2 };
 }
 
@@ -81,5 +129,26 @@ for i = 1, #layer do
     layer_map[L[j]] = i
   end
 end
+
+local dummy_uid = introduce_dummy_vertices(g, layer_map)
+
+local layer = initialize_layer(g, layer_map)
+
+-- fix
+local order = layer[3]
+assert(order[5] == 20)
+assert(order[6] == 55)
+order[5] = 55
+order[6] = 20
+
+-- io.write("digraph {\n")
+-- local eid = g.e.first
+-- while eid do
+--   local uid = g.vu.target[eid]
+--   local vid = g.uv.target[eid]
+--   io.write(uid, "->", vid, ";\n")
+--   eid = g.e.after[eid]
+-- end
+-- io.write("}\n")
 
 brandes_kopf(g, layer_map, layer, dummy_uid)
