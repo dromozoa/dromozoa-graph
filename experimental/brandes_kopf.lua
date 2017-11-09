@@ -96,41 +96,50 @@ return function (g, layer_map, layer, dummy_uid)
     uid = u_after[uid]
   end
 
-  for i = #layer, 1, -1 do
-    local order = layer[i]
-    local r = 0
+  do
+    local layer_first = #layer
+    local layer_last = 1
+    local layer_step = -1
+    local first = vu_first
+    local after = vu_after
+    local target = vu_target
 
-    for k = 1, #order do
-      local uid = order[k]
-      local eids = {}
+    for i = layer_first, layer_last, layer_step do
+      local order = layer[i]
+      local r = 0
 
-      local eid = vu_first[uid]
-      while eid do
-        eids[#eids + 1] = eid
-        eid = vu_after[eid]
-      end
+      for j = 1, #order do
+        local uid = order[j]
+        local eids = {}
 
-      table.sort(eids, function (eid1, eid2)
-        return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
-      end)
+        local eid = first[uid]
+        while eid do
+          eids[#eids + 1] = eid
+          eid = after[eid]
+        end
 
-      local d = #eids
-      if d > 0 then
-        local h = (d + 1) / 2
+        table.sort(eids, function (eid1, eid2)
+          return layer_index[target[eid1]] < layer_index[target[eid2]]
+        end)
 
-        for m = math.floor(h), math.ceil(h) do
-          if align[uid] == uid then
-            local eid = eids[m]
-            if not mark[eid] then
-              local vid = vu_target[eid]
-              local q = layer_index[vid]
-              if r < q then
-                print("?", uid, vid)
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                r = q
+        local d = #eids
+        if d > 0 then
+          local h = (d + 1) / 2
+
+          for m = math.floor(h), math.ceil(h) do
+            if align[uid] == uid then
+              local eid = eids[m]
+              if not mark[eid] then
+                local vid = target[eid]
+                local q = layer_index[vid]
+                if r < q then
+                  print("?", uid, vid)
+                  local wid = root[vid]
+                  root[uid] = wid
+                  align[vid] = uid
+                  align[uid] = wid
+                  r = q
+                end
               end
             end
           end
