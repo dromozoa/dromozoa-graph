@@ -202,7 +202,7 @@ local function horizontal_compaction_left(u, layer_map, layer, layer_index, root
   return ax
 end
 
-local function dump(layer, x)
+local function dump(layer, dummy_uid, x)
   for i = #layer, 1, -1 do
     local L = layer[i]
     local row = {}
@@ -210,7 +210,11 @@ local function dump(layer, x)
     for j = 1, #L do
       local uid = L[j]
       local X = x[uid] + 1
-      row[X] = uid
+      if uid < dummy_uid then
+        row[X] = uid
+      else
+        row[X] = "(" .. uid .. ")"
+      end
       if max < X then
         max = X
       end
@@ -242,7 +246,8 @@ return function (g, layer_map, layer, dummy_uid)
 
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
   local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  -- local root, align = vertical_alignment_left(u, uv, layer, layer_index, mark, 1, #layer, 1)
   local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
 
-  dump(layer, x)
+  dump(layer, dummy_uid, x)
 end
