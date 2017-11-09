@@ -29,16 +29,12 @@ return function (g, layer_map, layer, dummy_uid)
   local vu_after = vu.after
   local vu_target = vu.target
 
-  local h = #layer
-
-  local position_map = {}
+  local layer_index = {}
   for i = 1, #layer do
-    local L = layer[i]
-    local P = {}
-    for j = 1, #L do
-      P[L[j]] = j
+    local order = layer[i]
+    for j = 1, #order do
+      layer_index[order[j]] = j
     end
-    position_map[i] = P
   end
 
   local mark = {}
@@ -49,8 +45,6 @@ return function (g, layer_map, layer, dummy_uid)
     local n0 = #L0
     local L1 = layer[i]
     local n1 = #L1
-    local P0 = position_map[i + 1]
-    local P1 = position_map[i]
 
     local k0 = 0
     local l = 1
@@ -72,7 +66,7 @@ return function (g, layer_map, layer, dummy_uid)
       if l1 == n1 or is_inner_segment then
         local k1 = n0
         if is_inner_segment then
-          k1 = P0[vid]
+          k1 = layer_index[vid]
           assert(k1, "? " .. i .. " " .. uid .. " " .. vid)
         end
 
@@ -81,7 +75,7 @@ return function (g, layer_map, layer, dummy_uid)
           local eid = vu_first[uid]
           while eid do
             local vid = vu_target[eid]
-            local k = P0[vid]
+            local k = layer_index[vid]
             if k < k0 or k > k1 then
               print("mark", uid, vid, "e", eid)
               mark[eid] = true
@@ -111,7 +105,6 @@ return function (g, layer_map, layer, dummy_uid)
     local L = layer[i]
     local n = #L
     local L0 = layer[i + 1]
-    local P0 = position_map[i + 1]
 
     local r = 0
     for k = 1, n do
@@ -128,7 +121,7 @@ return function (g, layer_map, layer, dummy_uid)
       table.sort(eids, function (eid1, eid2)
         local vid1 = vu_target[eid1]
         local vid2 = vu_target[eid2]
-        return P0[vid1] < P0[vid2]
+        return layer_index[vid1] < layer_index[vid2]
       end)
 
       local d = #eids
@@ -139,12 +132,12 @@ return function (g, layer_map, layer, dummy_uid)
           if align[uid] == uid then
             local eid = eids[m]
             local vid = vu_target[eid]
-            if not mark[eid] and r < P0[vid] then
+            if not mark[eid] and r < layer_index[vid] then
               print("?", uid, vid)
               align[vid] = uid
               root[uid] = root[vid]
               align[uid] = root[uid]
-              r = P0[vid]
+              r = layer_index[vid]
             end
           end
         end
@@ -172,8 +165,7 @@ return function (g, layer_map, layer, dummy_uid)
       local wid = vid
       repeat
         local i = assert(layer_map[wid])
-        local P = position_map[i]
-        local p = P[wid]
+        local p = layer_index[wid]
         if p > 1 then
           local L = layer[i]
           local uid = root[L[p - 1]]
