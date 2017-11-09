@@ -17,6 +17,61 @@
 
 local sort = table.sort
 
+local function preprocessing(g, layer, layer_index, dummy_uid)
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
+
+  local layer_max = #layer
+
+  local mark = {}
+
+  local vn = #layer[layer_max - 1]
+  for i = layer_max - 2, 2, -1 do
+    local uids = layer[i]
+    local un = #uids
+
+    local a = 1
+    local c = 0
+
+    for b = 1, un do
+      local uid = uids[b]
+
+      local d
+      if b == un then
+        d = vn
+      end
+      if uid >= dummy_uid then
+        local vid = vu_target[vu_first[uid]]
+        if vid >= dummy_uid then
+          d = layer_index[vid]
+        end
+      end
+
+      if d then
+        for a = a, b do
+          local eid = vu_first[uids[a]]
+          while eid do
+            local j = layer_index[vu_target[eid]]
+            if j < c or d < j then
+              print("mark", uids[a], vu_target[eid], "e", eid)
+              mark[eid] = true
+            end
+            eid = vu_after[eid]
+          end
+        end
+        a = b
+        c = d
+      end
+    end
+
+    vn = #uids
+  end
+
+  return mark
+end
+
 local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
   local u_after = u.after
 
@@ -117,6 +172,39 @@ local function place_block_left(layer_map, layer, layer_index, root, align, sink
   end
 end
 
+local function horizontal_compaction(u, layer_map, layer, layer_index, root, align)
+  local u_after = u.after
+
+  local sink = {}
+  local shift = {}
+  local rx = {}
+  local ax = {}
+
+  local uid = u.first
+  while uid do
+    sink[uid] = uid
+    uid = u_after[uid]
+  end
+
+  local uid = u.first
+  while uid do
+    if root[uid] == uid then
+      place_block_left(layer_map, layer, layer_index, root, align, sink, shift, rx, uid)
+    end
+    uid = u_after[uid]
+  end
+
+  local uid = u.first
+  while uid do
+    local vid = root[uid]
+    ax[uid] = rx[vid] + (shift[sink[vid]] or 0)
+    print("X", uid, ax[uid], shift[sink[vid]])
+    uid = u_after[uid]
+  end
+
+  return ax
+end
+
 return function (g, layer_map, layer, dummy_uid)
   local u = g.u
   local u_after = u.after
@@ -140,87 +228,9 @@ return function (g, layer_map, layer, dummy_uid)
     end
   end
 
-  local mark = {}
-
-  -- preprocessing (mark type 1 conflicts)
-  local vn = #layer[layer_max - 1]
-  for i = layer_max - 2, 2, -1 do
-    local uids = layer[i]
-    local un = #uids
-
-    local a = 1
-    local c = 0
-
-    for b = 1, un do
-      local uid = uids[b]
-
-      local d
-      if b == un then
-        d = vn
-      end
-      if uid >= dummy_uid then
-        local vid = vu_target[vu_first[uid]]
-        if vid >= dummy_uid then
-          d = layer_index[vid]
-        end
-      end
-
-      if d then
-        for a = a, b do
-          local eid = vu_first[uids[a]]
-          while eid do
-            local j = layer_index[vu_target[eid]]
-            if j < c or d < j then
-              print("mark", uids[a], vu_target[eid], "e", eid)
-              mark[eid] = true
-            end
-            eid = vu_after[eid]
-          end
-        end
-        a = b
-        c = d
-      end
-    end
-
-    vn = #uids
-  end
-
-  -- local root = {}
-  -- local align = {}
-  local sink = {}
-  local shift = {}
-  local rx = {}
-  local ax = {}
-
-  local uid = u.first
-  while uid do
-    -- root[uid] = uid
-    -- align[uid] = uid
-    sink[uid] = uid
-    uid = u_after[uid]
-  end
-
-  -- vertical alignment
-
+  local mark = preprocessing(g, layer, layer_index, dummy_uid)
   local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
-
-  -- horizontal compaction
-
-  local uid = u.first
-  while uid do
-    if root[uid] == uid then
-      place_block_left(layer_map, layer, layer_index, root, align, sink, shift, rx, uid)
-    end
-    uid = u_after[uid]
-  end
-
-  local uid = u.first
-  while uid do
-    local vid = root[uid]
-    ax[uid] = rx[vid] + (shift[sink[vid]] or 0)
-    print("X", uid, ax[uid], shift[sink[vid]])
-    uid = u_after[uid]
-  end
+  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align)
 
   for i = #layer, 1, -1 do
     local L = layer[i]
@@ -228,7 +238,7 @@ return function (g, layer_map, layer, dummy_uid)
     local max = 1
     for j = 1, #L do
       local uid = L[j]
-      local X = ax[uid] + 1
+      local X = x[uid] + 1
       row[X] = uid
       if max < X then
         max = X
