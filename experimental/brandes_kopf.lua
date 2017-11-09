@@ -125,7 +125,6 @@ return function (g, layer_map, layer, dummy_uid)
         local d = #eids
         if d > 0 then
           local h = (d + 1) / 2
-
           for m = math.floor(h), math.ceil(h) do
             if align[uid] == uid then
               local eid = eids[m]
