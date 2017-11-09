@@ -29,8 +29,9 @@ return function (g, layer_map, layer, dummy_uid)
   local vu_after = vu.after
   local vu_target = vu.target
 
+  local layer_max = #layer
   local layer_index = {}
-  for i = 1, #layer do
+  for i = 1, layer_max do
     local order = layer[i]
     for j = 1, #order do
       layer_index[order[j]] = j
@@ -40,53 +41,47 @@ return function (g, layer_map, layer, dummy_uid)
   local mark = {}
 
   -- preprocessing (mark type 1 conflicts)
-  for i = 2, #layer - 2 do
-    local L0 = layer[i + 1]
-    local n0 = #L0
-    local L1 = layer[i]
-    local n1 = #L1
+  local v_last = #layer[layer_max - 1]
+  for i = layer_max - 2, 2, -1 do
+    local u_order = layer[i]
+    local u_first = 1
+    local u_last = #u_order
 
-    local k0 = 0
-    local l = 1
+    local k_first = 0
+    local j = 1
 
-    for l1 = 1, n1 do
-      local uid = L1[l1]
-      local vid
-      local is_inner_segment
+    for l = u_first, u_last do
+      local uid = u_order[l]
+
+      local k_last
+      if l == u_last then
+        k_last = v_last
+      end
       if uid >= dummy_uid then
-        local eid = vu_first[uid]
-        assert(vu:degree(uid) == 1)
-        vid = vu_target[eid]
-        is_inner_segment = vid >= dummy_uid
-        -- if is_inner_segment then
-        --   print("inner", uid, vid)
-        -- end
+        local vid = vu_target[vu_first[uid]]
+        if vid >= dummy_uid then
+          k_last = layer_index[vid]
+        end
       end
 
-      if l1 == n1 or is_inner_segment then
-        local k1 = n0
-        if is_inner_segment then
-          k1 = layer_index[vid]
-          assert(k1, "? " .. i .. " " .. uid .. " " .. vid)
-        end
-
-        while l <= l1 do
-          local uid = L1[l]
-          local eid = vu_first[uid]
+      if k_last then
+        while j <= l do
+          local eid = vu_first[u_order[j]]
           while eid do
-            local vid = vu_target[eid]
-            local k = layer_index[vid]
-            if k < k0 or k > k1 then
-              print("mark", uid, vid, "e", eid)
+            local k = layer_index[vu_target[eid]]
+            if k < k_first or k > k_last then
+              print("mark", u_order[j], vu_target[eid], "e", eid)
               mark[eid] = true
             end
             eid = vu_after[eid]
           end
-          l = l + 1
+          j = j + 1
         end
-        k0 = k1
+        k_first = k_last
       end
     end
+
+    v_last = #u_order
   end
 
   -- vertical alignment
