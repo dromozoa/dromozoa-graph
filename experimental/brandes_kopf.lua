@@ -55,7 +55,6 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
           while eid do
             local j = layer_index[vu_target[eid]]
             if j < c or d < j then
-              print("mark", uids[a], vu_target[eid], "e", eid)
               mark[eid] = true
             end
             eid = vu_after[eid]
@@ -120,7 +119,6 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
               local vid = vu_target[eid]
               local b = layer_index[vid]
               if a < b then
-                print("?", uid, vid)
                 local wid = root[vid]
                 root[uid] = wid
                 align[vid] = uid
@@ -198,7 +196,6 @@ local function horizontal_compaction_left(u, layer_map, layer, layer_index, root
   while uid do
     local vid = root[uid]
     ax[uid] = rx[vid] + (shift[sink[vid]] or 0)
-    print("X", uid, ax[uid], shift[sink[vid]])
     uid = u_after[uid]
   end
 
