@@ -41,47 +41,46 @@ return function (g, layer_map, layer, dummy_uid)
   local mark = {}
 
   -- preprocessing (mark type 1 conflicts)
-  local v_last = #layer[layer_max - 1]
+  local vn = #layer[layer_max - 1]
   for i = layer_max - 2, 2, -1 do
-    local u_order = layer[i]
-    local u_first = 1
-    local u_last = #u_order
+    local uids = layer[i]
+    local un = #uids
 
-    local k_first = 0
-    local j = 1
+    local a = 1
+    local c = 0
 
-    for i = u_first, u_last do
-      local uid = u_order[i]
+    for b = 1, un do
+      local uid = uids[b]
 
-      local k_last
-      if i == u_last then
-        k_last = v_last
+      local d
+      if b == un then
+        d = vn
       end
       if uid >= dummy_uid then
         local vid = vu_target[vu_first[uid]]
         if vid >= dummy_uid then
-          k_last = layer_index[vid]
+          d = layer_index[vid]
         end
       end
 
-      if k_last then
-        while j <= i do
-          local eid = vu_first[u_order[j]]
+      if d then
+        for a = a, b do
+          local eid = vu_first[uids[a]]
           while eid do
-            local k = layer_index[vu_target[eid]]
-            if k < k_first or k > k_last then
-              print("mark", u_order[j], vu_target[eid], "e", eid)
+            local j = layer_index[vu_target[eid]]
+            if j < c or d < j then
+              print("mark", uids[a], vu_target[eid], "e", eid)
               mark[eid] = true
             end
             eid = vu_after[eid]
           end
-          j = j + 1
         end
-        k_first = k_last
+        a = b
+        c = d
       end
     end
 
-    v_last = #u_order
+    vn = #uids
   end
 
   -- vertical alignment
@@ -104,40 +103,43 @@ return function (g, layer_map, layer, dummy_uid)
     local after = vu_after
     local target = vu_target
 
-    for i = layer_first, layer_last, layer_step do
-      local order = layer[i]
-      local r = 0
+    local compare = function (eid1, eid2)
+      return layer_index[target[eid1]] < layer_index[target[eid2]]
+    end
 
-      for j = 1, #order do
-        local uid = order[j]
+    for i = layer_first, layer_last, layer_step do
+      local uids = layer[i]
+      local a = 0
+
+      for j = 1, #uids do
+        local uid = uids[j]
         local eids = {}
+        local n = 0
 
         local eid = first[uid]
         while eid do
-          eids[#eids + 1] = eid
+          n = n + 1
+          eids[n] = eid
           eid = after[eid]
         end
 
-        table.sort(eids, function (eid1, eid2)
-          return layer_index[target[eid1]] < layer_index[target[eid2]]
-        end)
+        table.sort(eids, compare)
 
-        local d = #eids
-        if d > 0 then
-          local h = (d + 1) / 2
+        if n > 0 then
+          local h = (n + 1) / 2
           for m = math.floor(h), math.ceil(h) do
             if align[uid] == uid then
               local eid = eids[m]
               if not mark[eid] then
                 local vid = target[eid]
-                local q = layer_index[vid]
-                if r < q then
+                local b = layer_index[vid]
+                if a < b then
                   print("?", uid, vid)
                   local wid = root[vid]
                   root[uid] = wid
                   align[vid] = uid
                   align[uid] = wid
-                  r = q
+                  a = b
                 end
               end
             end
