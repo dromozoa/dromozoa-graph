@@ -15,6 +15,73 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local sort = table.sort
+
+local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
+  local u_after = u.after
+
+  local first = vu.first
+  local after = vu.after
+  local target = vu.target
+
+  local root = {}
+  local align = {}
+
+  local uid = u.first
+  while uid do
+    root[uid] = uid
+    align[uid] = uid
+    uid = u_after[uid]
+  end
+
+  local compare = function (eid1, eid2)
+    return layer_index[target[eid1]] < layer_index[target[eid2]]
+  end
+
+  for i = layer_first, layer_last, layer_step do
+    local uids = layer[i]
+    local a = 0
+
+    for j = 1, #uids do
+      local uid = uids[j]
+      local eids = {}
+      local n = 0
+
+      local eid = first[uid]
+      while eid do
+        n = n + 1
+        eids[n] = eid
+        eid = after[eid]
+      end
+
+      sort(eids, compare)
+
+      if n > 0 then
+        local h = (n + 1) / 2
+        for m = math.floor(h), math.ceil(h) do
+          if align[uid] == uid then
+            local eid = eids[m]
+            if not mark[eid] then
+              local vid = target[eid]
+              local b = layer_index[vid]
+              if a < b then
+                print("?", uid, vid)
+                local wid = root[vid]
+                root[uid] = wid
+                align[vid] = uid
+                align[uid] = wid
+                a = b
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return root, align
+end
+
 local function place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, vid)
   if not x[vid] then
     x[vid] = 0
@@ -118,103 +185,40 @@ return function (g, layer_map, layer, dummy_uid)
     vn = #uids
   end
 
-  -- vertical alignment
-
-  local root = {}
-  local align = {}
-
-  local uid = u.first
-  while uid do
-    root[uid] = uid
-    align[uid] = uid
-    uid = u_after[uid]
-  end
-
-  do
-    local layer_first = #layer
-    local layer_last = 1
-    local layer_step = -1
-    local first = vu_first
-    local after = vu_after
-    local target = vu_target
-
-    local compare = function (eid1, eid2)
-      return layer_index[target[eid1]] < layer_index[target[eid2]]
-    end
-
-    for i = layer_first, layer_last, layer_step do
-      local uids = layer[i]
-      local a = 0
-
-      for j = 1, #uids do
-        local uid = uids[j]
-        local eids = {}
-        local n = 0
-
-        local eid = first[uid]
-        while eid do
-          n = n + 1
-          eids[n] = eid
-          eid = after[eid]
-        end
-
-        table.sort(eids, compare)
-
-        if n > 0 then
-          local h = (n + 1) / 2
-          for m = math.floor(h), math.ceil(h) do
-            if align[uid] == uid then
-              local eid = eids[m]
-              if not mark[eid] then
-                local vid = target[eid]
-                local b = layer_index[vid]
-                if a < b then
-                  print("?", uid, vid)
-                  local wid = root[vid]
-                  root[uid] = wid
-                  align[vid] = uid
-                  align[uid] = wid
-                  a = b
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-
-  -- horizontal compaction
-
+  -- local root = {}
+  -- local align = {}
   local sink = {}
   local shift = {}
-  local x = {}
+  local rx = {}
+  local ax = {}
 
   local uid = u.first
   while uid do
+    -- root[uid] = uid
+    -- align[uid] = uid
     sink[uid] = uid
     uid = u_after[uid]
   end
 
+  -- vertical alignment
+
+  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
+
+  -- horizontal compaction
+
   local uid = u.first
   while uid do
     if root[uid] == uid then
-      place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, uid)
+      place_block_left(layer_map, layer, layer_index, root, align, sink, shift, rx, uid)
     end
     uid = u_after[uid]
   end
 
-  local x_old = x
-  local x = {}
-
   local uid = u.first
   while uid do
-    x[uid] = x_old[root[uid]]
-    local s = shift[sink[root[uid]]]
-    if s then
-      x[uid] = x[uid] + s
-    end
-    print("X", uid, x[uid], s)
+    local vid = root[uid]
+    ax[uid] = rx[vid] + (shift[sink[vid]] or 0)
+    print("X", uid, ax[uid], shift[sink[vid]])
     uid = u_after[uid]
   end
 
@@ -224,7 +228,7 @@ return function (g, layer_map, layer, dummy_uid)
     local max = 1
     for j = 1, #L do
       local uid = L[j]
-      local X = x[uid] + 1
+      local X = ax[uid] + 1
       row[X] = uid
       if max < X then
         max = X
