@@ -15,6 +15,41 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local function place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, vid)
+  if not x[vid] then
+    x[vid] = 0
+    local wid = vid
+    repeat
+      local i = layer_index[wid]
+      if i > 1 then
+        local uid = root[layer[layer_map[wid]][i - 1]]
+        place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, uid)
+        local u_sink = sink[uid]
+        local v_sink = sink[vid]
+        if v_sink == vid then
+          sink[vid] = u_sink
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        elseif v_sink == u_sink then
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        else
+          local a = shift[u_sink]
+          local b = x[vid] - x[uid] - 1
+          if not a or a > b then
+            shift[u_sink] = b
+          end
+        end
+      end
+      wid = align[wid]
+    until wid == vid
+  end
+end
+
 return function (g, layer_map, layer, dummy_uid)
   local u = g.u
   local u_after = u.after
@@ -161,53 +196,10 @@ return function (g, layer_map, layer, dummy_uid)
     uid = u_after[uid]
   end
 
-  local delta = 1
-
-  local function place_block(vid)
-    if not x[vid] then
-      x[vid] = 0
-      local wid = vid
-      repeat
-        local i = assert(layer_map[wid])
-        local p = layer_index[wid]
-        if p > 1 then
-          local L = layer[i]
-          local uid = root[L[p - 1]]
-          place_block(uid)
-          if sink[vid] == vid then
-            sink[vid] = sink[uid]
-          end
-          if sink[vid] ~= sink[uid] then
-            local a = shift[sink[uid]]
-            local b = x[vid] - x[uid] - delta
-            if not a then
-              shift[sink[uid]] = b
-            else
-              if a < b then
-                shift[sink[uid]] = a
-              else
-                shift[sink[uid]] = b
-              end
-            end
-          else
-            local a = x[vid]
-            local b = x[uid] + delta
-            if a < b then
-              x[vid] = b
-            else
-              x[vid] = a
-            end
-          end
-        end
-        wid = align[wid]
-      until wid == vid
-    end
-  end
-
   local uid = u.first
   while uid do
     if root[uid] == uid then
-      place_block(uid)
+      place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, uid)
     end
     uid = u_after[uid]
   end
