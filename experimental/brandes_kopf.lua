@@ -97,14 +97,11 @@ return function (g, layer_map, layer, dummy_uid)
   end
 
   for i = #layer, 1, -1 do
-    local L = layer[i]
-    local n = #L
-    local L0 = layer[i + 1]
-
+    local order = layer[i]
     local r = 0
-    for k = 1, n do
-      local uid = L[k]
 
+    for k = 1, #order do
+      local uid = order[k]
       local eids = {}
 
       local eid = vu_first[uid]
@@ -114,9 +111,7 @@ return function (g, layer_map, layer, dummy_uid)
       end
 
       table.sort(eids, function (eid1, eid2)
-        local vid1 = vu_target[eid1]
-        local vid2 = vu_target[eid2]
-        return layer_index[vid1] < layer_index[vid2]
+        return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
       end)
 
       local d = #eids
@@ -126,13 +121,17 @@ return function (g, layer_map, layer, dummy_uid)
         for m = math.floor(h), math.ceil(h) do
           if align[uid] == uid then
             local eid = eids[m]
-            local vid = vu_target[eid]
-            if not mark[eid] and r < layer_index[vid] then
-              print("?", uid, vid)
-              align[vid] = uid
-              root[uid] = root[vid]
-              align[uid] = root[uid]
-              r = layer_index[vid]
+            if not mark[eid] then
+              local vid = vu_target[eid]
+              local q = layer_index[vid]
+              if r < q then
+                print("?", uid, vid)
+                local wid = root[vid]
+                root[uid] = wid
+                align[vid] = uid
+                align[uid] = wid
+                r = q
+              end
             end
           end
         end
