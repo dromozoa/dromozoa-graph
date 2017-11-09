@@ -75,9 +75,9 @@ end
 local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
   local u_after = u.after
 
-  local first = vu.first
-  local after = vu.after
-  local target = vu.target
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
 
   local root = {}
   local align = {}
@@ -90,7 +90,7 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
   end
 
   local compare = function (eid1, eid2)
-    return layer_index[target[eid1]] < layer_index[target[eid2]]
+    return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
   end
 
   for i = layer_first, layer_last, layer_step do
@@ -102,11 +102,11 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
       local eids = {}
       local n = 0
 
-      local eid = first[uid]
+      local eid = vu_first[uid]
       while eid do
         n = n + 1
         eids[n] = eid
-        eid = after[eid]
+        eid = vu_after[eid]
       end
 
       sort(eids, compare)
@@ -117,7 +117,7 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
           if align[uid] == uid then
             local eid = eids[m]
             if not mark[eid] then
-              local vid = target[eid]
+              local vid = vu_target[eid]
               local b = layer_index[vid]
               if a < b then
                 print("?", uid, vid)
@@ -172,7 +172,7 @@ local function place_block_left(layer_map, layer, layer_index, root, align, sink
   end
 end
 
-local function horizontal_compaction(u, layer_map, layer, layer_index, root, align)
+local function horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
   local u_after = u.after
 
   local sink = {}
@@ -205,33 +205,7 @@ local function horizontal_compaction(u, layer_map, layer, layer_index, root, ali
   return ax
 end
 
-return function (g, layer_map, layer, dummy_uid)
-  local u = g.u
-  local u_after = u.after
-
-  local uv = g.uv
-  local uv_first = uv.first
-  local uv_after = uv.after
-  local uv_target = uv.target
-
-  local vu = g.vu
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
-
-  local layer_max = #layer
-  local layer_index = {}
-  for i = 1, layer_max do
-    local order = layer[i]
-    for j = 1, #order do
-      layer_index[order[j]] = j
-    end
-  end
-
-  local mark = preprocessing(g, layer, layer_index, dummy_uid)
-  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align)
-
+local function dump(layer, x)
   for i = #layer, 1, -1 do
     local L = layer[i]
     local row = {}
@@ -251,4 +225,27 @@ return function (g, layer_map, layer, dummy_uid)
     end
     print(table.concat(row, "\t"))
   end
+end
+
+return function (g, layer_map, layer, dummy_uid)
+  local u = g.u
+  local u_after = u.after
+
+  local uv = g.uv
+  local vu = g.vu
+
+  local layer_max = #layer
+  local layer_index = {}
+  for i = 1, layer_max do
+    local order = layer[i]
+    for j = 1, #order do
+      layer_index[order[j]] = j
+    end
+  end
+
+  local mark = preprocessing(g, layer, layer_index, dummy_uid)
+  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
+
+  dump(layer, x)
 end
