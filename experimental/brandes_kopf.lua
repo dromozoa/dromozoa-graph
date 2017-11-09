@@ -48,13 +48,13 @@ return function (g, layer_map, layer, dummy_uid)
     local u_last = #u_order
 
     local k_first = 0
-    local j = 1
+    local l1 = 1
 
-    for l = u_first, u_last do
-      local uid = u_order[l]
+    for j = u_first, u_last do
+      local uid = u_order[j]
 
       local k_last
-      if l == u_last then
+      if j == u_last then
         k_last = v_last
       end
       if uid >= dummy_uid then
@@ -65,17 +65,17 @@ return function (g, layer_map, layer, dummy_uid)
       end
 
       if k_last then
-        while j <= l do
-          local eid = vu_first[u_order[j]]
+        while l1 <= j do
+          local eid = vu_first[u_order[l1]]
           while eid do
             local k = layer_index[vu_target[eid]]
             if k < k_first or k > k_last then
-              print("mark", u_order[j], vu_target[eid], "e", eid)
+              print("mark", u_order[l1], vu_target[eid], "e", eid)
               mark[eid] = true
             end
             eid = vu_after[eid]
           end
-          j = j + 1
+          l1 = l1 + 1
         end
         k_first = k_last
       end
