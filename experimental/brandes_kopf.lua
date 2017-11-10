@@ -71,12 +71,30 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
   return mark
 end
 
-local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step, left)
+local function vertical_alignment(g, layer, layer_index, mark, upper, left)
+  local u = g.u
   local u_after = u.after
 
+  local vu
+  if upper then
+    vu = g.vu
+  else
+    vu = g.uv
+  end
   local vu_first = vu.first
   local vu_after = vu.after
   local vu_target = vu.target
+
+  local compare
+  if left then
+    compare = function (eid1, eid2)
+      return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
+    end
+  else
+    compare = function (eid1, eid2)
+      return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
+    end
+  end
 
   local root = {}
   local align = {}
@@ -88,15 +106,17 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
     uid = u_after[uid]
   end
 
-  local compare
-  if left then
-    compare = function (eid1, eid2)
-      return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
-    end
+  local layer_first
+  local layer_last
+  local layer_step
+  if upper then
+    layer_first = #layer
+    layer_last = 1
+    layer_step = -1
   else
-    compare = function (eid1, eid2)
-      return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
-    end
+    layer_first = 1
+    layer_last = #layer
+    layer_step = 1
   end
 
   for i = layer_first, layer_last, layer_step do
@@ -138,23 +158,22 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
             if not mark[eid] then
               local vid = vu_target[eid]
               local b = layer_index[vid]
-              if left then
-                if not a or a < b then
-                  local wid = root[vid]
-                  root[uid] = wid
-                  align[vid] = uid
-                  align[uid] = wid
-                  a = b
+              local condition
+              if a then
+                if left then
+                  condition = a < b
+                else
+                  condition = a > b
                 end
               else
-                assert(left == false)
-                if not a or a > b then
-                  local wid = root[vid]
-                  root[uid] = wid
-                  align[vid] = uid
-                  align[uid] = wid
-                  a = b
-                end
+                condition = true
+              end
+              if condition then
+                local wid = root[vid]
+                root[uid] = wid
+                align[vid] = uid
+                align[uid] = wid
+                a = b
               end
             end
           end
@@ -298,22 +317,22 @@ return function (g, layer_map, layer, dummy_uid)
 
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
 
-  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, #layer, 1, -1, true)
+  local root, align = vertical_alignment(g, layer, layer_index, mark, true, true)
   local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
   print("-- leftmost upper")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, #layer, 1, -1, false)
+  local root, align = vertical_alignment(g, layer, layer_index, mark, true, false)
   local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
   print("-- rightmost upper")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, #layer, 1, true)
+  local root, align = vertical_alignment(g, layer, layer_index, mark, false, true)
   local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
   print("-- leftmost lower")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, #layer, 1, false)
+  local root, align = vertical_alignment(g, layer, layer_index, mark, false, false)
   local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
   print("-- rightmost lower")
   dump(layer, dummy_uid, x)
