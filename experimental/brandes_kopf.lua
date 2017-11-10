@@ -317,6 +317,8 @@ end
 
 return function (g, layer_map, layer, dummy_uid)
   local u = g.u
+  local u_after = u.after
+
   local uv = g.uv
   local vu = g.vu
 
@@ -332,22 +334,58 @@ return function (g, layer_map, layer, dummy_uid)
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
 
   local root, align = vertical_alignment(u, vu, layer, layer_index, mark, layer_max, 1, -1, true)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
-  print("-- leftmost upper")
-  dump(layer, dummy_uid, x)
-
+  local xul = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
   local root, align = vertical_alignment(u, vu, layer, layer_index, mark, layer_max, 1, -1, false)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
-  print("-- rightmost upper")
-  dump(layer, dummy_uid, x)
-
+  local xur = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
   local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, layer_max, 1, true)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
-  print("-- leftmost lower")
-  dump(layer, dummy_uid, x)
-
+  local xll = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
   local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, layer_max, 1, false)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
+  local xlr = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
+
+  local x = {}
+
+  local uid = u.first
+  while uid do
+    local a = xul[uid]
+    local b = xur[uid]
+    local c = xll[uid]
+    local d = xlr[uid]
+
+    if b < a then
+      a, b = b, a
+    end
+    if c < a then
+      a, b, c = c, a, b
+    else
+      if c < b then
+        b, c = c, b
+      end
+    end
+    if d < b then
+      if d < a then
+        x[uid] = (a + b) / 2 -- d,a,b,c
+      else
+        x[uid] = (d + b) / 2 -- a,d,b,c
+      end
+    else
+      if d < c then
+        x[uid] = (b + d) / 2 -- a,b,d,c
+      else
+        x[uid] = (b + c) / 2 -- a,b,c,d
+      end
+    end
+
+    uid = u_after[uid]
+  end
+
+  print("-- leftmost upper")
+  dump(layer, dummy_uid, xul)
+  print("-- rightmost upper")
+  dump(layer, dummy_uid, xur)
+  print("-- leftmost lower")
+  dump(layer, dummy_uid, xll)
   print("-- rightmost lower")
-  dump(layer, dummy_uid, x)
+  dump(layer, dummy_uid, xlr)
+
+  return x
 end

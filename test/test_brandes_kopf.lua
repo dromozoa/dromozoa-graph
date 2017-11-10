@@ -151,4 +151,10 @@ order[6] = 20
 -- end
 -- io.write("}\n")
 
-brandes_kopf(g, layer_map, layer, dummy_uid)
+local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+
+local uid = g.u.first
+while uid do
+  print(uid, x[uid], layer_map[uid])
+  uid = g.u.after[uid]
+end
