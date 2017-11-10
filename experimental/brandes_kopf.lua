@@ -71,7 +71,7 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
   return mark
 end
 
-local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
+local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step, left)
   local u_after = u.after
 
   local vu_first = vu.first
@@ -88,79 +88,36 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
     uid = u_after[uid]
   end
 
-  local compare = function (eid1, eid2)
-    return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
-  end
-
-  for i = layer_first, layer_last, layer_step do
-    local uids = layer[i]
-    local a
-
-    for j = 1, #uids do
-      local uid = uids[j]
-      local eids = {}
-      local en = 0
-
-      local eid = vu_first[uid]
-      while eid do
-        en = en + 1
-        eids[en] = eid
-        eid = vu_after[eid]
-      end
-
-      if en > 0 then
-        sort(eids, compare)
-        local h = (en + 1) / 2
-        for m = math.floor(h), math.ceil(h) do
-          if align[uid] == uid then
-            local eid = eids[m]
-            if not mark[eid] then
-              local vid = vu_target[eid]
-              local b = layer_index[vid]
-              if not a or a < b then
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                a = b
-              end
-            end
-          end
-        end
-      end
+  local compare
+  if left then
+    compare = function (eid1, eid2)
+      return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
+    end
+  else
+    compare = function (eid1, eid2)
+      return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
     end
   end
 
-  return root, align
-end
-
-local function vertical_alignment_right(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
-  local u_after = u.after
-
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
-
-  local root = {}
-  local align = {}
-
-  local uid = u.first
-  while uid do
-    root[uid] = uid
-    align[uid] = uid
-    uid = u_after[uid]
-  end
-
-  local compare = function (eid1, eid2)
-    return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
-  end
-
   for i = layer_first, layer_last, layer_step do
     local uids = layer[i]
 
-    local a
+    local first
+    local last
+    local step
 
-    for j = #uids, 1, -1 do
+    if left then
+      first = 1
+      last = #uids
+      step = 1
+    else
+      first = #uids
+      last = 1
+      step = -1
+    end
+
+    local a
+    for j = first, last, step do
       local uid = uids[j]
       local eids = {}
       local en = 0
@@ -181,12 +138,23 @@ local function vertical_alignment_right(u, vu, layer, layer_index, mark, layer_f
             if not mark[eid] then
               local vid = vu_target[eid]
               local b = layer_index[vid]
-              if not a or a > b then
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                a = b
+              if left then
+                if not a or a < b then
+                  local wid = root[vid]
+                  root[uid] = wid
+                  align[vid] = uid
+                  align[uid] = wid
+                  a = b
+                end
+              else
+                assert(left == false)
+                if not a or a > b then
+                  local wid = root[vid]
+                  root[uid] = wid
+                  align[vid] = uid
+                  align[uid] = wid
+                  a = b
+                end
               end
             end
           end
@@ -373,14 +341,11 @@ end
 
 return function (g, layer_map, layer, dummy_uid)
   local u = g.u
-  local u_after = u.after
-
   local uv = g.uv
   local vu = g.vu
 
-  local layer_max = #layer
   local layer_index = {}
-  for i = 1, layer_max do
+  for i = 1, #layer do
     local order = layer[i]
     for j = 1, #order do
       layer_index[order[j]] = j
@@ -389,22 +354,22 @@ return function (g, layer_map, layer, dummy_uid)
 
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
 
-  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, #layer, 1, -1, true)
   local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
   print("-- leftmost upper")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment_right(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, #layer, 1, -1, false)
   local x = horizontal_compaction_right(u, layer_map, layer, layer_index, root, align)
   print("-- rightmost upper")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment_left(u, uv, layer, layer_index, mark, 1, #layer, 1)
+  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, #layer, 1, true)
   local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
   print("-- leftmost lower")
   dump(layer, dummy_uid, x)
 
-  local root, align = vertical_alignment_right(u, uv, layer, layer_index, mark, 1, #layer, 1)
+  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, #layer, 1, false)
   local x = horizontal_compaction_right(u, layer_map, layer, layer_index, root, align)
   print("-- rightmost lower")
   dump(layer, dummy_uid, x)
