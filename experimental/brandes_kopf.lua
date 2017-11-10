@@ -94,31 +94,94 @@ local function vertical_alignment_left(u, vu, layer, layer_index, mark, layer_fi
 
   for i = layer_first, layer_last, layer_step do
     local uids = layer[i]
-    local a = 0
+    local a
 
     for j = 1, #uids do
       local uid = uids[j]
       local eids = {}
-      local n = 0
+      local en = 0
 
       local eid = vu_first[uid]
       while eid do
-        n = n + 1
-        eids[n] = eid
+        en = en + 1
+        eids[en] = eid
         eid = vu_after[eid]
       end
 
-      sort(eids, compare)
-
-      if n > 0 then
-        local h = (n + 1) / 2
+      if en > 0 then
+        sort(eids, compare)
+        local h = (en + 1) / 2
         for m = math.floor(h), math.ceil(h) do
           if align[uid] == uid then
             local eid = eids[m]
             if not mark[eid] then
               local vid = vu_target[eid]
               local b = layer_index[vid]
-              if a < b then
+              if not a or a < b then
+                local wid = root[vid]
+                root[uid] = wid
+                align[vid] = uid
+                align[uid] = wid
+                a = b
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return root, align
+end
+
+local function vertical_alignment_right(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step)
+  local u_after = u.after
+
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
+
+  local root = {}
+  local align = {}
+
+  local uid = u.first
+  while uid do
+    root[uid] = uid
+    align[uid] = uid
+    uid = u_after[uid]
+  end
+
+  local compare = function (eid1, eid2)
+    return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
+  end
+
+  for i = layer_first, layer_last, layer_step do
+    local uids = layer[i]
+
+    local a
+
+    for j = #uids, 1, -1 do
+      local uid = uids[j]
+      local eids = {}
+      local en = 0
+
+      local eid = vu_first[uid]
+      while eid do
+        en = en + 1
+        eids[en] = eid
+        eid = vu_after[eid]
+      end
+
+      if en > 0 then
+        sort(eids, compare)
+        local h = (en + 1) / 2
+        for m = math.floor(h), math.ceil(h) do
+          if align[uid] == uid then
+            local eid = eids[m]
+            if not mark[eid] then
+              local vid = vu_target[eid]
+              local b = layer_index[vid]
+              if not a or a > b then
                 local wid = root[vid]
                 root[uid] = wid
                 align[vid] = uid
@@ -144,6 +207,42 @@ local function place_block_left(layer_map, layer, layer_index, root, align, sink
       if i > 1 then
         local uid = root[layer[layer_map[wid]][i - 1]]
         place_block_left(layer_map, layer, layer_index, root, align, sink, shift, x, uid)
+        local u_sink = sink[uid]
+        local v_sink = sink[vid]
+        if v_sink == vid then
+          sink[vid] = u_sink
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        elseif v_sink == u_sink then
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        else
+          local a = shift[u_sink]
+          local b = x[vid] - x[uid] - 1
+          if not a or a > b then
+            shift[u_sink] = b
+          end
+        end
+      end
+      wid = align[wid]
+    until wid == vid
+  end
+end
+
+local function place_block_right(layer_map, layer, layer_index, root, align, sink, shift, x, vid)
+  if not x[vid] then
+    x[vid] = 0
+    local wid = vid
+    repeat
+      local i = layer_index[wid]
+      local order = layer[layer_map[wid]]
+      if i < #order then
+        local uid = root[order[i + 1]]
+        place_block_right(layer_map, layer, layer_index, root, align, sink, shift, x, uid)
         local u_sink = sink[uid]
         local v_sink = sink[vid]
         if v_sink == vid then
@@ -202,6 +301,50 @@ local function horizontal_compaction_left(u, layer_map, layer, layer_index, root
   return ax
 end
 
+local function horizontal_compaction_right(u, layer_map, layer, layer_index, root, align)
+  local u_after = u.after
+
+  local sink = {}
+  local shift = {}
+  local rx = {}
+  local ax = {}
+
+  local uid = u.first
+  while uid do
+    sink[uid] = uid
+    uid = u_after[uid]
+  end
+
+  local uid = u.first
+  while uid do
+    if root[uid] == uid then
+      place_block_right(layer_map, layer, layer_index, root, align, sink, shift, rx, uid)
+    end
+    uid = u_after[uid]
+  end
+
+  local max = 0
+
+  local uid = u.first
+  while uid do
+    local vid = root[uid]
+    local x = rx[vid] + (shift[sink[vid]] or 0)
+    ax[uid] = x
+    if max < x then
+      max = x
+    end
+    uid = u_after[uid]
+  end
+
+  local uid = u.first
+  while uid do
+    ax[uid] = max - ax[uid]
+    uid = u_after[uid]
+  end
+
+  return ax
+end
+
 local function dump(layer, dummy_uid, x)
   for i = #layer, 1, -1 do
     local L = layer[i]
@@ -213,7 +356,7 @@ local function dump(layer, dummy_uid, x)
       if uid < dummy_uid then
         row[X] = uid
       else
-        row[X] = "(" .. uid .. ")"
+        row[X] = "*"
       end
       if max < X then
         max = X
@@ -245,9 +388,24 @@ return function (g, layer_map, layer, dummy_uid)
   end
 
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
-  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
-  -- local root, align = vertical_alignment_left(u, uv, layer, layer_index, mark, 1, #layer, 1)
-  local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
 
+  local root, align = vertical_alignment_left(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
+  print("-- leftmost upper")
+  dump(layer, dummy_uid, x)
+
+  local root, align = vertical_alignment_right(u, vu, layer, layer_index, mark, #layer, 1, -1)
+  local x = horizontal_compaction_right(u, layer_map, layer, layer_index, root, align)
+  print("-- rightmost upper")
+  dump(layer, dummy_uid, x)
+
+  local root, align = vertical_alignment_left(u, uv, layer, layer_index, mark, 1, #layer, 1)
+  local x = horizontal_compaction_left(u, layer_map, layer, layer_index, root, align)
+  print("-- leftmost lower")
+  dump(layer, dummy_uid, x)
+
+  local root, align = vertical_alignment_right(u, uv, layer, layer_index, mark, 1, #layer, 1)
+  local x = horizontal_compaction_right(u, layer_map, layer, layer_index, root, align)
+  print("-- rightmost lower")
   dump(layer, dummy_uid, x)
 end
