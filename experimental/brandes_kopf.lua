@@ -185,7 +185,7 @@ local function vertical_alignment(g, layer, layer_index, mark, upper, left)
   return root, align
 end
 
-local function place_block(layer_map, layer, layer_index, root, align, sink, shift, x, left, vid)
+local function place_block(layer_map, layer, layer_index, root, align, left, sink, shift, x, vid)
   if not x[vid] then
     x[vid] = 0
     local wid = vid
@@ -203,7 +203,7 @@ local function place_block(layer_map, layer, layer_index, root, align, sink, shi
         end
       end
       if uid then
-        place_block(layer_map, layer, layer_index, root, align, sink, shift, x, left, uid)
+        place_block(layer_map, layer, layer_index, root, align, left, sink, shift, x, uid)
         local u_sink = sink[uid]
         local v_sink = sink[vid]
         if v_sink == vid then
@@ -230,7 +230,8 @@ local function place_block(layer_map, layer, layer_index, root, align, sink, shi
   end
 end
 
-local function horizontal_compaction(u, layer_map, layer, layer_index, root, align, left)
+local function horizontal_compaction(g, layer_map, layer, layer_index, root, align, left)
+  local u = g.u
   local u_after = u.after
 
   local sink = {}
@@ -247,7 +248,7 @@ local function horizontal_compaction(u, layer_map, layer, layer_index, root, ali
   local uid = u.first
   while uid do
     if root[uid] == uid then
-      place_block(layer_map, layer, layer_index, root, align, sink, shift, rx, left, uid)
+      place_block(layer_map, layer, layer_index, root, align, left, sink, shift, rx, uid)
     end
     uid = u_after[uid]
   end
@@ -303,10 +304,6 @@ local function dump(layer, dummy_uid, x)
 end
 
 return function (g, layer_map, layer, dummy_uid)
-  local u = g.u
-  local uv = g.uv
-  local vu = g.vu
-
   local layer_index = {}
   for i = 1, #layer do
     local order = layer[i]
@@ -318,22 +315,22 @@ return function (g, layer_map, layer, dummy_uid)
   local mark = preprocessing(g, layer, layer_index, dummy_uid)
 
   local root, align = vertical_alignment(g, layer, layer_index, mark, true, true)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
+  local x = horizontal_compaction(g, layer_map, layer, layer_index, root, align, true)
   print("-- leftmost upper")
   dump(layer, dummy_uid, x)
 
   local root, align = vertical_alignment(g, layer, layer_index, mark, true, false)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
+  local x = horizontal_compaction(g, layer_map, layer, layer_index, root, align, false)
   print("-- rightmost upper")
   dump(layer, dummy_uid, x)
 
   local root, align = vertical_alignment(g, layer, layer_index, mark, false, true)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
+  local x = horizontal_compaction(g, layer_map, layer, layer_index, root, align, true)
   print("-- leftmost lower")
   dump(layer, dummy_uid, x)
 
   local root, align = vertical_alignment(g, layer, layer_index, mark, false, false)
-  local x = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
+  local x = horizontal_compaction(g, layer_map, layer, layer_index, root, align, false)
   print("-- rightmost lower")
   dump(layer, dummy_uid, x)
 end
