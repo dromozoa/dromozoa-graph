@@ -23,12 +23,12 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
   local vu_after = vu.after
   local vu_target = vu.target
 
-  local layer_max = #layer
+  local layer_first = #layer - 2
 
   local mark = {}
 
-  local vn = #layer[layer_max - 1]
-  for i = layer_max - 2, 2, -1 do
+  local vn = #layer[layer_first + 1]
+  for i = layer_first, 2, -1 do
     local uids = layer[i]
     local un = #uids
 
@@ -75,12 +75,7 @@ local function vertical_alignment(g, layer, layer_index, mark, upper, left)
   local u = g.u
   local u_after = u.after
 
-  local vu
-  if upper then
-    vu = g.vu
-  else
-    vu = g.uv
-  end
+  local vu = upper and g.vu or g.uv
   local vu_first = vu.first
   local vu_after = vu.after
   local vu_target = vu.target
@@ -106,9 +101,7 @@ local function vertical_alignment(g, layer, layer_index, mark, upper, left)
     uid = u_after[uid]
   end
 
-  local layer_first
-  local layer_last
-  local layer_step
+  local layer_first, layer_last, layer_step
   if upper then
     layer_first = #layer
     layer_last = 1
@@ -178,10 +171,11 @@ local function vertical_alignment(g, layer, layer_index, mark, upper, left)
               align[vid] = uid
               align[uid] = wid
               a = b
+              m = nil
             end
           end
 
-          if align[uid] == uid then
+          if m then
             m = m + 1
             local eid = eids[m]
             if not mark[eid] then
