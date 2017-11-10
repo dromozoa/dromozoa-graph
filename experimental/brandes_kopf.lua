@@ -225,6 +225,7 @@ local function place_block(layer_map, layer, layer_index, root, align, left, sin
 end
 
 local function horizontal_compaction(u, layer_map, layer, layer_index, root, align, left)
+  local u_first = u.first
   local u_after = u.after
 
   local sink = {}
@@ -232,13 +233,13 @@ local function horizontal_compaction(u, layer_map, layer, layer_index, root, ali
   local rx = {}
   local ax = {}
 
-  local uid = u.first
+  local uid = u_first
   while uid do
     sink[uid] = uid
     uid = u_after[uid]
   end
 
-  local uid = u.first
+  local uid = u_first
   while uid do
     if root[uid] == uid then
       place_block(layer_map, layer, layer_index, root, align, left, sink, shift, rx, uid)
@@ -246,31 +247,39 @@ local function horizontal_compaction(u, layer_map, layer, layer_index, root, ali
     uid = u_after[uid]
   end
 
-  local uid = u.first
-  while uid do
-    local vid = root[uid]
-    local s = shift[sink[vid]]
-    if s then
-      ax[uid] = rx[vid] + s
-    else
-      ax[uid] = rx[vid]
+  if left then
+    local uid = u_first
+    while uid do
+      local vid = root[uid]
+      local s = shift[sink[vid]]
+      if s then
+        ax[uid] = rx[vid] + s
+      else
+        ax[uid] = rx[vid]
+      end
+      uid = u_after[uid]
     end
-    uid = u_after[uid]
-  end
-
-  if not left then
+  else
+    local x
     local max = 0
 
-    local uid = u.first
+    local uid = u_first
     while uid do
-      local x = ax[uid]
+      local vid = root[uid]
+      local s = shift[sink[vid]]
+      if s then
+        x = rx[vid] + s
+      else
+        x = rx[vid]
+      end
+      ax[uid] = x
       if max < x then
         max = x
       end
       uid = u_after[uid]
     end
 
-    local uid = u.first
+    local uid = u_first
     while uid do
       ax[uid] = max - ax[uid]
       uid = u_after[uid]
