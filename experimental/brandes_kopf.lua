@@ -151,24 +151,43 @@ local function vertical_alignment(g, layer, layer_index, mark, upper, left)
 
       if en > 0 then
         sort(eids, compare)
-        local h = (en + 1) / 2
-        for m = math.floor(h), math.ceil(h) do
+
+        if en % 2 == 1 then
+          local eid = eids[(en + 1) / 2]
+          if not mark[eid] then
+            local vid = vu_target[eid]
+            local b = layer_index[vid]
+            if not a or left and a < b or a > b then
+              local wid = root[vid]
+              root[uid] = wid
+              align[vid] = uid
+              align[uid] = wid
+              a = b
+            end
+          end
+        else
+          local m = en / 2
+
+          local eid = eids[m]
+          if not mark[eid] then
+            local vid = vu_target[eid]
+            local b = layer_index[vid]
+            if not a or left and a < b or a > b then
+              local wid = root[vid]
+              root[uid] = wid
+              align[vid] = uid
+              align[uid] = wid
+              a = b
+            end
+          end
+
           if align[uid] == uid then
+            m = m + 1
             local eid = eids[m]
             if not mark[eid] then
               local vid = vu_target[eid]
               local b = layer_index[vid]
-              local condition
-              if a then
-                if left then
-                  condition = a < b
-                else
-                  condition = a > b
-                end
-              else
-                condition = true
-              end
-              if condition then
+              if not a or left and a < b or a > b then
                 local wid = root[vid]
                 root[uid] = wid
                 align[vid] = uid
