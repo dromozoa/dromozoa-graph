@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
-local initialize_layer = require "experimental.initialize_layer2"
+local initialize_layer = require "dromozoa.graph.initialize_layer"
 
 local g = graph()
 

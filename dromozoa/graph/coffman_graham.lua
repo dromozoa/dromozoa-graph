@@ -76,7 +76,7 @@ return function (g, width_max)
     for i = 1, n2 do
       local priority1 = priorities1[i]
       local priority2 = priorities2[i]
-      if priority1 == nil then
+      if not priority1 then
         result = true
         break
       elseif priority1 ~= priorities2 then
