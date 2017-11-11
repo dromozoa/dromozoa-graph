@@ -378,14 +378,14 @@ return function (g, layer_map, layer, dummy_uid)
     uid = u_after[uid]
   end
 
-  print("-- leftmost upper")
-  dump(layer, dummy_uid, xul)
-  print("-- rightmost upper")
-  dump(layer, dummy_uid, xur)
-  print("-- leftmost lower")
-  dump(layer, dummy_uid, xll)
-  print("-- rightmost lower")
-  dump(layer, dummy_uid, xlr)
+  -- print("-- leftmost upper")
+  -- dump(layer, dummy_uid, xul)
+  -- print("-- rightmost upper")
+  -- dump(layer, dummy_uid, xur)
+  -- print("-- leftmost lower")
+  -- dump(layer, dummy_uid, xll)
+  -- print("-- rightmost lower")
+  -- dump(layer, dummy_uid, xlr)
 
   return x
 end
