@@ -153,6 +153,36 @@ order[6] = 20
 
 local x = brandes_kopf(g, layer_map, layer, dummy_uid)
 
+local expect = {
+  [0.0] = { 13, 17 };
+  [1.5] = { 21 };
+  [2.0] = { 10, 14, 18 };
+  [2.5] = { 1, 8 };
+  [3.0] = { 11, 15 };
+  [4.0] = { 4, 6, 16, 19, 22 };
+  [4.5] = { 23 };
+  [6.0] = { 3, 5, 7, 9, 12, 20 };
+  [7.0] = { 2 };
+}
+
+local expect_map = {}
+for k, v in pairs(expect) do
+  for i = 1, #v do
+    expect_map[v[i]] = k
+  end
+end
+
+local uid = g.u.first
+while uid do
+  assert(x[uid] >= 0)
+  if uid < dummy_uid then
+    assert(x[uid] == expect_map[uid])
+  end
+  uid = g.u.after[uid]
+end
+
+os.exit()
+
 local function calc_x(x)
   return x * 50 + 50
 end
