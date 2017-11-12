@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local initialize_layer = require "dromozoa.graph.initialize_layer"
-local brandes_kopf = require "experimental.brandes_kopf4"
+local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 
 local g = graph()
 for i = 1, 11 do
@@ -63,8 +63,6 @@ while uid do
   assert(x[uid] == expect[uid])
   uid = g.u.after[uid]
 end
-
-os.exit()
 
 local g = graph()
 
