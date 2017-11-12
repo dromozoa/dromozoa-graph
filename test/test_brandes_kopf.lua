@@ -18,7 +18,53 @@
 local graph = require "dromozoa.graph"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local initialize_layer = require "dromozoa.graph.initialize_layer"
-local brandes_kopf = require "experimental.brandes_kopf"
+local brandes_kopf = require "experimental.brandes_kopf4"
+
+local g = graph()
+for i = 1, 11 do
+  g:add_vertex()
+end
+g:add_edge(1, 2)
+g:add_edge(1, 3)
+g:add_edge(2, 4)
+g:add_edge(2, 5)
+g:add_edge(2, 6)
+g:add_edge(2, 7)
+g:add_edge(2, 8)
+g:add_edge(3, 9)
+g:add_edge(3, 10)
+g:add_edge(3, 11)
+local dummy_uid = 12
+
+local layer = {
+  { 1 };
+  { 2, 3 };
+  { 4, 5, 6, 7, 8, 9, 10, 11 };
+}
+
+local expect = {
+  4,
+  3, 5.5,
+  0, 1, 2, 3, 4, 5, 6, 7,
+}
+
+local layer_map = {}
+for i = 1, #layer do
+  local uids = layer[i]
+  for j = 1, #uids do
+    layer_map[uids[j]] = i
+  end
+end
+
+local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+
+local uid = g.u.first
+while uid do
+  assert(x[uid] == expect[uid])
+  uid = g.u.after[uid]
+end
+
+os.exit()
 
 local g = graph()
 
