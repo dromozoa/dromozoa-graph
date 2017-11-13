@@ -343,6 +343,7 @@ return function (g, layer_map, layer, dummy_uid)
   local vu = g.vu
 
   local layer_max = #layer
+
   local index_map = {}
   for i = 1, #layer do
     local order = layer[i]

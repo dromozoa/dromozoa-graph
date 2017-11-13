@@ -19,7 +19,21 @@ local graph = require "dromozoa.graph"
 local graphviz_vertex_ordering = require "experimental.graphviz_vertex_ordering"
 
 local g = graph()
-for i = 1, 8 do
+
+--[[
+for i = 1, 4 do
+  g:add_vertex()
+end
+g:add_edge(1, 3)
+g:add_edge(1, 4)
+g:add_edge(2, 3)
+local layer = {
+  { 3, 4 };
+  { 1, 2 };
+}
+]]
+
+for i = 1, 10 do
   g:add_vertex()
 end
 g:add_edge(1, 3)
@@ -28,8 +42,16 @@ g:add_edge(2, 4)
 g:add_edge(2, 5)
 g:add_edge(2, 6)
 g:add_edge(2, 7)
+g:add_edge(3, 9)
+g:add_edge(4, 9)
+g:add_edge(5, 10)
+g:add_edge(6, 10)
+g:add_edge(7, 10)
+g:add_edge(8, 9)
 local layer = {
+  { 9, 10 };
   { 3, 4, 5, 6, 7, 8 };
   { 1, 2 };
 }
+
 graphviz_vertex_ordering(g, layer)

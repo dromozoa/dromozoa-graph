@@ -33,6 +33,8 @@
       <li><a href="https://cs.brown.edu/~rt/gdhandbook/chapters/hierarchical.pdf">Hierarchical Drawing Algorithms</a></li>
       <li><a href="http://www.graphviz.org/Documentation/TSE93.pdf">A Technique for Drawing Directed Graph</a></li>
       <li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.64.4457&rep=rep1&type=pdf">Fast and Simple Horizontal Coordinate Assignment</a></li>
+      <li><a href="http://jgaa.info/accepted/2004/BarthMutzelJuenger2004.8.2.pdf">Simple and Efficient Bilayer Cross Counting</a></li>
+      <li><a href="http://www.researchgate.net/profile/Petra_Mutzel/publication/30508315_2-Layer_Straightline_Crossing_Minimization_Performance_of_Exact_and_Heuristic_Algorithms/links/09e4150eabaf4cc7bd000000.pdf">2-Layer Straightline Crossing Minimization</a></li>
       <li><a href="http://www.lib.kobe-u.ac.jp/repository/thesis2/d1/D1005931.pdf">階層グラフの描画アルゴリズムに関する研究</a></li>
     </ol>
   </li>
@@ -57,8 +59,10 @@
   </li>
   <li>プログラム
     <ol>
+      <li><a href="http://www.rw.cdl.uni-saarland.de/~sander/html/gsvcg1.html">VCG</a></li>
       <li><a href="http://www.graphviz.org/">Graphviz</a></li>
       <li><a href="https://github.com/cpettitt/dagre-d3">dagre-d3</a></li>
+      <li><a href="https://github.com/cpettitt/dagre/wiki">dagre (wiki)</a></li>
     </ol>
   </li>
 </ul>
@@ -135,6 +139,16 @@ Coffman-Grahamアルゴリズムはふたつのステップからなる。
 <ul>
   <li>OLCM = one-layerd crossing minimization</li>
 </ul>
+
+<h4>Counting Crossings</h4>
+
+<div>
+\(u, v \in V_2\)で、\(u\)が\(v\)の左にあるとき、\(u,v\)に接続するエッジの交差数を\(c_{uv}\)とする。
+交差数行列は\(c_{uv}\)を要素に持つ。
+\(V_1\)の頂点は固定されていると仮定するので、この行列はOLCMだけに関係する。
+</div>
+
+<h4>Exact Methods</h4>
 
 <div>
 \(\delta_{ij}^k\)を、階層\(k=1,2\)上の頂点\(i,j\)の順序を表すような0-1変数とする。
