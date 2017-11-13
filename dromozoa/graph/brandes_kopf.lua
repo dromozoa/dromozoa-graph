@@ -17,7 +17,7 @@
 
 local sort = table.sort
 
-local function preprocessing(g, layer, layer_index, dummy_uid)
+local function preprocessing(g, layer, index_map, dummy_uid)
   local vu = g.vu
   local vu_first = vu.first
   local vu_after = vu.after
@@ -45,7 +45,7 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
       if uid >= dummy_uid then
         local vid = vu_target[vu_first[uid]]
         if vid >= dummy_uid then
-          d = layer_index[vid]
+          d = index_map[vid]
         end
       end
 
@@ -53,7 +53,7 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
         for a = a, b do
           local eid = vu_first[uids[a]]
           while eid do
-            local j = layer_index[vu_target[eid]]
+            local j = index_map[vu_target[eid]]
             if j < c or d < j then
               mark[eid] = true
             end
@@ -71,7 +71,7 @@ local function preprocessing(g, layer, layer_index, dummy_uid)
   return mark
 end
 
-local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, layer_last, layer_step, left)
+local function vertical_alignment(u, vu, layer, index_map, mark, layer_first, layer_last, layer_step, left)
   local u_after = u.after
 
   local vu_first = vu.first
@@ -81,11 +81,11 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
   local compare
   if left then
     compare = function (eid1, eid2)
-      return layer_index[vu_target[eid1]] < layer_index[vu_target[eid2]]
+      return index_map[vu_target[eid1]] < index_map[vu_target[eid2]]
     end
   else
     compare = function (eid1, eid2)
-      return layer_index[vu_target[eid1]] > layer_index[vu_target[eid2]]
+      return index_map[vu_target[eid1]] > index_map[vu_target[eid2]]
     end
   end
 
@@ -155,7 +155,7 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
             local eid = eids[m]
             if not mark[eid] then
               local vid = vu_target[eid]
-              local b = layer_index[vid]
+              local b = index_map[vid]
               local condition
               if not a then
                 condition = true
@@ -177,7 +177,7 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
             local eid = eids[m]
             if not mark[eid] then
               local vid = vu_target[eid]
-              local b = layer_index[vid]
+              local b = index_map[vid]
               local condition
               if not a then
                 condition = true
@@ -199,7 +199,7 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
               local eid = eids[m + 1]
               if not mark[eid] then
                 local vid = vu_target[eid]
-                local b = layer_index[vid]
+                local b = index_map[vid]
                 if not a then
                   condition = true
                 elseif left then
@@ -225,12 +225,12 @@ local function vertical_alignment(u, vu, layer, layer_index, mark, layer_first, 
   return root, align
 end
 
-local function place_block(layer_map, layer, layer_index, root, align, left, sink, shift, x, vid)
+local function place_block(layer_map, layer, index_map, root, align, left, sink, shift, x, vid)
   if not x[vid] then
     x[vid] = 0
     local wid = vid
     repeat
-      local i = layer_index[wid]
+      local i = index_map[wid]
       local wids = layer[layer_map[wid]]
       local uid
       if left then
@@ -243,7 +243,7 @@ local function place_block(layer_map, layer, layer_index, root, align, left, sin
         end
       end
       if uid then
-        place_block(layer_map, layer, layer_index, root, align, left, sink, shift, x, uid)
+        place_block(layer_map, layer, index_map, root, align, left, sink, shift, x, uid)
         local u_sink = sink[uid]
         local v_sink = sink[vid]
         if v_sink == vid then
@@ -270,7 +270,7 @@ local function place_block(layer_map, layer, layer_index, root, align, left, sin
   end
 end
 
-local function horizontal_compaction(u, layer_map, layer, layer_index, root, align, left)
+local function horizontal_compaction(u, layer_map, layer, index_map, root, align, left)
   local u_first = u.first
   local u_after = u.after
 
@@ -288,7 +288,7 @@ local function horizontal_compaction(u, layer_map, layer, layer_index, root, ali
   local uid = u_first
   while uid do
     if root[uid] == uid then
-      place_block(layer_map, layer, layer_index, root, align, left, sink, shift, rx, uid)
+      place_block(layer_map, layer, index_map, root, align, left, sink, shift, rx, uid)
     end
     uid = u_after[uid]
   end
@@ -343,24 +343,24 @@ return function (g, layer_map, layer, dummy_uid)
   local vu = g.vu
 
   local layer_max = #layer
-  local layer_index = {}
+  local index_map = {}
   for i = 1, #layer do
     local order = layer[i]
     for j = 1, #order do
-      layer_index[order[j]] = j
+      index_map[order[j]] = j
     end
   end
 
-  local mark = preprocessing(g, layer, layer_index, dummy_uid)
+  local mark = preprocessing(g, layer, index_map, dummy_uid)
 
-  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, layer_max, 1, -1, true)
-  local xul = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
-  local root, align = vertical_alignment(u, vu, layer, layer_index, mark, layer_max, 1, -1, false)
-  local xur = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
-  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, layer_max, 1, true)
-  local xll = horizontal_compaction(u, layer_map, layer, layer_index, root, align, true)
-  local root, align = vertical_alignment(u, uv, layer, layer_index, mark, 1, layer_max, 1, false)
-  local xlr = horizontal_compaction(u, layer_map, layer, layer_index, root, align, false)
+  local root, align = vertical_alignment(u, vu, layer, index_map, mark, layer_max, 1, -1, true)
+  local xul = horizontal_compaction(u, layer_map, layer, index_map, root, align, true)
+  local root, align = vertical_alignment(u, vu, layer, index_map, mark, layer_max, 1, -1, false)
+  local xur = horizontal_compaction(u, layer_map, layer, index_map, root, align, false)
+  local root, align = vertical_alignment(u, uv, layer, index_map, mark, 1, layer_max, 1, true)
+  local xll = horizontal_compaction(u, layer_map, layer, index_map, root, align, true)
+  local root, align = vertical_alignment(u, uv, layer, index_map, mark, 1, layer_max, 1, false)
+  local xlr = horizontal_compaction(u, layer_map, layer, index_map, root, align, false)
 
   local x = {}
 
