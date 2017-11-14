@@ -219,10 +219,10 @@ local function crossing_layer(g, layer, index_map)
   local eids = {}
   for i = #layer - 1, 1, -1 do
     local uids = layer[i]
+    local un = #uids
     local en = 0
-    local count = {}
 
-    for j = 1, #uids do
+    for j = 1, un do
       local uid = uids[j]
       local eid = vu_first[uid]
       while eid do
@@ -230,8 +230,6 @@ local function crossing_layer(g, layer, index_map)
         eids[en] = eid
         eid = vu_after[eid]
       end
-
-      count[j] = 0
     end
 
     if en > 1 then
@@ -252,17 +250,33 @@ local function crossing_layer(g, layer, index_map)
       sort(eids, compare)
     end
 
-    local n = 0
-    for j = 1, en do
-      local eid = eids[j]
-      local uid = uv_target[eid]
-      local vid = vu_target[eid]
-      local index = index_map[uid]
-
-      count[index] = count[index] + 1
-
-
+    -- エッジの数が少ないときは？
+    local tree = {}
+    local first = 1
+    while first < un do
+      first = first * 2
     end
+    first = first - 2
+    for j = 0, first + un + 1 do
+      tree[j] = 0
+    end
+
+    local count = 0
+    for j = 1, en do
+      local index = first + index_map[uv_target[eids[j]]]
+      tree[index] = tree[index] + 1
+      while index > 0 do
+        if index % 2 == 1 then
+          count = count + tree[index + 1]
+          index = (index - 1) / 2
+        else
+          index = (index - 2) / 2
+        end
+        tree[index] = tree[index] + 1
+      end
+    end
+
+    print(count)
   end
 end
 

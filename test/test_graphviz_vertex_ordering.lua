@@ -33,6 +33,7 @@ local layer = {
 }
 ]]
 
+--[[
 for i = 1, 10 do
   g:add_vertex()
 end
@@ -52,6 +53,34 @@ local layer = {
   { 9, 10 };
   { 3, 4, 5, 6, 7, 8 };
   { 1, 2 };
+}
+]]
+
+local n0 = g:add_vertex()
+local n1 = g:add_vertex()
+local n2 = g:add_vertex()
+local n3 = g:add_vertex()
+local n4 = g:add_vertex()
+local n5 = g:add_vertex()
+local s0 = g:add_vertex()
+local s1 = g:add_vertex()
+local s2 = g:add_vertex()
+local s3 = g:add_vertex()
+local s4 = g:add_vertex()
+g:add_edge(n0, s0)
+g:add_edge(n1, s1)
+g:add_edge(n1, s2)
+g:add_edge(n2, s0)
+g:add_edge(n2, s3)
+g:add_edge(n2, s4)
+g:add_edge(n3, s0)
+g:add_edge(n3, s2)
+g:add_edge(n4, s3)
+g:add_edge(n5, s2)
+g:add_edge(n5, s4)
+local layer = {
+  { s0, s1, s2, s3, s4 };
+  { n0, n1, n2, n3, n4, n5 };
 }
 
 graphviz_vertex_ordering(g, layer)
