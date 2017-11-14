@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local graphviz_vertex_ordering = require "experimental.graphviz_vertex_ordering"
+local graphviz_vertex_ordering = require "dromozoa.graph.graphviz_vertex_ordering"
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 
 local g = graph()
