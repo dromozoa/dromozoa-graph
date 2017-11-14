@@ -17,10 +17,10 @@
 
 local graph = require "dromozoa.graph"
 local graphviz_vertex_ordering = require "experimental.graphviz_vertex_ordering"
+local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 
 local g = graph()
 
---[[
 for i = 1, 4 do
   g:add_vertex()
 end
@@ -31,7 +31,7 @@ local layer = {
   { 3, 4 };
   { 1, 2 };
 }
-]]
+local dummy_uid = 5
 
 --[[
 for i = 1, 10 do
@@ -54,8 +54,10 @@ local layer = {
   { 3, 4, 5, 6, 7, 8 };
   { 1, 2 };
 }
+local dummy_uid = 12
 ]]
 
+--[[
 local n0 = g:add_vertex()
 local n1 = g:add_vertex()
 local n2 = g:add_vertex()
@@ -82,5 +84,52 @@ local layer = {
   { s0, s1, s2, s3, s4 };
   { n0, n1, n2, n3, n4, n5 };
 }
+]]
 
-graphviz_vertex_ordering(g, layer)
+local layer = graphviz_vertex_ordering(g, layer)
+
+local layer_map = {}
+for i = 1, #layer do
+  local uids = layer[i]
+  for j = 1, #uids do
+    layer_map[uids[j]] = i
+  end
+end
+
+local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+
+local function calc_x(x)
+  return x * 50 + 50
+end
+
+local function calc_y(y)
+  return 600 - y * 50
+end
+
+io.write([[<svg version="1.1" width="600" height="600" xmlns="http://www.w3.org/2000/svg">]])
+
+local eid = g.e.first
+while eid do
+  local uid = g.vu.target[eid]
+  local vid = g.uv.target[eid]
+  local x1 = calc_x(x[uid])
+  local y1 = calc_y(layer_map[uid])
+  local x2 = calc_x(x[vid])
+  local y2 = calc_y(layer_map[vid])
+  io.write(([[<line x1="%.17g" y1="%.17g" x2="%.17g" y2="%.17g" stroke="black"/>]]):format(x1, y1, x2, y2))
+  eid = g.e.after[eid]
+end
+
+local uid = g.u.first
+while uid do
+  local cx = calc_x(x[uid])
+  local cy = calc_y(layer_map[uid])
+  if uid < dummy_uid then
+    io.write(([[<circle cx="%.17g" cy="%.17g" r="5" stroke="black" fill="black"/>]]):format(cx, cy))
+    io.write(([[<text x="%.17g" y="%.17g" stroke="none" fill="black">%s</text>]]):format(cx + 5, cy - 5, uid))
+  else
+    io.write(([[<circle cx="%.17g" cy="%.17g" r="5" stroke="black" fill="white"/>]]):format(cx, cy))
+  end
+  uid = g.u.after[uid]
+end
+io.write("</svg>\n")

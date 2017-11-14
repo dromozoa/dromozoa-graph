@@ -216,68 +216,71 @@ local function crossing_layer(g, layer, index_map)
   local vu_after = vu.after
   local vu_target = vu.target
 
+  local count = 0
+
   local eids = {}
   for i = #layer - 1, 1, -1 do
     local uids = layer[i]
     local un = #uids
-    local en = 0
+    if un > 1 then
+      local en = 0
 
-    for j = 1, un do
-      local uid = uids[j]
-      local eid = vu_first[uid]
-      while eid do
-        en = en + 1
-        eids[en] = eid
-        eid = vu_after[eid]
-      end
-    end
-
-    if en > 1 then
-      for j = en + 1, #eids do
-        eids[i] = nil
-      end
-      local compare = function (eid1, eid2)
-        local index1 = index_map[vu_target[eid1]]
-        local index2 = index_map[vu_target[eid2]]
-        if index1 == index2 then
-          local index1 = index_map[uv_target[eid1]]
-          local index2 = index_map[uv_target[eid2]]
-          return index1 < index2
-        else
-          return index1 < index2
+      for j = 1, un do
+        local uid = uids[j]
+        local eid = vu_first[uid]
+        while eid do
+          en = en + 1
+          eids[en] = eid
+          eid = vu_after[eid]
         end
       end
-      sort(eids, compare)
-    end
 
-    -- エッジの数が少ないときは？
-    local tree = {}
-    local first = 1
-    while first < un do
-      first = first * 2
-    end
-    first = first - 2
-    for j = 0, first + un + 1 do
-      tree[j] = 0
-    end
-
-    local count = 0
-    for j = 1, en do
-      local index = first + index_map[uv_target[eids[j]]]
-      tree[index] = tree[index] + 1
-      while index > 0 do
-        if index % 2 == 1 then
-          count = count + tree[index + 1]
-          index = (index - 1) / 2
-        else
-          index = (index - 2) / 2
+      if en > 1 then
+        for j = en + 1, #eids do
+          eids[i] = nil
         end
+        local compare = function (eid1, eid2)
+          local index1 = index_map[vu_target[eid1]]
+          local index2 = index_map[vu_target[eid2]]
+          if index1 == index2 then
+            local index1 = index_map[uv_target[eid1]]
+            local index2 = index_map[uv_target[eid2]]
+            return index1 < index2
+          else
+            return index1 < index2
+          end
+        end
+        sort(eids, compare)
+      end
+
+      local tree = {}
+      local first = 1
+      while first < un do
+        first = first * 2
+      end
+      first = first - 2
+      for j = 0, first + un + 1 do
+        tree[j] = 0
+      end
+
+      for j = 1, en do
+        local index = first + index_map[uv_target[eids[j]]]
         tree[index] = tree[index] + 1
+        while index > 0 do
+          if index % 2 == 1 then
+            count = count + tree[index + 1]
+            index = (index - 1) / 2
+          else
+            index = (index - 2) / 2
+          end
+          tree[index] = tree[index] + 1
+        end
       end
-    end
 
-    print(count)
+    end
   end
+
+  return count
 end
 
 return function (g, layer)
@@ -288,13 +291,32 @@ return function (g, layer)
 
   local index_map = make_index_map(layer)
 
-  -- local new_layer = wmedian(vu, layer, index_map, layer_max, 1, -1)
-  local new_layer = wmedian(uv, layer, index_map, 1, layer_max, 1)
-  local new_index_map = make_index_map(new_layer)
-  -- transpose(g, new_layer, new_index_map)
-  -- transpose(g, layer, index_map)
+  local best_layer = layer
+  local best_count = crossing_layer(g, layer, index_map)
 
-  crossing_layer(g, layer, index_map)
+  for i = 1, 12 do
+    -- vu
+    local new_layer = wmedian(vu, layer, index_map, layer_max, 1, -1)
+    local new_index_map = make_index_map(new_layer)
+    local new_count = crossing_layer(g, new_layer, new_index_map)
+    if new_count < best_count then
+      best_layer = new_layer
+      best_count = new_count
+    end
+    layer = new_layer
+    index_map = new_index_map
 
+    -- uv
+    local new_layer = wmedian(uv, layer, index_map, 1, layer_max, 1)
+    local new_index_map = make_index_map(new_layer)
+    local new_count = crossing_layer(g, new_layer, new_index_map)
+    if new_count < best_count then
+      best_layer = new_layer
+      best_count = new_count
+    end
+    layer = new_layer
+    index_map = new_index_map
+  end
 
+  return best_layer
 end
