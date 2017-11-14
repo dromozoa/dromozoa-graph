@@ -27,6 +27,10 @@ local function preprocessing(g, layer, index_map, dummy_uid)
 
   local mark = {}
 
+  if layer_max < 3 then
+    return mark
+  end
+
   local vn = #layer[layer_max - 2]
   for i = layer_max - 1, 2, -1 do
     local uids = layer[i]
