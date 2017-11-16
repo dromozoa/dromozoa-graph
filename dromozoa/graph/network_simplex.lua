@@ -16,8 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local longest_path = require "dromozoa.graph.longest_path"
+local spanning_tree = require "dromozoa.graph.spanning_tree"
 
-local function visit(g, color, rank_map, uid, rank)
+local function visit(g, t, color, rank_map, uid, rank)
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
@@ -37,7 +38,8 @@ local function visit(g, color, rank_map, uid, rank)
   while eid do
     local vid = uv_target[eid]
     if not color[vid] then
-      visit(g, color, rank_map, vid, uv_rank)
+      t:add_edge(eid, uid, vid)
+      visit(g, t, color, rank_map, vid, uv_rank)
     end
     eid = uv_after[eid]
   end
@@ -46,7 +48,8 @@ local function visit(g, color, rank_map, uid, rank)
   while eid do
     local vid = vu_target[eid]
     if not color[vid] then
-      visit(g, color, rank_map, vid, vu_rank)
+      t:add_edge(eid, uid, vid)
+      visit(g, t, color, rank_map, vid, vu_rank)
     end
     eid = vu_after[eid]
   end
@@ -56,21 +59,23 @@ local function feasible_tree(g)
   local u = g.u
   local u_after = u.after
 
+  local t = spanning_tree()
   local color = {}
   local rank_map = {}
 
   local uid = u.first
   while uid do
     if not color[uid] then
-      visit(g, color, rank_map, uid, 1)
+      visit(g, t, color, rank_map, uid, 1)
     end
     uid = u_after[uid]
   end
 
-  return rank_map
+  return t, rank_map
 end
 
 return function (g)
-  local rank_map = feasible_tree(g)
-  print(table.concat(rank_map, " "))
+  local t, rank_map = feasible_tree(g)
+  -- print(table.concat(rank_map, " "))
+  return t, rank_map
 end
