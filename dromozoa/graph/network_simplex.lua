@@ -63,9 +63,12 @@ local function feasible_tree(g)
   local color = {}
   local rank_map = {}
 
+  local root = {}
+
   local uid = u.first
   while uid do
     if not color[uid] then
+      root[#root + 1] = uid
       visit(g, t, color, rank_map, uid, 1)
     end
     uid = u_after[uid]
