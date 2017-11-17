@@ -16,27 +16,27 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local longest_path = require "dromozoa.graph.longest_path"
 local network_simplex = require "dromozoa.graph.network_simplex"
 
 local g = graph()
-for i = 1, 4 do
+for i = 1, 8 do
   g:add_vertex()
 end
 g:add_edge(1, 2)
 g:add_edge(2, 3)
-g:add_edge(4, 1)
--- g:add_edge(1, 2)
--- g:add_edge(3, 1)
--- g:add_edge(2, 4)
--- g:add_edge(5, 3)
+g:add_edge(3, 4)
+g:add_edge(4, 5)
+g:add_edge(6, 5)
+g:add_edge(7, 6)
+g:add_edge(1, 7)
+g:add_edge(8, 6)
+g:add_edge(1, 8)
 
--- local layer = longest_path(g)
 -- print(table.concat(layer, " "))
 local t, rank_map = network_simplex(g)
 
 local function visit(t, uid)
-  io.write(("%d [label=\"%d/%d\"];\n"):format(uid, uid, rank_map[uid]))
+  -- io.write(("%d [label=\"%d/%d\"];\n"):format(uid, uid, rank_map[uid]))
 
   local eid = t.uv.first[uid]
   while eid do

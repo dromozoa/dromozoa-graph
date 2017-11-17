@@ -39,7 +39,7 @@ function class:remove_edge(eid)
 end
 
 return setmetatable(class, {
-  __call = function (g)
+  __call = function ()
     local vu_first = {}
     local vu_before = {}
     return setmetatable({
