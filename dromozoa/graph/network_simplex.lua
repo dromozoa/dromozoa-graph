@@ -17,7 +17,7 @@
 
 local spanning_tree = require "dromozoa.graph.spanning_tree"
 
-local function make_spanning_tree(g, t, color, uid)
+local function make_spanning_tree(g, t, dir_map, color, uid)
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
@@ -35,7 +35,8 @@ local function make_spanning_tree(g, t, color, uid)
     local vid = uv_target[eid]
     if not color[vid] then
       t:add_edge(eid, uid, vid)
-      make_spanning_tree(g, t, color, vid)
+      dir_map[eid] = 1
+      make_spanning_tree(g, t, dir_map, color, vid)
     end
     eid = uv_after[eid]
   end
@@ -45,7 +46,8 @@ local function make_spanning_tree(g, t, color, uid)
     local vid = vu_target[eid]
     if not color[vid] then
       t:add_edge(eid, uid, vid)
-      make_spanning_tree(g, t, color, vid)
+      dir_map[eid] = -1
+      make_spanning_tree(g, t, dir_map, color, vid)
     end
     eid = vu_after[eid]
   end
@@ -77,22 +79,54 @@ local function update_tree_properties(t, lim_map, low_map, uid, lim)
   return lim, low
 end
 
-local function update_cut_value(g, t, lim_map, low_map, cut_map, uid)
+local function update_cut_value(g, t, dir_map, cv_map, dv_map, uid)
   local uv = t.uv
   local uv_after = uv.after
   local uv_target = uv.target
 
   -- disocver vertex
 
+  local sum = 0
+
   local eid = uv.first[uid]
   while eid do
     local vid = uv_target[eid]
-
-    update_cut_value(g, t, lim_map, low_map, cut_map, vid)
+    update_cut_value(g, t, dir_map, cv_map, dv_map, vid)
+    -- sum = sum + cv_map[vid] - dv_map[vid]
     eid = uv_after[eid]
   end
 
-  -- finish vertex
+  local guv = g.uv
+  local guv_first = guv.first
+  local guv_after = guv.after
+
+  local gvu = g.vu
+  local gvu_first = gvu.first
+  local gvu_after = gvu.after
+
+  local dv = 0
+
+  local eid = guv_first[uid]
+  while eid do
+    if not uv_target[eid] then -- is non-tree edge
+      dv = dv + 1
+    end
+    eid = guv_after[eid]
+  end
+
+  local eid = gvu_first[uid]
+  while eid do
+    if not uv_target[eid] then -- is non-tree edge
+      dv = dv - 1
+    end
+    eid = gvu_after[eid]
+  end
+  dv_map[uid] = dv
+
+  -- local cv = dir_map[uid] * (dv - sum) - 1
+  -- cv_map[uid] = cv
+
+  -- print("cv,dv", uid, cv, dv)
 end
 
 local function feasible_tree(g)
@@ -110,6 +144,7 @@ local function feasible_tree(g)
   local vu_target = vu.target
 
   local t = spanning_tree()
+  local dir_map = {}
   local color = {}
   local root = {}
 
@@ -117,7 +152,7 @@ local function feasible_tree(g)
   while uid do
     if not color[uid] then
       root[#root + 1] = uid
-      make_spanning_tree(g, t, color, uid)
+      make_spanning_tree(g, t, dir_map, color, uid)
     end
     uid = u_after[uid]
   end
@@ -132,9 +167,10 @@ local function feasible_tree(g)
   print(table.concat(lim_map, " "))
   print(table.concat(low_map, " "))
 
-  local cut_map = {}
+  local cv_map = {}
+  local dv_map = {}
   for i = 1, #root do
-    update_cut_value(g, t, lim_map, low_map, cut_map, root[i])
+    update_cut_value(g, t, dir_map, cv_map, dv_map, root[i])
   end
 
   return t
