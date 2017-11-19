@@ -49,5 +49,5 @@ local function visit(t, uid)
   end
 end
 io.write("digraph {\n")
-visit(t, 1)
+visit(t, 7)
 io.write("}\n")

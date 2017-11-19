@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local longest_path = require "dromozoa.graph.longest_path"
 local spanning_tree = require "dromozoa.graph.spanning_tree"
 
 local function make_spanning_tree(g, t, dir_map, color, uid)
@@ -192,6 +193,9 @@ local function feasible_tree(g)
   local dir_map = {}
   local color = {}
   local root = {}
+
+  local layer_map = longest_path(g)
+  print(table.concat(layer_map, " "))
 
   local uid = u.first
   while uid do
