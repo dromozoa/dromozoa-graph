@@ -79,6 +79,50 @@ local function update_tree_properties(t, lim_map, low_map, uid, lim)
   return lim, low
 end
 
+local function update_dv(g, t, dv_map, uid)
+  local uv = t.uv
+  local uv_after = uv.after
+  local uv_target = uv.target
+
+  local dv = 0
+
+  local eid = uv.first[uid]
+  while eid do
+    local vid = uv_target[eid]
+    dv = dv + update_dv(g, t, dv_map, vid)
+    eid = uv_after[eid]
+  end
+
+  local guv = g.uv
+  local guv_first = guv.first
+  local guv_after = guv.after
+
+  local gvu = g.vu
+  local gvu_first = gvu.first
+  local gvu_after = gvu.after
+
+  local eid = gvu_first[uid]
+  while eid do
+    if not uv_target[eid] then -- is non-tree edge
+      dv = dv + 1
+    end
+    eid = gvu_after[eid]
+  end
+
+  local eid = guv_first[uid]
+  while eid do
+    if not uv_target[eid] then -- is non-tree edge
+      dv = dv - 1
+    end
+    eid = guv_after[eid]
+  end
+
+  print("dv", uid, dv)
+
+  dv_map[uid] = dv
+  return dv
+end
+
 local function update_cut_value(g, t, dir_map, dv_map, cv_map, uid)
   local uv = t.uv
   local uv_after = uv.after
@@ -152,26 +196,42 @@ local function feasible_tree(g)
   local uid = u.first
   while uid do
     if not color[uid] then
-      root[#root + 1] = uid
-      make_spanning_tree(g, t, dir_map, color, uid)
+      if vu:degree(uid) == 0 then
+        root[#root + 1] = uid
+        make_spanning_tree(g, t, dir_map, color, uid)
+      end
     end
     uid = u_after[uid]
   end
 
-  local lim_map = {}
-  local low_map = {}
-
-  for i = 1, #root do
-    update_tree_properties(t, lim_map, low_map, root[i], 0)
-  end
-
-  print(table.concat(lim_map, " "))
-  print(table.concat(low_map, " "))
+  print("root", root[1])
 
   local dv_map = {}
-  local cv_map = {}
   for i = 1, #root do
-    update_cut_value(g, t, dir_map, dv_map, cv_map, root[i])
+    update_dv(g, t, dv_map, root[i])
+  end
+
+  local eid = g.e.first
+  while eid do
+    local uid = vu_target[eid]
+    local vid = uv_target[eid]
+    local is_tree_edge = t.uv.target[eid] ~= nil
+    local dir
+    local wid
+    local dv
+    local cv
+    if is_tree_edge then
+      dir = dir_map[eid]
+      if dir_map[eid] == 1 then
+        wid = vid
+      else
+        wid = uid
+      end
+      dv = dv_map[wid]
+      cv = dir_map[eid] * dv_map[wid] + 1
+    end
+    print(uid, vid, dir, wid, dv, cv)
+    eid = g.e.after[eid]
   end
 
   return t
