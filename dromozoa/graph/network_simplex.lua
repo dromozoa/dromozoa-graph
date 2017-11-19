@@ -79,20 +79,18 @@ local function update_tree_properties(t, lim_map, low_map, uid, lim)
   return lim, low
 end
 
-local function update_cut_value(g, t, dir_map, cv_map, dv_map, uid)
+local function update_cut_value(g, t, dir_map, dv_map, cv_map, uid)
   local uv = t.uv
   local uv_after = uv.after
   local uv_target = uv.target
-
-  -- disocver vertex
 
   local sum = 0
 
   local eid = uv.first[uid]
   while eid do
     local vid = uv_target[eid]
-    update_cut_value(g, t, dir_map, cv_map, dv_map, vid)
-    -- sum = sum + cv_map[vid] - dv_map[vid]
+    update_cut_value(g, t, dir_map, dv_map, cv_map, vid)
+    sum = sum + cv_map[eid] + dv_map[vid]
     eid = uv_after[eid]
   end
 
@@ -109,7 +107,7 @@ local function update_cut_value(g, t, dir_map, cv_map, dv_map, uid)
   local eid = guv_first[uid]
   while eid do
     if not uv_target[eid] then -- is non-tree edge
-      dv = dv + 1
+      dv = dv - 1
     end
     eid = guv_after[eid]
   end
@@ -117,16 +115,19 @@ local function update_cut_value(g, t, dir_map, cv_map, dv_map, uid)
   local eid = gvu_first[uid]
   while eid do
     if not uv_target[eid] then -- is non-tree edge
-      dv = dv - 1
+      dv = dv + 1
     end
     eid = gvu_after[eid]
   end
+
   dv_map[uid] = dv
 
-  -- local cv = dir_map[uid] * (dv - sum) - 1
-  -- cv_map[uid] = cv
-
-  -- print("cv,dv", uid, cv, dv)
+  local eid = t.vu.first[uid]
+  if eid then
+    local cv = dir_map[eid] * (dv + sum) - 1
+    cv_map[eid] = cv
+    print("cv,dv", uid, cv, dv)
+  end
 end
 
 local function feasible_tree(g)
@@ -167,10 +168,10 @@ local function feasible_tree(g)
   print(table.concat(lim_map, " "))
   print(table.concat(low_map, " "))
 
-  local cv_map = {}
   local dv_map = {}
+  local cv_map = {}
   for i = 1, #root do
-    update_cut_value(g, t, dir_map, cv_map, dv_map, root[i])
+    update_cut_value(g, t, dir_map, dv_map, cv_map, root[i])
   end
 
   return t
