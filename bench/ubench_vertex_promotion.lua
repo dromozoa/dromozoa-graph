@@ -17,10 +17,9 @@
 
 local graph = require "dromozoa.graph"
 local clone = require "dromozoa.graph.clone"
-local longest_path = require "experimental.longest_path"
+local longest_path = require "dromozoa.graph.longest_path"
 local vertex_promotion = require "experimental.vertex_promotion"
 
--- local N = 200
 local N = 10
 
 local function run(f, g, layer_map)
