@@ -15,6 +15,38 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local function visit(uv_first, uv_after, uv_target, color, layer_map, uid)
+  color[uid] = 1
+
+  local u_layer = 0
+
+  local eid = uv_first[uid]
+  while eid do
+    local vid = uv_target[eid]
+    local c = color[vid]
+    if not c then
+      local v_layer = visit(uv_first, uv_after, uv_target, color, layer_map, vid)
+      if u_layer < v_layer then
+        u_layer = v_layer
+      end
+    elseif c == 1 then
+      error "not a dag"
+    else
+      local v_layer = layer_map[vid]
+      if u_layer < v_layer then
+        u_layer = v_layer
+      end
+    end
+    eid = uv_after[eid]
+  end
+
+  color[uid] = 2
+
+  u_layer = u_layer + 1
+  layer_map[uid] = u_layer
+  return u_layer
+end
+
 return function (g)
   local u = g.u
   local u_after = u.after
@@ -24,57 +56,16 @@ return function (g)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local vu = g.vu
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
-
-  local uset = {}
-  local zset = {}
-  local result = {}
+  local color = {}
+  local layer_map = {}
 
   local uid = u.first
   while uid do
-    if not uv_first[uid] then
-      result[uid] = 1
-      zset[uid] = true
-    else
-      uset[uid] = true
+    if not color[uid] then
+      visit(uv_first, uv_after, uv_target, color, layer_map, uid)
     end
     uid = u_after[uid]
   end
 
-  local layer = 2
-  while next(uset) ~= nil do
-    local znew = {}
-
-    for uid in pairs(uset) do
-      local assign = true
-      local eid = uv_first[uid]
-      while eid do
-        local vid = uv_target[eid]
-        if not zset[vid] then
-          assign = false
-          break
-        end
-        eid = uv_after[eid]
-      end
-      if assign then
-        result[uid] = layer
-        znew[uid] = true
-        uset[uid] = nil
-      end
-    end
-
-    if next(znew) == nil then
-      break
-    end
-
-    layer = layer + 1
-    for uid in pairs(znew) do
-      zset[uid] = uid
-    end
-  end
-
-  return result
+  return layer_map
 end

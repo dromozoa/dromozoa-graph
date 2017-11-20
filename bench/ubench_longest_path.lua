@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local longest_path = require "experimental.longest_path"
+local longest_path = require "dromozoa.graph.longest_path"
 local longest_path2 = require "experimental.longest_path2"
 local longest_path3 = require "experimental.longest_path3"
 
@@ -43,7 +43,7 @@ for i = 1, N do
 end
 
 local algorithms = {
-  -- longest_path;
+  longest_path;
   longest_path2;
   longest_path3;
 }

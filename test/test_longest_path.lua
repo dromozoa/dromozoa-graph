@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local longest_path = require "dromozoa.graph.longest_path"
+local longest_path = require "experimental.longest_path3"
 
 -- https://www.slideshare.net/nikolovn/gd-2001-ver2
 local g = graph()
