@@ -28,22 +28,16 @@ return function (g)
   local order = topological_sort(g)
   for i = 1, #order do
     local uid = order[i]
+    local u = 0
     local eid = uv_first[uid]
-    if not eid then
-      layer_map[uid] = 1
-    else
-      local u
-
-      repeat
-        local v = layer_map[uv_target[eid]]
-        if not u or u < v then
-          u = v
-        end
-        eid = uv_after[eid]
-      until not eid
-
-      layer_map[uid] = u + 1
+    while eid do
+      local v = layer_map[uv_target[eid]]
+      if u < v then
+        u = v
+      end
+      eid = uv_after[eid]
     end
+    layer_map[uid] = u + 1
   end
 
   return layer_map
