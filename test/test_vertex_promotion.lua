@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local clone = require "dromozoa.graph.clone"
 local longest_path = require "dromozoa.graph.longest_path"
-local vertex_promotion = require "dromozoa.graph.vertex_promotion"
+local vertex_promotion = require "experimental.vertex_promotion6"
 
 local function check(result, expect)
   local n = #result
@@ -43,6 +43,7 @@ local layer_map1 = longest_path(g)
 check(layer_map1, { 4, 3, 2, 1, 1, 1, 1 })
 
 local layer_map2 = vertex_promotion(g, layer_map1)
+-- print(table.concat(layer_map2, " "))
 check(layer_map2, { 4, 3, 2, 1, 1, 2, 3 })
 
 -- Fig.6
