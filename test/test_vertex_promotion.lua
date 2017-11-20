@@ -16,19 +16,53 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local clone = require "dromozoa.graph.clone"
 local longest_path = require "dromozoa.graph.longest_path"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
+local function check(result, expect)
+  local n = #result
+  assert(n == #expect)
+  for i = 1, n do
+    assert(result[i] == expect[i])
+  end
+end
+
 local g = graph()
-for i = 1, 4 do
+for i = 1, 7 do
   g:add_vertex()
 end
 g:add_edge(1, 2)
-g:add_edge(1, 3)
+g:add_edge(2, 3)
 g:add_edge(3, 4)
+g:add_edge(3, 5)
+g:add_edge(2, 6)
+g:add_edge(1, 7)
 
-local layer_map = longest_path(g)
-print(table.concat(layer_map, " "))
+local layer_map1 = longest_path(g)
+check(layer_map1, { 4, 3, 2, 1, 1, 1, 1 })
 
-local layer_map = vertex_promotion(g, layer_map)
-print(table.concat(layer_map, " "))
+local layer_map2 = vertex_promotion(g, layer_map1)
+check(layer_map2, { 4, 3, 2, 1, 1, 2, 3 })
+
+-- Fig.6
+local g = graph()
+for i = 1, 8 do
+  g:add_vertex()
+end
+g:add_edge(1, 2)
+g:add_edge(2, 3)
+g:add_edge(3, 4)
+g:add_edge(1, 5)
+g:add_edge(5, 6)
+g:add_edge(5, 7)
+g:add_edge(5, 8)
+
+local layer_map1 = longest_path(g)
+local layer_map2 = vertex_promotion(g, clone(layer_map1))
+for k, v in pairs(layer_map1) do
+  assert(v == layer_map2[k])
+end
+for k, v in pairs(layer_map2) do
+  assert(v == layer_map1[k])
+end
