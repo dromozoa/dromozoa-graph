@@ -15,54 +15,66 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.graph.clone"
+local function promote(vu_first, vu_after, vu_target, layer_map, d_map, uid)
+  local d = d_map[uid]
+  local u_layer = layer_map[uid] + 1
 
-local function promote(g, layer_map, uid)
-  local vu = g.vu
-  local vu_after = vu.after
-  local vu_target = vu.target
-
-  local d = 0
-  local u = layer_map[uid] + 1
-
-  local eid = vu.first[uid]
+  local eid = vu_first[uid]
   while eid do
     local vid = vu_target[eid]
-    if u == layer_map[vid] then
-      d = d + promote(g, layer_map, vid)
+    if u_layer == layer_map[vid] then
+      d = d + promote(vu_first, vu_after, vu_target, layer_map, d_map, vid)
     end
     eid = vu_after[eid]
   end
 
-  layer_map[uid] = u
-
-  return d - vu:degree(uid) + g.uv:degree(uid)
+  layer_map[uid] = u_layer
+  return d
 end
 
 return function (g, layer_map)
+  local next = next
+
   local u = g.u
   local u_first = u.first
   local u_after = u.after
 
-  local vu = g.vu
+  local uv = g.uv
 
-  local layer_map_backup = clone(layer_map)
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
+
+  local new_layer_map = setmetatable({}, { __index = layer_map })
+
+  local d_map = {}
+  local uid = u_first
+  while uid do
+    d_map[uid] = uv:degree(uid) - vu:degree(uid)
+    uid = u_after[uid]
+  end
 
   repeat
-    local promotions = 0
+    local promoted
     local uid = u_first
     while uid do
-      if vu:degree(uid) > 0 then
-        if promote(g, layer_map, uid) < 0 then
-          promotions = promotions + 1
-          layer_map_backup = clone(layer_map)
+      if vu_first[uid] then
+        if promote(vu_first, vu_after, vu_target, new_layer_map, d_map, uid) < 0 then
+          promoted = true
+          for vid, v_layer in next, new_layer_map do
+            layer_map[vid] = v_layer
+            new_layer_map[vid] = nil
+          end
         else
-          layer_map = clone(layer_map_backup)
+          for vid, v_layer in next, new_layer_map do
+            new_layer_map[vid] = nil
+          end
         end
       end
       uid = u_after[uid]
     end
-  until promotions == 0
+  until not promoted
 
   return layer_map
 end

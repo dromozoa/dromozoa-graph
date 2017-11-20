@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local clone = require "dromozoa.graph.clone"
 local longest_path = require "dromozoa.graph.longest_path"
-local vertex_promotion = require "experimental.vertex_promotion6"
+local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
 local function check(result, expect)
   local n = #result
