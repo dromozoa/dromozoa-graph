@@ -17,6 +17,7 @@
 
 local longest_path = require "dromozoa.graph.longest_path"
 local spanning_tree = require "dromozoa.graph.spanning_tree"
+local topological_sort = require "dromozoa.graph.topological_sort"
 
 local function make_spanning_tree(g, t, dir_map, color, uid)
   local uv = g.uv
@@ -241,8 +242,40 @@ local function feasible_tree(g)
   return t
 end
 
+
+
+
+local function feasible_tree(g)
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
+
+  local rank_map = {}
+
+  local order = topological_sort(g)
+  for i = #order, 1, -1 do
+    local uid = order[i]
+    local u = 0
+    local eid = vu_first[uid]
+    while eid do
+      local vid = vu_target[eid]
+      local v = rank_map[vid]
+      if u < v then
+        u = v
+      end
+      eid = vu_after[eid]
+    end
+    rank_map[uid] = u + 1
+  end
+
+
+
+
+
+end
+
 return function (g)
-  local t = feasible_tree(g)
-  -- print(table.concat(rank_map, " "))
+  feasible_tree(g)
   return t
 end

@@ -36,6 +36,7 @@
       <li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.64.4457&rep=rep1&type=pdf">Fast and Simple Horizontal Coordinate Assignment</a></li>
       <li><a href="http://jgaa.info/accepted/2004/BarthMutzelJuenger2004.8.2.pdf">Simple and Efficient Bilayer Cross Counting</a></li>
       <li><a href="http://www.researchgate.net/profile/Petra_Mutzel/publication/30508315_2-Layer_Straightline_Crossing_Minimization_Performance_of_Exact_and_Heuristic_Algorithms/links/09e4150eabaf4cc7bd000000.pdf">2-Layer Straightline Crossing Minimization</a></li>
+      <li><a href="https://core.ac.uk/download/pdf/82207433.pdf">Graph layering by promotion of nodes</a></li>
       <li><a href="http://www.lib.kobe-u.ac.jp/repository/thesis2/d1/D1005931.pdf">階層グラフの描画アルゴリズムに関する研究</a></li>
     </ol>
   </li>
@@ -133,12 +134,34 @@ Coffman-Grahamアルゴリズムはふたつのステップからなる。
 以下、この条件を続ける。
 </div>
 
+<h3>Improvement by Promotion Vertex</h3>
+
+<div>
+ダミー頂点を少なくすることを目的とする。ダミー頂点が少なければ、エッジは短く保たれる。
+</div>
+
+<div>
+関数\(\mathrm{PromoteVertex}(v)\)は、\(v\)の入力頂点のなかで、一階層上に位置する頂点\(u\)の\(\mathrm{PromoteVertex}(u)\)を積算する。
+これに\(v\)の出力次数と入力次数の差を加えた値を返す。
+また、\(v\)の階層をひとつ上に移動する。
+</div>
+
+<div>
+頂点の格上げヒューリスティクスでは、ランク移動が発生しなくなるまで、すべての頂点\(v \in V\)について、次に述べる操作をくりかえす。
+\(v\)の入力次数が\(0\)でなければ、\(\mathrm{PromoteVertex}(v)\)を行う。
+ただし、結果が正の場合、移動は発生しなかったものとする。
+</div>
+
 <h3>Graphviz</h3>
 
 <div>
-初期ランクはLongest-Pathアルゴリズムで導かれないように見える。
-素直に全域木を作ってランクを計算するほうがよいのではないか。
-全域木は任意のソースから開始する。
+初期ランクは厳密にはLongest-Pathアルゴリズムで求めていないように見える。
+トポロジカルな順序に従って、ランクを割り振っていく。
+その後、短くすることが可能なエッジを短くする。
+</div>
+
+<div>
+全域木はソースから開始したほうがよいのか？
 </div>
 
 <div>
