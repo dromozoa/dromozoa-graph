@@ -18,6 +18,7 @@
 local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
 local longest_path2 = require "experimental.longest_path2"
+local longest_path3 = require "experimental.longest_path3"
 
 local N = 200
 
@@ -44,6 +45,7 @@ end
 local algorithms = {
   longest_path;
   longest_path2;
+  longest_path3;
 }
 
 local benchmarks = {}
