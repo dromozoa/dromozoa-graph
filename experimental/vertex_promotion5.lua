@@ -15,27 +15,20 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.graph.clone"
-
-local function promote(g, layer_map, d_map, uid)
-  local vu = g.vu
-  local vu_after = vu.after
-  local vu_target = vu.target
-
+local function promote(vu_first, vu_after, vu_target, layer_map, d_map, uid)
   local d = d_map[uid]
   local u_layer = layer_map[uid] + 1
 
-  local eid = vu.first[uid]
+  local eid = vu_first[uid]
   while eid do
     local vid = vu_target[eid]
     if u_layer == layer_map[vid] then
-      d = d + promote(g, layer_map, d_map, vid)
+      d = d + promote(vu_first, vu_after, vu_target, layer_map, d_map, vid)
     end
     eid = vu_after[eid]
   end
 
   layer_map[uid] = u_layer
-
   return d
 end
 
@@ -50,6 +43,8 @@ return function (g, layer_map)
 
   local vu = g.vu
   local vu_first = vu.first
+  local vu_after = vu.after
+  local vu_target = vu.target
 
   local new_layer_map = setmetatable({}, { __index = layer_map })
 
@@ -65,7 +60,7 @@ return function (g, layer_map)
     local uid = u_first
     while uid do
       if vu_first[uid] then
-        if promote(g, new_layer_map, d_map, uid) < 0 then
+        if promote(vu_first, vu_after, vu_target, new_layer_map, d_map, uid) < 0 then
           promoted = true
           for i, v in next, new_layer_map do
             layer_map[i] = v

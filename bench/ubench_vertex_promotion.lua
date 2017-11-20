@@ -23,6 +23,7 @@ local vertex_promotion2 = require "experimental.vertex_promotion2"
 local vertex_promotion3 = require "experimental.vertex_promotion3"
 local vertex_promotion4 = require "experimental.vertex_promotion4"
 local vertex_promotion5 = require "experimental.vertex_promotion5"
+local vertex_promotion6 = require "experimental.vertex_promotion6"
 
 local N = 20
 
@@ -49,6 +50,7 @@ local algorithms = {
   vertex_promotion3;
   vertex_promotion4;
   vertex_promotion5;
+  vertex_promotion6;
 }
 
 local benchmarks = {}
