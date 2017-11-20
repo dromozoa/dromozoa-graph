@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>グラフの階層的描画</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 <body>
 
@@ -35,6 +36,7 @@
       <li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.64.4457&rep=rep1&type=pdf">Fast and Simple Horizontal Coordinate Assignment</a></li>
       <li><a href="http://jgaa.info/accepted/2004/BarthMutzelJuenger2004.8.2.pdf">Simple and Efficient Bilayer Cross Counting</a></li>
       <li><a href="http://www.researchgate.net/profile/Petra_Mutzel/publication/30508315_2-Layer_Straightline_Crossing_Minimization_Performance_of_Exact_and_Heuristic_Algorithms/links/09e4150eabaf4cc7bd000000.pdf">2-Layer Straightline Crossing Minimization</a></li>
+      <li><a href="https://core.ac.uk/download/pdf/82207433.pdf">Graph layering by promotion of nodes</a></li>
       <li><a href="http://www.lib.kobe-u.ac.jp/repository/thesis2/d1/D1005931.pdf">階層グラフの描画アルゴリズムに関する研究</a></li>
     </ol>
   </li>
@@ -132,6 +134,72 @@ Coffman-Grahamアルゴリズムはふたつのステップからなる。
 以下、この条件を続ける。
 </div>
 
+<h3>Improvement by Promotion Vertex</h3>
+
+<div>
+ダミー頂点を少なくすることを目的とする。ダミー頂点が少なければ、エッジは短く保たれる。
+</div>
+
+<div>
+関数\(\mathrm{PromoteVertex}(v)\)は、\(v\)の入力頂点のなかで、一階層上に位置する頂点\(u\)の\(\mathrm{PromoteVertex}(u)\)を積算する。
+これに\(v\)の出力次数と入力次数の差を加えた値を返す。
+また、\(v\)の階層をひとつ上に移動する。
+</div>
+
+<div>
+頂点の格上げヒューリスティクスでは、ランク移動が発生しなくなるまで、すべての頂点\(v \in V\)について、次に述べる操作をくりかえす。
+\(v\)の入力次数が\(0\)でなければ、\(\mathrm{PromoteVertex}(v)\)を行う。
+ただし、結果が正の場合、移動は発生しなかったものとする。
+</div>
+
+<h3>Graphviz</h3>
+
+<div>
+初期ランクは厳密にはLongest-Pathアルゴリズムで求めていないように見える。
+トポロジカルな順序に従って、ランクを割り振っていく。
+その後、短くすることが可能なエッジを短くする。
+</div>
+
+<div>
+全域木はソースから開始したほうがよいのか？
+</div>
+
+<div>
+エッジの重みが\(1\)である場合のカット値の計算を考える。
+ツリーエッジの向きと、対応するグラフエッジの向きが逆転している場合、末尾要素と先頭要素が入れ替わるので、カット値の符号を反転させる。
+エッジ\(e\)について、ツリーエッジの向きとグラフエッジの向きが同じ場合は\(+1\)を、向きが逆転している場合は\(-1\)を与えるような変数を\(R_e\)で表すとする。
+</div>
+
+<div>
+頂点\(x\)について、非ツリーエッジだけを考慮した入力次数と出力次数の差を\(d_x\)で表すとする。
+全域木のツリーエッジ\((u,v)\)の端点\(v\)が葉であるとき、カット値は、
+\[\begin{eqnarray}
+  C_{(u,v)} &amp;=&amp; R_{(u,v)} (d_v + R_{(u,v)}) \\
+            &amp;=&amp; R_{(u,v)} d_v + 1
+\end{eqnarray}\]
+と表せる。
+\((u,v)\)以外の\(v\)の全近接エッジが非ツリーエッジであるため、ここで、\(d_v + R_{(u,v)}\)は入力次数と出力次数の差に等しい。
+</div>
+
+<div>
+あるツリーエッジ\((u,v)\)について、端点\(v\)が子ツリーエッジ\((v,w_i)\)を持つとき、
+\[
+  D_v = d_v + \sum_i D_{w_i}
+\]
+を定義する。\(D_v\)は端点\(v\)側の要素に対して、入力する非ツリーエッジの数と出力する非ツリーエッジの差である。
+このような値は、全域木を子から走査しながら積算することで容易に求まる。
+このとき、ツリーエッジ\((u,v)\)のカット値は、
+\[\begin{eqnarray}
+  C_{(u,v)} &amp;=&amp; R_{(u,v)} (D_v + R_{(u,v)}) \\
+            &amp;=&amp; R_{(u,v)} D_v + 1
+\end{eqnarray}\]
+</div>
+
+<div>
+あるツリーエッジ\((u_1,v_1)\)を全域木から除去し、新しいツリーエッジ\((u_2,v_2)\)を加えたとき、\(d_{v_1}\)と\(d_{v_2}\)が更新される（インクリメントまたはデクリメントする）。
+全域木上で\(v_1,v_2\)自体とその祖先の頂点\(\{x\}\)について、\(D_x\)を更新する。
+</div>
+
 <h2>13.5 Vertex Ordering</h2>
 
 <h3>13.5.1 One-Sided Crossing Minimization</h3>
@@ -210,7 +278,7 @@ OLCMの場合、\(\pi_1\)が固定されていると仮定し、交差を最小�
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 90,
+    /* scale: 90, */
     undefinedFamily: "sans-serif"
   }
 });
