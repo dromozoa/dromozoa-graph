@@ -2,3 +2,4 @@
 /out
 /test/boost_graph
 /ubench_result*
+/test/icu4j/target
