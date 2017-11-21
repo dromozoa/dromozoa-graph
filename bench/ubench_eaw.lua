@@ -163,9 +163,9 @@ for i = 1, #range do
 end
 assert(sum == 0x110000)
 
-print("flat", c2 - c1, #flat)
-print("range", c3 - c2, #range)
-print("tree", c4 - c3, #tree, #leaf)
+-- print("flat", c2 - c1, #flat)
+-- print("range", c3 - c2, #range)
+-- print("tree", c4 - c3, #tree, #leaf)
 
 local function run(fn, first, last)
   local sum = 0
@@ -202,6 +202,6 @@ local algorithms = {
 
 local benchmarks = {}
 for i = 1, #algorithms do
-  benchmarks[("%02d"):format(i)] = { run, algorithms[i], 0, 0x10FFFF }
+  benchmarks[("%02d"):format(i)] = { run, algorithms[i], 0x3000, 0x3800 }
 end
 return benchmarks
