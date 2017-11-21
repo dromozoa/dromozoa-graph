@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 public class ApplicationTest extends TestCase {
   public void testApplication() {
-    Application.main(null);
+    String[] args = { "3000", "30FF" };
+    Application.main(args);
   }
 }

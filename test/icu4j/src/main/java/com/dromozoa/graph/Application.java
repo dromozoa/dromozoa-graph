@@ -4,7 +4,19 @@ import com.ibm.icu.lang.*;
 
 public class Application {
   public static void main(String[] args) {
-    for (int codePoint = 0; codePoint <= 0x10FFFF; ++codePoint) {
+    int codePointFirst = 0;
+    int codePointLast = 0x10FFFF;
+
+    if (args != null) {
+      if (args.length > 0) {
+        codePointFirst = Integer.parseInt(args[0], 16);
+      }
+      if (args.length > 1) {
+        codePointLast = Integer.parseInt(args[1], 16);
+      }
+    }
+
+    for (int codePoint = codePointFirst; codePoint <= codePointLast; ++codePoint) {
       int property = UCharacter.getIntPropertyValue(codePoint, UProperty.EAST_ASIAN_WIDTH);
       switch (property) {
         case UCharacter.EastAsianWidth.AMBIGUOUS:
