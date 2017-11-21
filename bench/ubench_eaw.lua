@@ -134,6 +134,19 @@ local function make_tree(range)
   return tree, leaf
 end
 
+local function make_code(tree, leaf, code, m, i, indent)
+  local v = tree[i]
+  if v then
+    code[#code + 1] = indent .. ("if v < %d then"):format(v)
+    make_code(tree, leaf, code, m, i * 2, indent .. "  ")
+    code[#code + 1] = indent .. "else"
+    make_code(tree, leaf, code, m, i * 2 + 1, indent .. "  ")
+    code[#code + 1] = indent .. "end"
+  else
+    code[#code + 1] = indent .. ("return %d"):format(leaf[i - m])
+  end
+end
+
 collectgarbage()
 collectgarbage()
 local c1 = collectgarbage("count")
@@ -155,6 +168,14 @@ local tree, leaf = make_tree(range)
 collectgarbage()
 collectgarbage()
 local c4 = collectgarbage("count")
+
+local code = { "return function (v)" }
+make_code(tree, leaf, code, #range - 1, 1, "  ")
+code[#code + 1] = "end"
+local code = table.concat(code, "\n") .. "\n"
+-- io.write(code)
+
+local fn_code = (loadstring or load)(code)()
 
 local sum = 0
 for i = 1, #range do
@@ -195,9 +216,20 @@ local function fn_tree(code_point)
   end
 end
 
+if false then
+  for i = 0, 0x10FFFF do
+    local f = fn_flat(i)
+    local t = fn_tree(i)
+    local c = fn_code(i)
+    assert(f == t)
+    assert(f == c)
+  end
+end
+
 local algorithms = {
   fn_flat,
   fn_tree,
+  fn_code,
 }
 
 local benchmarks = {}
