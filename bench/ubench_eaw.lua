@@ -157,6 +157,27 @@ local function make_code(tree, leaf, code, m, i, indent)
   end
 end
 
+local function make_tcode(tree, leaf, m)
+  return ([[
+local tree = { %s }
+local leaf = { %s }
+return function (code_point)
+  local x = 1
+  while true do
+    local v = tree[x]
+    if not v then
+      return leaf[x - %d]
+    end
+    if code_point < v then
+      x = x * 2
+    else
+      x = x * 2 + 1
+    end
+  end
+end
+]]):format(table.concat(tree, ", "), table.concat(leaf, ", "), m)
+end
+
 collectgarbage()
 collectgarbage()
 local c1 = collectgarbage("count")
@@ -183,6 +204,9 @@ local code = { "return function (v)" }
 make_code(tree, leaf, code, #range - 1, 1, "  ")
 code[#code + 1] = "end"
 local code = table.concat(code, "\n") .. "\n"
+
+local tcode = make_tcode(tree, leaf, #range - 1)
+
 -- io.write(code)
 
 local fn_code = (loadstring or load)(code)()
