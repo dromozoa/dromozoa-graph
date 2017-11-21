@@ -89,7 +89,16 @@ end
 
 local function make_tree(range)
   local m = #range - 1
-  local n = math.ceil(math.log(m, 2))
+  local x = 1
+  local y = 0
+  while x < m do
+    x = x * 2
+    y = y + 1
+  end
+
+  -- local n = math.ceil(math.log(m, 2))
+  -- print(n, y)
+  local n = y
 
   local indice = linked_list()
   for i = 1, m do
@@ -136,6 +145,7 @@ end
 
 local function make_code(tree, leaf, code, m, i, indent)
   local v = tree[i]
+  -- print(indent .. #code .. " " ..  i .. " " .. v)
   if v then
     code[#code + 1] = indent .. ("if v < %d then"):format(v)
     make_code(tree, leaf, code, m, i * 2, indent .. "  ")
