@@ -74,7 +74,7 @@ local function make_range(flat)
 
   local i = 0
   local u = flat[0]
-  for j = 2, 0x10FFFF do
+  for j = 1, 0x10FFFF do
     local v = flat[j]
     if u ~= v then
       range[#range + 1] = { i, j - 1, u }
