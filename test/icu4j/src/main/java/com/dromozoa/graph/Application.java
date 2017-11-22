@@ -29,7 +29,7 @@ public class Application {
           System.out.println(codePoint + "\tH");
           break;
         case UCharacter.EastAsianWidth.NEUTRAL:
-          // System.out.println(codePoint + "\tN");
+          System.out.println(codePoint + "\tN");
           break;
         case UCharacter.EastAsianWidth.NARROW:
           System.out.println(codePoint + "\tNa");

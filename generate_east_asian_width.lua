@@ -21,12 +21,12 @@ local linked_list = require "dromozoa.graph.linked_list"
 -- https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt
 
 local properties = {
-  ["N"]  = 1; -- neutral
-  ["Na"] = 2; -- narrow
-  ["H"]  = 3; -- halfwidth
-  ["A"]  = 4; -- ambiguous
-  ["W"]  = 5; -- wide
-  ["F"]  = 6; -- fullwidth
+  ["N"]  = true; -- neutral
+  ["Na"] = true; -- narrow
+  ["H"]  = true; -- halfwidth
+  ["A"]  = true; -- ambiguous
+  ["W"]  = true; -- wide
+  ["F"]  = true; -- fullwidth
 }
 
 local function make_flat(filename)
@@ -139,15 +139,10 @@ local function make_code(tree, code, i, depth)
     make_code(tree, code, j + 1, depth)
     code[#code + 1] = indent .. "end\n"
   elseif type(v) == "number" then
-    local pw = properties[w]
     code[#code + 1] = indent .. ("if c < %d then\n"):format(u)
     make_code(tree, code, j, depth)
-    -- code[#code + 1] = indent .. ("else return %d end\n"):format(pw)
     code[#code + 1] = indent .. ("else return \"%s\" end\n"):format(w)
   else
-    local pv = properties[v]
-    local pw = properties[w]
-    -- code[#code + 1] = indent .. ("if c < %d then return %d else return %d end\n"):format(u, pv, pw)
     code[#code + 1] = indent .. ("if c < %d then return \"%s\" else return \"%s\" end\n"):format(u, v, w)
   end
 end
@@ -158,6 +153,7 @@ local range = make_range(flat)
 local tree = make_tree(range)
 
 local code = {[[
+-- generated from EastAsianWidth-10.0.0.txt
 return function (c)
 ]]}
 make_code(tree, code, 1, 1)
@@ -168,12 +164,9 @@ end
 local code = table.concat(code)
 
 local f = assert((loadstring or load)(code))()
-
-if true then
-  for i = 0, 0x10FFFF do
-    -- assert(properties[flat[i]] == f(i))
-    assert(flat[i] == f(i))
-  end
+for i = 0, 0x10FFFF do
+  -- io.write(("%d\t%s\n"):format(i, flat[i]))
+  assert(flat[i] == f(i))
 end
 
 io.write(code)
