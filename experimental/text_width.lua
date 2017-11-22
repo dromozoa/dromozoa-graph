@@ -30,7 +30,6 @@ local width_map = {
 return function (s)
   local width = 0
   for p, c in utf8.codes(s) do
-    print(p, c, east_asian_width(c))
     width = width + width_map[east_asian_width(c)]
   end
   return width
