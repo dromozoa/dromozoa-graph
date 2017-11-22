@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local utf8 = require "dromozoa.utf8"
 local linked_list = require "dromozoa.graph.linked_list"
 
 -- https://www.unicode.org/reports/tr11/
@@ -147,6 +148,50 @@ local function make_code(tree, code, i, depth)
   end
 end
 
+local function encode_utf8(code_point)
+  local s = utf8.char(code_point)
+  local a, b, c, d = string.byte(s, 1, #s)
+  -- b = b or 0
+  -- c = c or 0
+  -- d = d or 0
+  -- return a * 0x1000000 + b * 0x10000 + c * 0x100 + d
+  local v
+  if d then
+    v = a * 0x1000000 + b * 0x10000 + c * 0x100 + d
+  elseif c then
+    v = a * 0x10000 + b * 0x100 + c
+  elseif b then
+    v = a * 0x100 + b
+  else
+    v = a
+  end
+  return v
+end
+
+local function make_code_utf8(tree, code, i, depth)
+  local u = tree[i]
+  local j = i * 2
+  local v = tree[j]
+  local w = tree[j + 1]
+
+  local indent = ("  "):rep(depth)
+  local depth = depth + 1
+
+  if type(w) == "number" then
+    code[#code + 1] = indent .. ("if c < %d then\n"):format(encode_utf8(u))
+    make_code_utf8(tree, code, j, depth)
+    code[#code + 1] = indent .. "else\n"
+    make_code_utf8(tree, code, j + 1, depth)
+    code[#code + 1] = indent .. "end\n"
+  elseif type(v) == "number" then
+    code[#code + 1] = indent .. ("if c < %d then\n"):format(encode_utf8(u))
+    make_code_utf8(tree, code, j, depth)
+    code[#code + 1] = indent .. ("else return \"%s\" end\n"):format(w)
+  else
+    code[#code + 1] = indent .. ("if c < %d then return \"%s\" else return \"%s\" end\n"):format(encode_utf8(u), v, w)
+  end
+end
+
 local filename = ...
 local flat = make_flat(filename)
 local range = make_range(flat)
@@ -156,17 +201,19 @@ local code = {[[
 -- generated from EastAsianWidth-10.0.0.txt
 return function (c)
 ]]}
-make_code(tree, code, 1, 1)
+make_code_utf8(tree, code, 1, 1)
 code[#code + 1] = [[
 end
 ]]
 
 local code = table.concat(code)
+io.write(code)
 
 local f = assert((loadstring or load)(code))()
 for i = 0, 0x10FFFF do
   -- io.write(("%d\t%s\n"):format(i, flat[i]))
-  assert(flat[i] == f(i))
+  -- assert(flat[i] == f(i)
+  -- print(flat[i], f(encode_utf8(i)))
+  assert(flat[i] == f(encode_utf8(i)))
 end
 
-io.write(code)

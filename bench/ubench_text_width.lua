@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local text_width = require "experimental.text_width"
+local text_width2 = require "experimental.text_width2"
 
 local data = (table.concat {
   string.char(0x41, 0xE2, 0x89, 0xA2, 0xCE, 0x91, 0x2E);
@@ -31,6 +32,7 @@ end
 
 local algorithms = {
   text_width;
+  text_width2;
 }
 
 local benchmarks = {}
