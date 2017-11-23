@@ -18,6 +18,7 @@
 local text_width = require "experimental.text_width"
 local text_width2 = require "experimental.text_width2"
 local text_width3 = require "experimental.text_width3"
+local text_width4 = require "experimental.text_width4"
 
 local data = (table.concat {
   string.char(0x41, 0xE2, 0x89, 0xA2, 0xCE, 0x91, 0x2E);
@@ -35,11 +36,13 @@ local algorithms = {
   text_width;
   text_width2;
   text_width3;
+  text_width4;
 }
 
 -- print(text_width(data))
 -- print(text_width2(data))
 -- print(text_width3(data))
+-- print(text_width4(data))
 
 local benchmarks = {}
 
