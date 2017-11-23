@@ -31,23 +31,28 @@ local byte = string.byte
 
 return function (s)
   local i = 1
-  local n = #s
   local w = 0
-  while i <= n do
+  while true do
     local a, b, c, d = byte(s, i, i + 3)
-    if a <= 0x7F then
-      i = i + 1
-      w = w + width_map[east_asian_width(a)]
-    elseif a <= 0xDF then
-      i = i + 2
-      w = w + width_map[east_asian_width(a * 0x100 + b)]
-    elseif a <= 0xEF then
-      i = i + 3
-      w = w + width_map[east_asian_width(a * 0x10000 + b * 0x100 + c)]
-    else -- a <= 0xF7
-      i = i + 4
-      w = w + width_map[east_asian_width(a * 0x1000000 + b * 0x10000 + c * 0x100 + d)]
+    if not a then
+      return w
+    end
+    if a <= 0xDF then
+      if a <= 0x7F then
+        i = i + 1
+        w = w + width_map[east_asian_width(a)]
+      else
+        i = i + 2
+        w = w + width_map[east_asian_width(a * 0x100 + b)]
+      end
+    else
+      if a <= 0xEF then
+        i = i + 3
+        w = w + width_map[east_asian_width(a * 0x10000 + b * 0x100 + c)]
+      else
+        i = i + 4
+        w = w + width_map[east_asian_width(a * 0x1000000 + b * 0x10000 + c * 0x100 + d)]
+      end
     end
   end
-  return w
 end
