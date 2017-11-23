@@ -15,6 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local dumper = require "dromozoa.commons.dumper"
 local utf8 = require "dromozoa.utf8"
 local linked_list = require "dromozoa.graph.linked_list"
 
@@ -168,6 +169,15 @@ local function encode_utf8(code_point)
   return v
 end
 
+local function encode_utf8_2(code_point)
+  local s = utf8.char(code_point)
+  local a, b, c, d = string.byte(s, 1, #s)
+  b = b or 0
+  c = c or 0
+  d = d or 0
+  return a * 0x1000000 + b * 0x10000 + c * 0x100 + d
+end
+
 local function make_code_utf8(tree, code, i, depth)
   local u = tree[i]
   local j = i * 2
@@ -217,3 +227,51 @@ for i = 0, 0x10FFFF do
   assert(flat[i] == f(encode_utf8(i)))
 end
 
+local flat_utf8_1 = {}
+local flat_utf8_2 = {}
+local flat_utf8_3 = {}
+local flat_utf8_4 = {}
+
+for i = 0, 0x10FFFF do
+  local v = flat[i]
+  local s = utf8.char(i)
+  local n = #s
+  local a, b, c, d = string.byte(s, 1, n)
+  if n == 1 then
+    flat_utf8_1[a] = v
+  elseif n == 2 then
+    if not flat_utf8_2[a] then
+      flat_utf8_2[a] = {}
+    end
+    flat_utf8_2[a][b] = v
+  elseif n == 3 then
+    if not flat_utf8_3[a] then
+      flat_utf8_3[a] = {}
+    end
+    if not flat_utf8_3[a][b] then
+      flat_utf8_3[a][b] = {}
+    end
+    flat_utf8_3[a][b][c] = v
+  else
+    assert(n == 4)
+    if not flat_utf8_4[a] then
+      flat_utf8_4[a] = {}
+    end
+    if not flat_utf8_4[a][b] then
+      flat_utf8_4[a][b] = {}
+    end
+    if not flat_utf8_4[a][b][c] then
+      flat_utf8_4[a][b][c] = {}
+    end
+    flat_utf8_4[a][b][c][d] = v
+  end
+end
+
+local out = assert(io.open("flat_utf8.lua", "w"))
+out:write("return", dumper.encode({
+  flat_utf8_1,
+  flat_utf8_2,
+  flat_utf8_3,
+  flat_utf8_4,
+}), "\n")
+out:close()
