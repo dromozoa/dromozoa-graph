@@ -39,10 +39,10 @@ local algorithms = {
   text_width4;
 }
 
-print(text_width(data))
-print(text_width2(data))
-print(text_width3(data))
-print(text_width4(data))
+-- print(text_width(data))
+-- print(text_width2(data))
+-- print(text_width3(data))
+-- print(text_width4(data))
 
 local benchmarks = {}
 
