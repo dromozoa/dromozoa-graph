@@ -16,8 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local utf8 = require "dromozoa.utf8"
-local east_asian_width = require "experimental.east_asian_width_utf8"
-local flat_utf8 = require "experimental.flat_utf8"
+local east_asian_width_lexer = require "experimental.east_asian_width_lexer"
 
 local width_map = {
   ["N"]  = 1; -- neutral
@@ -28,36 +27,101 @@ local width_map = {
   ["F"]  = 2; -- fullwidth
 }
 
+local accept_map = {
+  [1] = 1; -- neutral
+  [2] = 1; -- narrow
+  [3] = 1; -- halfwidth
+  [4] = 2; -- ambiguous
+  [5] = 2; -- wide
+  [6] = 2; -- fullwidth
+}
+
 local byte = string.byte
-local flat_utf8_1 = flat_utf8[1]
-local flat_utf8_2 = flat_utf8[2]
-local flat_utf8_3 = flat_utf8[3]
-local flat_utf8_4 = flat_utf8[4]
+
+local lexer = east_asian_width_lexer().lexers[1]
+local automaton = lexer.automaton
+local transitions = automaton.transitions
+local start_state = automaton.start_state
+local accept_states = automaton.accept_states
 
 return function (s)
-  local i = 1
+  local n = #s
   local w = 0
-  while true do
-    local a, b, c, d = byte(s, i, i + 3)
-    if not a then
-      return w
+  local state = start_state
+
+  for i = 4, n, 4 do
+    local a, b, c, d = byte(s, i - 3, i)
+    state = transitions[a][state]
+    local accept = accept_states[state]
+    if accept then
+      w = w + accept_map[accept]
+      state = start_state
     end
-    if a <= 0xDF then
-      if a <= 0x7F then
-        i = i + 1
-        w = w + width_map[flat_utf8_1[a]]
-      else
-        i = i + 2
-        w = w + width_map[flat_utf8_2[a][b]]
+    state = transitions[b][state]
+    local accept = accept_states[state]
+    if accept then
+      w = w + accept_map[accept]
+      state = start_state
+    end
+    state = transitions[c][state]
+    local accept = accept_states[state]
+    if accept then
+      w = w + accept_map[accept]
+      state = start_state
+    end
+    state = transitions[d][state]
+    local accept = accept_states[state]
+    if accept then
+      w = w + accept_map[accept]
+      state = start_state
+    end
+  end
+
+  local p = n + 1
+  local m = p - (p - 1) % 4
+  if m < p then
+    local a, b, c = byte(s, m, n)
+    if c then
+      state = transitions[a][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
+      end
+      state = transitions[b][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
+      end
+      state = transitions[c][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
+      end
+    elseif b then
+      state = transitions[a][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
+      end
+      state = transitions[b][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
       end
     else
-      if a <= 0xEF then
-        i = i + 3
-        w = w + width_map[flat_utf8_3[a][b][c]]
-      else
-        i = i + 4
-        w = w + width_map[flat_utf8_4[a][b][c][d]]
+      state = transitions[a][state]
+      local accept = accept_states[state]
+      if accept then
+        w = w + accept_map[accept]
+        state = start_state
       end
     end
   end
+
+  return w
 end
