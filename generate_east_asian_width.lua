@@ -426,25 +426,24 @@ for i = 1, #range do
   end
 end
 
-_:lexer()
-  :_ (patterns.N)  :as "N"
-  :_ (patterns.Na) :as "Na"
-  :_ (patterns.H)  :as "H"
-  :_ (patterns.A)  :as "A"
-  :_ (patterns.W)  :as "W"
-  :_ (patterns.F)  :as "F"
+-- _:lexer()
+--   :_ (patterns.N)  :as "N"
+--   :_ (patterns.Na) :as "Na"
+--   :_ (patterns.H)  :as "H"
+--   :_ (patterns.A)  :as "A"
+--   :_ (patterns.W)  :as "W"
+--   :_ (patterns.F)  :as "F"
+-- 
+-- local lexer = _:build()
+-- lexer:compile("east_asian_width_lexer.lua")
 
-local lexer = _:build()
-lexer:compile("east_asian_width_lexer.lua")
-
---[[
 io.stderr:write("construct nfa\n")
-local re_n  = regexp(patterns.n,  1):nfa_to_dfa():minimize()
-local re_na = regexp(patterns.na, 2):nfa_to_dfa():minimize()
-local re_h  = regexp(patterns.h,  3):nfa_to_dfa():minimize()
-local re_a  = regexp(patterns.a,  4):nfa_to_dfa():minimize()
-local re_w  = regexp(patterns.w,  5):nfa_to_dfa():minimize()
-local re_f  = regexp(patterns.f,  6):nfa_to_dfa():minimize()
+local re_n  = regexp(patterns.N,  1):nfa_to_dfa():minimize()
+local re_na = regexp(patterns.Na, 2):nfa_to_dfa():minimize()
+local re_h  = regexp(patterns.H,  3):nfa_to_dfa():minimize()
+local re_a  = regexp(patterns.A,  4):nfa_to_dfa():minimize()
+local re_w  = regexp(patterns.W,  5):nfa_to_dfa():minimize()
+local re_f  = regexp(patterns.F,  6):nfa_to_dfa():minimize()
 local nfa = re_n:union(re_na):union(re_h):union(re_a):union(re_w):union(re_f)
 
 io.stderr:write("nfa to dfa\n")
@@ -453,4 +452,3 @@ io.stderr:write("minimize dfa\n")
 local dfa = dfa:minimize()
 io.stderr:write("write dfa\n")
 dfa:write_graphviz("test.dot")
-]]
