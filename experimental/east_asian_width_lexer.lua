@@ -1,4 +1,3 @@
-local lexer = require "dromozoa.parser.lexer"
 local _ = {}
 _[1] = {}
 _[2] = {_[1],_[1],_[1],_[1],_[1],_[1]}
@@ -102,4 +101,4 @@ _[99] = {_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_[5],_
 _[100] = {accept_states=_[4],max_state=125,start_state=7,transitions=_[99]}
 _[101] = {accept_to_actions=_[2],accept_to_symbol=_[3],automaton=_[100]}
 _[102] = {_[101]}
-return function () return lexer(_[102]) end
+return function () return { lexers = _[102] } end
