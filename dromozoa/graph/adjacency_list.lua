@@ -19,7 +19,9 @@ local class = {}
 local metatable = { __index = class }
 
 function class:add_edge(eid, uid, vid)
-  local prev_eid = self.last[uid]
+  local last = self.last
+
+  local prev_eid = last[uid]
   if not prev_eid then
     self.first[uid] = eid
   else
@@ -27,7 +29,7 @@ function class:add_edge(eid, uid, vid)
     self.after[prev_eid] = eid
   end
 
-  self.last[uid] = eid
+  last[uid] = eid
   self.target[eid] = vid
 end
 

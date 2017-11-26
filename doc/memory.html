@@ -103,6 +103,32 @@ LP64/LLP64では、あきらかに\(3 S_a(n) \lt (S_t + 3 S_v) n\)が成立す�
 つまり、基本的な議論は前節に準じたものとなる。
 </div>
 
+<h2>DOM</h2>
+
+<div>
+MicroXMLが示したように、単純化されたDOMノードは名前と属性マップと子要素のリストで構成できる。
+Luaではひとつのテーブルで表現することもできる。
+</div>
+
+<h2>木構造</h2>
+
+<div>
+木構造の素朴な実装は、
+</div>
+
+<pre>template &lt;typename T&gt;
+struct node {
+  node* parent;
+  node* child;
+  node* next;
+  node* prev;
+  T value;
+};</pre>
+
+<div>
+のように与えられるので、リンクリストと同様に考察ができる。
+</div>
+
 <script type="text/x-mathjax-config">MathJax.Hub.Config({CommonHTML:{scale:90}});</script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
 </body>
