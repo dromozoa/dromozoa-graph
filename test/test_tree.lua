@@ -39,13 +39,13 @@ local function visit(t, uid)
 end
 visit(t, 1)
 
-assert(t:remove_node(3) == 4)
+assert(t:remove_node(1, 3) == 4)
 t:add_node(2, 3)
 
 print("--")
 visit(t, 1)
 
-t:insert_node(4, 8)
+t:insert_node(1, 4, 8)
 
 print("--")
 visit(t, 1)

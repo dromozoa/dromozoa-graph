@@ -30,15 +30,11 @@ function class:add_node(uid, vid)
   end
 
   last[uid] = vid
-  self.parent[vid] = uid
 end
 
-function class:insert_node(next_vid, vid)
+function class:insert_node(uid, next_vid, vid)
   local before = self.before
   local after = self.after
-  local parent = self.parent
-
-  local uid = parent[next_vid]
 
   local prev_vid = before[next_vid]
   if not prev_vid then
@@ -50,15 +46,11 @@ function class:insert_node(next_vid, vid)
 
   before[next_vid] = vid
   after[vid] = next_vid
-  parent[vid] = uid
 end
 
-function class:remove_node(vid)
+function class:remove_node(uid, vid)
   local before = self.before
   local after = self.after
-  local parent = self.parent
-
-  local uid = parent[vid]
 
   local prev_vid = before[vid]
   local next_vid = after[vid]
@@ -75,7 +67,6 @@ function class:remove_node(vid)
 
   before[vid] = nil
   after[vid] = nil
-  parent[vid] = nil
 
   return next_vid
 end
@@ -87,7 +78,6 @@ return setmetatable(class, {
       last = {};
       before = {};
       after = {};
-      parent = {};
     }, metatable)
   end;
 })
