@@ -15,37 +15,46 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local node_list = require "dromozoa.graph.node_list"
-
-local t = node_list()
-
-t:add_node(1, 2)
-t:add_node(1, 3)
-t:add_node(1, 4)
-t:add_node(3, 5)
-t:add_node(3, 6)
-t:add_node(4, 7)
+local tree = require "dromozoa.graph.tree"
 
 local function visit(t, uid)
-  local after = t.after
-
-  local vid = t.first[uid]
+  local uv = t.uv
+  local after = uv.after
+  local vid = uv.first[uid]
   while vid do
     visit(t, vid)
     vid = after[vid]
   end
-
   print(uid)
 end
+
+local t = tree()
+
+local n1 = t:add_vertex()
+local n2 = t:add_vertex()
+local n3 = t:add_vertex()
+local n4 = t:add_vertex()
+local n5 = t:add_vertex()
+local n6 = t:add_vertex()
+local n7 = t:add_vertex()
+
+t:add_edge(n1, n2)
+t:add_edge(n1, n3)
+t:add_edge(n1, n4)
+t:add_edge(n3, n5)
+t:add_edge(n3, n6)
+t:add_edge(n4, n7)
+
 visit(t, 1)
 
-assert(t:remove_node(1, 3) == 4)
-t:add_node(2, 3)
+assert(t:remove_edge(n1, n3) == n4)
+t:add_edge(n2, n3)
 
 print("--")
 visit(t, 1)
 
-t:insert_node(1, 4, 8)
+local n8 = t:add_vertex()
+t:insert_edge(n4, n8)
 
 print("--")
 visit(t, 1)
