@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
+local edge_list = require "dromozoa.graph.edge_list"
 local linked_list = require "dromozoa.graph.linked_list"
 
 local class = {}
@@ -90,8 +90,8 @@ return setmetatable(class, {
     return setmetatable({
       u = linked_list();
       e = linked_list();
-      uv = adjacency_list();
-      vu = adjacency_list();
+      uv = edge_list();
+      vu = edge_list();
     }, metatable)
   end;
 })

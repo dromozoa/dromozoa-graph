@@ -15,10 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local adjacency_list = require "dromozoa.graph.adjacency_list"
+local edge_list = require "dromozoa.graph.edge_list"
 -- local depth_first_search = require "dromozoa.graph.depth_first_search"
 
-local g = adjacency_list()
+local g = edge_list()
 
 g:add_edge(1, 1, 2)
 g:add_edge(2, 2, 3)
@@ -53,7 +53,7 @@ assert(g:degree(1) == 0)
 assert(g:degree(2) == 0)
 assert(g:degree(3) == 0)
 
-local g = adjacency_list()
+local g = edge_list()
 
 g:add_edge(1, 1, 2)
 assert(g:remove_edge(1, 1) == nil)
