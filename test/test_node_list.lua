@@ -15,9 +15,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local tree = require "dromozoa.graph.tree"
+local node_list = require "dromozoa.graph.node_list"
 
-local t = tree()
+local t = node_list()
 
 t:add_node(1, 2)
 t:add_node(1, 3)
