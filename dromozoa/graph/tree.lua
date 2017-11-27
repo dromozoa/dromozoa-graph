@@ -65,10 +65,13 @@ function class:insert_edge(next_vid, vid)
   vu[vid] = uid
 end
 
-function class:remove_edge(uid, vid)
+function class:remove_edge(vid)
   local uv = self.uv
   local uv_before = uv.before
   local uv_after = uv.after
+  local vu = self.vu
+
+  local uid = vu[vid]
 
   local prev_vid = uv_before[vid]
   local next_vid = uv_after[vid]
@@ -85,7 +88,7 @@ function class:remove_edge(uid, vid)
 
   uv_before[vid] = nil
   uv_after[vid] = nil
-  self.vu[vid] = nil
+  vu[vid] = nil
 
   return next_vid
 end

@@ -17,15 +17,15 @@
 
 local tree = require "dromozoa.graph.tree"
 
-local function visit(t, uid)
+local function visit(t, data, uid)
   local uv = t.uv
   local after = uv.after
   local vid = uv.first[uid]
   while vid do
-    visit(t, vid)
+    visit(t, data, vid)
     vid = after[vid]
   end
-  print(uid)
+  data[#data + 1] = uid
 end
 
 local t = tree()
@@ -40,23 +40,66 @@ local n7 = t:add_vertex()
 
 t:add_edge(n1, n2)
 t:add_edge(n1, n3)
-t:add_edge(n1, n4)
-t:add_edge(n3, n5)
+t:add_edge(n2, n4)
+t:add_edge(n2, n5)
 t:add_edge(n3, n6)
-t:add_edge(n4, n7)
+t:add_edge(n3, n7)
 
-visit(t, 1)
+assert(t.uv.first[n1] == n2)
+assert(t.uv.last[n1] == n3)
+assert(t.uv.after[n1] == nil)
+assert(t.uv.after[n2] == n3)
+assert(t.uv.after[n3] == nil)
+assert(t.uv.before[n1] == nil)
+assert(t.uv.before[n2] == nil)
+assert(t.uv.before[n3] == n2)
+assert(t.vu[n1] == nil)
+assert(t.vu[n2] == n1)
+assert(t.vu[n3] == n1)
 
-assert(t:remove_edge(n1, n3) == n4)
-t:add_edge(n2, n3)
+assert(t:remove_edge(n2) == n3)
 
-print("--")
-visit(t, 1)
+assert(t.uv.first[n1] == n3)
+assert(t.uv.last[n1] == n3)
+assert(t.uv.after[n1] == nil)
+assert(t.uv.after[n2] == nil)
+assert(t.uv.after[n3] == nil)
+assert(t.uv.before[n1] == nil)
+assert(t.uv.before[n2] == nil)
+assert(t.uv.before[n3] == nil)
+assert(t.vu[n1] == nil)
+assert(t.vu[n2] == nil)
+assert(t.vu[n3] == n1)
 
-local n8 = t:add_vertex()
-t:insert_edge(n4, n8)
+assert(t:remove_edge(n3) == nil)
 
-print("--")
-visit(t, 1)
+assert(t.uv.first[n1] == nil)
+assert(t.uv.last[n1] == nil)
+assert(t.uv.after[n1] == nil)
+assert(t.uv.after[n2] == nil)
+assert(t.uv.after[n3] == nil)
+assert(t.uv.before[n1] == nil)
+assert(t.uv.before[n2] == nil)
+assert(t.uv.before[n3] == nil)
+assert(t.vu[n1] == nil)
+assert(t.vu[n2] == nil)
+assert(t.vu[n3] == nil)
 
+t:add_edge(n1, n2)
+t:insert_edge(n2, n3)
 
+local data = {}
+visit(t, data, 1)
+assert(table.concat(data, " ") == "6 7 3 4 5 2 1")
+
+assert(t.uv.first[n1] == n3)
+assert(t.uv.last[n1] == n2)
+assert(t.uv.after[n1] == nil)
+assert(t.uv.after[n2] == nil)
+assert(t.uv.after[n3] == n2)
+assert(t.uv.before[n1] == nil)
+assert(t.uv.before[n2] == n3)
+assert(t.uv.before[n3] == nil)
+assert(t.vu[n1] == nil)
+assert(t.vu[n2] == n1)
+assert(t.vu[n3] == n1)
