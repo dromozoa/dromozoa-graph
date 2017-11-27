@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local linked_list = require "dromozoa.graph.linked_list"
+
 local class = {}
 local metatable = { __index = class }
 
