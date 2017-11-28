@@ -17,14 +17,15 @@
 
 local void_elements = require "dromozoa.graph.dom.void_elements"
 
--- https://www.w3.org/TR/html52/syntax.html#escaping-a-string
+-- https://www.w3.org/TR/DOM-Parsing/
+
+-- https://www.w3.org/TR/DOM-Parsing/#dfn-concept-serialize-attr-value
 local char_table = {
   ["&"] = "&amp;";
   ["\""] = "&quot;";
   ["<"] = "&lt;";
   [">"] = "&gt;";
 }
-local nbsp = string.char(0xC2, 0xA0) -- U+00A0 NO-BREAK SPACE
 
 local function serialize_html5(out, u)
   local name = u[0]
@@ -48,18 +49,20 @@ local function serialize_html5(out, u)
   out:write("<", name)
   for i = 1, n do
     local k = keys[i]
-    out:write(" ", k, "=\"", (u[k]:gsub("[&\"]", char_table):gsub(nbsp, "&nbsp;")), "\"")
+    out:write(" ", k, "=\"", (u[k]:gsub("[&\"]", char_table)), "\"")
   end
-  out:write(">")
 
-  if not void_elements[name] then
+  if void_elements[name] then
+    out:write("/>")
+  else
+    out:write(">")
     for i = 1, m do
       local v = u[i]
       local t = type(v)
       if t == "number" then
         out:write(("%.17g"):format(v))
       elseif t == "string" then
-        out:write((v:gsub("[&<>]", char_table):gsub(nbsp, "&nbsp;")))
+        out:write((v:gsub("[&<>]", char_table)))
       elseif t == "table" then
         serialize_html5(out, v)
       end

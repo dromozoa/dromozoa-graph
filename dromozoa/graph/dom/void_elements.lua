@@ -15,23 +15,23 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
--- local document = require "dromozoa.graph.dom.document"
-local element = require "dromozoa.graph.dom.element"
-local serialize_html5 = require "dromozoa.graph.dom.serialize_html5"
-local serialize_xml = require "dromozoa.graph.dom.serialize_xml"
-
-local _ = element
-
-local element = _"div" {
-  foo = "bar";
-  baz = "qux";
-  "foo bar baz";
-  _"strong" { "bold< >?" };
-  _"b" { _"u" { "foo" } };
-  _"f" { 1, " ", 2, " ", 4 / 2 };
-  _"img" { src = "test.png", alt = "代替" };
-  _"script" { src = "test.js" };
-  _"br";
+-- https://www.w3.org/TR/html5/syntax.html#void-elements
+-- https://www.w3.org/TR/html51/syntax.html#void-elements
+-- https://www.w3.org/TR/html52/syntax.html#void-elements
+return {
+  area = true;
+  base = true;
+  br = true;
+  col = true;
+  embed = true;
+  hr = true;
+  img = true;
+  input = true;
+  keygen = true; -- removed from HTML 5.2
+  link = true;
+  meta = true;
+  param = true;
+  source = true;
+  track = true;
+  wbr = true;
 }
-serialize_html5(io.stdout, element)
-io.write("\n")
