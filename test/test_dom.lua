@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 -- local document = require "dromozoa.graph.dom.document"
-local utf8 = require "dromozoa.utf8"
 local element = require "dromozoa.graph.dom.element"
 local serialize_html5 = require "dromozoa.graph.dom.serialize_html5"
 
@@ -34,26 +33,3 @@ local element = _"div" {
 }
 serialize_html5(io.stdout, element)
 io.write("\n")
-
--- local element = doc:create_element("div")
--- element:set_attribute("foo", "bar")
--- element:set_attribute("baz", "qux")
--- element:append_child(doc:create_text_node "foo bar baz")
--- element:serialize_html5(io.stdout)
--- io.write("\n")
-
--- doc:create_text_node("<foo\194\160>"):serialize_html5(io.stdout)
--- io.write("\n")
-
--- local element = _"div" {
---   class = "foo bar baz";
---   "foo";
---   "bar";
---   "baz";
--- }
-
--- _"div"
---   + _("class", "foo bar")
---   + _("style", "display: none")
---   + "text node"
-
