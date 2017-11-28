@@ -15,10 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local void_elements = require "dromozoa.graph.dom.void_elements"
-
--- https://www.w3.org/TR/DOM-Parsing/
-
 -- https://www.w3.org/TR/DOM-Parsing/#dfn-concept-serialize-attr-value
 local char_table = {
   ["&"] = "&amp;";
@@ -27,7 +23,7 @@ local char_table = {
   [">"] = "&gt;";
 }
 
-local function serialize_html5(out, u)
+local function serialize_xml(out, u)
   local name = u[0]
 
   local keys = {}
@@ -49,10 +45,14 @@ local function serialize_html5(out, u)
   out:write("<", name)
   for i = 1, n do
     local k = keys[i]
-    out:write(" ", k, "=\"", (u[k]:gsub("[&\"]", char_table)), "\"")
+    local v = u[k]
+    if type(v) == "number" then
+      v = ("%.17g"):format(v)
+    end
+    out:write(" ", k, "=\"", (v:gsub("[&\"]", char_table)), "\"")
   end
 
-  if void_elements[name] then
+  if m == 0 then
     out:write("/>")
   else
     out:write(">")
@@ -64,11 +64,11 @@ local function serialize_html5(out, u)
       elseif t == "string" then
         out:write((v:gsub("[&<>]", char_table)))
       elseif t == "table" then
-        serialize_html5(out, v)
+        serialize_xml(out, v)
       end
     end
     out:write("</", name, ">")
   end
 end
 
-return serialize_html5
+return serialize_xml

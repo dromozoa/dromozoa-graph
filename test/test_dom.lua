@@ -15,10 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
--- local document = require "dromozoa.graph.dom.document"
 local element = require "dromozoa.graph.dom.element"
 local serialize_html5 = require "dromozoa.graph.dom.serialize_html5"
-local serialize_xml = require "dromozoa.graph.dom.serialize_xml"
 
 local _ = element
 
