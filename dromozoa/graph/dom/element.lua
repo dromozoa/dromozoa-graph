@@ -18,8 +18,16 @@
 local class = {}
 local metatable = { __index = class }
 
+local name_pattern = "^[:A-Z_a-z\128-\255][:A-Z_a-z%-.0-9\128-\255]*$"
+
 function metatable:__call(t)
   for k, v in pairs(t) do
+    local t = type(k)
+    if k == "string" then
+      if not k:find(name_pattern) then
+        error "invalid name"
+      end
+    end
     self[k] = v
   end
   return self
@@ -27,6 +35,9 @@ end
 
 return setmetatable(class, {
   __call = function (_, name)
+    if not name:find(name_pattern) then
+      error "invalid name"
+    end
     return setmetatable({ [0] = name }, metatable)
   end;
 })

@@ -17,11 +17,10 @@
 
 -- local document = require "dromozoa.graph.dom.document"
 local utf8 = require "dromozoa.utf8"
-local builder = require "dromozoa.graph.dom.builder"
 local element = require "dromozoa.graph.dom.element"
 local serialize_html5 = require "dromozoa.graph.dom.serialize_html5"
 
-local _ = builder()
+local _ = element
 
 -- print(doc:create_element "div")
 
