@@ -21,7 +21,8 @@ local class = {}
 local metatable = { __index = class }
 
 function metatable:__call(name)
-  return self.doc:create_element(name)
+  -- return self.doc:create_element(name)
+  return element(name)
 end
 
 return setmetatable(class, {

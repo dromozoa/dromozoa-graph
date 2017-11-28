@@ -15,10 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local document = require "dromozoa.graph.dom.document"
+-- local document = require "dromozoa.graph.dom.document"
+local utf8 = require "dromozoa.utf8"
+local builder = require "dromozoa.graph.dom.builder"
+local element = require "dromozoa.graph.dom.element"
+local serialize_html5 = require "dromozoa.graph.dom.serialize_html5"
 
-local doc = document()
-local _ = doc:builder()
+local _ = builder()
 
 -- print(doc:create_element "div")
 
@@ -26,18 +29,22 @@ local element = _"div" {
   foo = "bar";
   baz = "qux";
   "foo bar baz";
-  _"strong" { "bold?" };
+  _"strong" { "bold< >?" };
+  _"b" { _"u" { "foo" } };
+  _"f" { 1, " ", 2, " ", 4 / 2 };
 }
+serialize_html5(io.stdout, element)
+io.write("\n")
 
 -- local element = doc:create_element("div")
 -- element:set_attribute("foo", "bar")
 -- element:set_attribute("baz", "qux")
 -- element:append_child(doc:create_text_node "foo bar baz")
-element:serialize_html5(io.stdout)
-io.write("\n")
+-- element:serialize_html5(io.stdout)
+-- io.write("\n")
 
-doc:create_text_node("<foo\194\160>"):serialize_html5(io.stdout)
-io.write("\n")
+-- doc:create_text_node("<foo\194\160>"):serialize_html5(io.stdout)
+-- io.write("\n")
 
 -- local element = _"div" {
 --   class = "foo bar baz";
