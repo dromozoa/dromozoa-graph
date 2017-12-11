@@ -15,8 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local element = require "dromozoa.graph.dom.element"
-local serialize_xml = require "dromozoa.graph.dom.serialize_xml"
+local element = require "dromozoa.dom.element"
+local xml_document = require "dromozoa.dom.xml_document"
 
 local _ = element
 
@@ -42,5 +42,6 @@ local svg = _"svg" {
     "ABC日本語";
   };
 }
-serialize_xml(io.stdout, svg)
+local doc = xml_document(svg)
+doc:serialize(io.stdout)
 io.write("\n")
