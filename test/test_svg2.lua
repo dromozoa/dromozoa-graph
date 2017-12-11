@@ -117,9 +117,6 @@ while uid do
   uid = g.u.after[uid]
 end
 
-io.stderr:write(gw, "\n")
-io.stderr:write(gh, "\n")
-
 local unit = 16
 local sqrt2 = math.sqrt(2)
 local rect_w = text_width * unit
