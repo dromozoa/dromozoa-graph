@@ -147,10 +147,10 @@ while eid do
   local vid = g.uv.target[eid]
 
   edges[#edges + 1] = _"line" {
-    x1 = calc_x(x[uid]);
-    y1 = calc_y(layer_map[uid]);
-    x2 = calc_x(x[vid]);
-    y2 = calc_y(layer_map[vid]);
+    y1 = calc_x(x[uid]);
+    x1 = calc_y(layer_map[uid]);
+    y2 = calc_x(x[vid]);
+    x2 = calc_y(layer_map[vid]);
     stroke = "black";
   }
   eid = g.e.after[eid]
