@@ -16,9 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local clone = require "dromozoa.graph.clone"
 local longest_path = require "dromozoa.graph.longest_path"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
+local clone = require "test.clone"
 
 local function check(result, expect)
   local n = #result

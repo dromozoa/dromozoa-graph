@@ -27,7 +27,7 @@ local function preprocessing(g, layer, index_map, dummy_uid)
 
   local mark = {}
 
-  if layer_max < 3 then
+  if not dummy_uid or layer_max < 3 then
     return mark
   end
 
