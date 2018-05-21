@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -17,9 +17,13 @@
 
 local binary_heap = require "dromozoa.graph.binary_heap"
 
+local verbose = os.getenv "VERBOSE" == "1"
+
 local function check(x, expect)
-  -- print("result", table.concat(x.heap, " "))
-  -- print("expect", table.concat(expect, " "))
+  if verbose then
+    print("result", table.concat(x.heap, " "))
+    print("expect", table.concat(expect, " "))
+  end
   local n = #expect
   assert(n == x.n)
   assert(n == #x.heap)
@@ -81,7 +85,7 @@ x:push(1, 1)
 assert(x.n == 1)
 assert(x:pop() == 1)
 assert(x.n == 0)
-assert(x:pop() == nil)
+assert(not x:pop())
 assert(x.n == 0)
 
 local x = binary_heap()
