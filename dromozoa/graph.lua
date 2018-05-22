@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -34,6 +34,12 @@ function class:add_edge(uid, vid)
   self.uv:add_edge(eid, uid, vid)
   self.vu:add_edge(eid, vid, uid)
   return eid
+end
+
+function class:set_edge(eid, uid, vid)
+  self.e:add(eid)
+  self.uv:add_edge(eid, uid, vid)
+  self.vu:add_edge(eid, vid, uid)
 end
 
 function class:remove_edge(eid)

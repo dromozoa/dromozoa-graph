@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,19 +16,41 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local layer_assignment = require "dromozoa.graph.layer_assignment.longest_path"
-local property_map = require "dromozoa.graph.property_map"
+local write_dot = require "write_dot"
 
-local read = require "test.read"
+local function check(uv, uid, expect)
+  local n = #expect
 
-local filename = ...
+  local result = {}
+  local eid = uv.first[uid]
+  while eid do
+    result[#result + 1] = uv.target[eid]
+    eid = uv.after[eid]
+  end
+  assert(n == #result)
+  for i = 1, n do
+    assert(result[i] == expect[i])
+  end
+end
 
 local g = graph()
-local n = read(g, filename)
 
-local vp = property_map()
-layer_assignment(g, vp)
+local u1 = g:add_vertex()
+local u2 = g:add_vertex()
+local u3 = g:add_vertex()
 
-for i = 1, n do
-  print(i, vp:get("layer", i))
-end
+local e1 = g:add_edge(u1, u2)
+local e2 = g:add_edge(u1, u2)
+local e3 = g:add_edge(u2, u3)
+local e4 = g:add_edge(u3, u1)
+
+write_dot("test1.dot", g)
+
+g:reverse_edge(e2, u2, u1)
+
+write_dot("test2.dot", g)
+
+g:remove_edge(e2)
+g:set_edge(e2, u1, u1)
+
+write_dot("test3.dot", g)

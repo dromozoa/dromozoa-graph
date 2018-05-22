@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,25 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function bench_test(n)
-  collectgarbage()
-  collectgarbage()
-  local count1 = collectgarbage "count"
-
-  local t = {}
-  for i = 1, n do
-    t[i] = math.random(n)
+return function (filename, g)
+  local out = assert(io.open(filename, "w"))
+  out:write "digraph {\n"
+  local uid = g.u.first
+  while uid do
+    local eid = g.uv.first[uid]
+    while eid do
+      local vid = g.uv.target[eid]
+      out:write(uid, "->", vid, "[label=", eid, "];\n")
+      eid = g.uv.after[eid]
+    end
+    uid = g.u.after[uid]
   end
-
-  collectgarbage()
-  collectgarbage()
-  local count2 = collectgarbage "count"
-
-  print(("%d\t%d"):format(n, (count2 - count1) * 1024))
-end
-
-for i = 1, 48 do
-  local n = 2^(i * 0.25 + 8)
-  n = n - n % 1
-  bench_test(n)
+  out:write "}\n"
+  out:close()
 end

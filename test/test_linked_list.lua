@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -26,6 +26,14 @@ local function check(source, expect)
     i = i + 1
     assert(id == expect[i])
     id = after[id]
+  end
+  local i = source.n + 1
+  local id = source.last
+  local before = source.before
+  while id do
+    i = i - 1
+    assert(id == expect[i])
+    id = before[id]
   end
 end
 
@@ -57,3 +65,18 @@ check(x, { 5 })
 
 assert(x:add() == 6)
 check(x, { 5, 6 })
+
+assert(x:add(42) == 42)
+check(x, { 5, 6, 42 })
+
+assert(x:add() == 43)
+check(x, { 5, 6, 42, 43 })
+
+assert(x:add(4) == 4)
+check(x, { 5, 6, 42, 43, 4 })
+
+assert(x:remove(42) == 43)
+check(x, { 5, 6, 43, 4 })
+
+assert(x:add(42) == 42)
+check(x, { 5, 6, 43, 4, 42 })

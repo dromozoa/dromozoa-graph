@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -18,17 +18,23 @@
 local class = {}
 local metatable = { __index = class }
 
-function class:add()
-  local id = self.id + 1
-  self.id = id
+function class:add(id)
+  if id then
+    if self.id < id then
+      self.id = id
+    end
+  else
+    id = self.id + 1
+    self.id = id
+  end
   self.n = self.n + 1
 
   local prev_id = self.last
-  if not prev_id then
-    self.first = id
-  else
+  if prev_id then
     self.before[id] = prev_id
     self.after[prev_id] = id
+  else
+    self.first = id
   end
 
   self.last = id
@@ -45,11 +51,11 @@ function class:insert(next_id)
   local after = self.after
 
   local prev_id = before[next_id]
-  if not prev_id then
-    self.first = id
-  else
+  if prev_id then
     before[id] = prev_id
     after[prev_id] = id
+  else
+    self.first = id
   end
 
   before[next_id] = id
@@ -66,15 +72,15 @@ function class:remove(id)
 
   local prev_id = before[id]
   local next_id = after[id]
-  if not prev_id then
-    self.first = next_id
-  else
+  if prev_id then
     after[prev_id] = next_id
-  end
-  if not next_id then
-    self.last = prev_id
   else
+    self.first = next_id
+  end
+  if next_id then
     before[next_id] = prev_id
+  else
+    self.last = prev_id
   end
 
   before[id] = nil

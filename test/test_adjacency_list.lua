@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
--- local depth_first_search = require "dromozoa.graph.depth_first_search"
 
 local g = adjacency_list()
 
@@ -31,8 +30,8 @@ local eid = g.after[eid]
 assert(eid == 3)
 assert(g.target[eid] == 4)
 local eid = g.after[eid]
-assert(eid == nil)
-assert(g.target[eid] == nil)
+assert(not eid)
+assert(not g.target[eid])
 
 assert(g:degree(1) == 1)
 assert(g:degree(2) == 2)
@@ -56,17 +55,17 @@ assert(g:degree(3) == 0)
 local g = adjacency_list()
 
 g:add_edge(1, 1, 2)
-assert(g:remove_edge(1, 1) == nil)
+assert(not g:remove_edge(1, 1))
 
 g:add_edge(1, 1, 2)
 g:add_edge(2, 1, 3)
 assert(g:remove_edge(1, 1) == 2)
-assert(g:remove_edge(2, 1) == nil)
+assert(not g:remove_edge(2, 1))
 
 g:add_edge(1, 1, 2)
 g:add_edge(2, 1, 3)
-assert(g:remove_edge(2, 1) == nil)
-assert(g:remove_edge(1, 1) == nil)
+assert(not g:remove_edge(2, 1))
+assert(not g:remove_edge(1, 1))
 
 g:add_edge(1, 1, 2)
 g:insert_edge(1, 2, 1, 3)
@@ -74,11 +73,11 @@ g:insert_edge(1, 3, 1, 4)
 assert(g.first[1] == 2)
 assert(g.after[2] == 3)
 assert(g.after[3] == 1)
-assert(g.after[1] == nil)
+assert(not g.after[1])
 assert(g.last[1] == 1)
 assert(g.before[1] == 3)
 assert(g.before[3] == 2)
-assert(g.before[2] == nil)
+assert(not g.before[2])
 assert(g.target[1] == 2)
 assert(g.target[2] == 3)
 assert(g.target[3] == 4)
