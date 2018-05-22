@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -18,7 +18,9 @@
 local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
 
--- https://www.slideshare.net/nikolovn/gd-2001-ver2
+local verbose = os.getenv "VERBOSE" == "1"
+
+-- https://www.slideshare.net/nikolovn/gd-2001-ver2#7
 local g = graph()
 for i = 1, 22 do
   g:add_vertex()
@@ -58,13 +60,17 @@ local expect_layering = {
 }
 
 local result = longest_path(g)
--- print(table.concat(result, " "))
+if verbose then
+  print(table.concat(result, " "))
+end
 
 for layer = 1, #expect_layering do
   local layering = expect_layering[layer]
   for i = 1, #layering do
     local uid = layering[i]
-    -- print(uid, layer, result[uid])
+    if verbose then
+      print(uid, layer, result[uid])
+    end
     assert(result[uid] == layer)
   end
 end
