@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -18,7 +18,7 @@
 local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
-local clone = require "test.clone"
+local clone = require "clone"
 
 local function check(result, expect)
   local n = #result
@@ -43,7 +43,6 @@ local layer_map1 = longest_path(g)
 check(layer_map1, { 4, 3, 2, 1, 1, 1, 1 })
 
 local layer_map2 = vertex_promotion(g, layer_map1)
--- print(table.concat(layer_map2, " "))
 check(layer_map2, { 4, 3, 2, 1, 1, 2, 3 })
 
 -- Fig.6
