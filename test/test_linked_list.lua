@@ -65,3 +65,18 @@ check(x, { 5 })
 
 assert(x:add() == 6)
 check(x, { 5, 6 })
+
+assert(x:add(42) == 42)
+check(x, { 5, 6, 42 })
+
+assert(x:add() == 43)
+check(x, { 5, 6, 42, 43 })
+
+assert(x:add(4) == 4)
+check(x, { 5, 6, 42, 43, 4 })
+
+assert(x:remove(42) == 43)
+check(x, { 5, 6, 43, 4 })
+
+assert(x:add(42) == 42)
+check(x, { 5, 6, 43, 4, 42 })

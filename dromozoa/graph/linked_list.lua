@@ -18,9 +18,15 @@
 local class = {}
 local metatable = { __index = class }
 
-function class:add()
-  local id = self.id + 1
-  self.id = id
+function class:add(id)
+  if id then
+    if self.id < id then
+      self.id = id
+    end
+  else
+    id = self.id + 1
+    self.id = id
+  end
   self.n = self.n + 1
 
   local prev_id = self.last
