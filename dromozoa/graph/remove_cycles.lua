@@ -181,15 +181,15 @@ return function (g)
 
   local e = g.e
   local e_after = e.after
-  local source = g.vu.target
-  local target = g.uv.target
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
   local reverse_eids = {}
   local n = 0
 
   local eid = e.first
   while eid do
-    if order_map[source[eid]] > order_map[target[eid]] then
+    if order_map[uv_target[eid]] < order_map[vu_target[eid]] then
       n = n + 1
       reverse_eids[n] = eid
     end

@@ -18,8 +18,8 @@
 return function (g)
   local e = g.e
   local e_after = e.after
-  local source = g.vu.target
-  local target = g.uv.target
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
   local remove_eids = {}
   local remove_uids = {}
@@ -27,8 +27,8 @@ return function (g)
 
   local eid = e.first
   while eid do
-    local uid = source[eid]
-    if uid == target[eid] then
+    local uid = vu_target[eid]
+    if uid == uv_target[eid] then
       n = n + 1
       remove_eids[n] = eid
       remove_uids[n] = uid
