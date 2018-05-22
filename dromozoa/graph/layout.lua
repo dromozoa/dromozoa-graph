@@ -61,8 +61,8 @@ return function (g)
   local layer = initialize_layer(g, layer_map)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
 
-  -- undo reverse
-  -- undo remove
+  -- restore reverse
+  -- restore removed edge
 
   return dummy_min, layer_map, x
 end

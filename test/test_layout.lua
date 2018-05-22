@@ -83,12 +83,23 @@ while eid do
   local y1 = calc_y(layer_map[uid])
   local x2 = calc_x(x[vid])
   local y2 = calc_y(layer_map[vid])
+  local x3 = (x1 + x2) * 0.5
+  local y3 = (y1 + y2) * 0.5
+  --[[
   svg[#svg + 1] = _"line" {
     x1 = x1;
     y1 = y1;
     x2 = x2;
     y2 = y2;
     stroke = colors.black;
+    fill = "none";
+    ["marker-end"] = "url(#triangle)";
+  }
+  ]]
+  svg[#svg + 1] = _"path" {
+    d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
+    stroke = colors.black;
+    fill = "none";
     ["marker-end"] = "url(#triangle)";
   }
   eid = g.e.after[eid]
