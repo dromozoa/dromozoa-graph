@@ -28,25 +28,28 @@ local function remove_loop_edges(g)
   local source = g.vu.target
   local target = g.uv.target
 
-  local remove = {}
+  local remove_eids = {}
+  local remove_uids = {}
   local n = 0
 
   local eid = e.first
   while eid do
-    if source[eid] == target[eid] then
+    local uid = source[eid]
+    if uid == target[eid] then
       n = n + 1
-      remove[n] = eid
+      remove_eids[n] = eid
+      remove_uids[n] = uid
     end
     eid = e_after[eid]
   end
 
-  return remove
+  return remove_eids, remove_uids
 end
 
 return function (g)
-  local remove = remove_loop_edges(g)
-  for i = 1, #remove do
-    g:remove_edge(remove[i])
+  local remove_eids, remove_uids = remove_loop_edges(g)
+  for i = 1, #remove_eids do
+    g:remove_edge(remove_eids[i])
   end
 
   -- remove multi-edges
@@ -63,6 +66,11 @@ return function (g)
 
   -- restore reverse
   -- restore removed edge
+
+  for i = 1, #remove_eids do
+    local uid = remove_uids[i]
+    g:set_edge(remove_eids[i], uid, uid)
+  end
 
   return dummy_min, layer_map, x
 end
