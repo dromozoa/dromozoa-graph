@@ -25,16 +25,10 @@ local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
 return function (g)
   local removed_eids, removed_uids = remove_self_edges(g)
-
   local reversed_eids = remove_cycles(g)
-  local reverse_set = {}
-  for i = 1, #reversed_eids do
-    local eid = reversed_eids[i]
-    reverse_set[eid] = true
-  end
 
   local layer_map = vertex_promotion(g, longest_path(g))
-  local dummy_min = introduce_dummy_vertices(g, layer_map, reversed_eids, reverse_set)
+  local dummy_min = introduce_dummy_vertices(g, layer_map, reversed_eids)
   local layer = initialize_layer(g, layer_map)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
 
