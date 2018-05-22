@@ -34,12 +34,11 @@ local e4 = g:add_edge(u3, u4)
 local e5 = g:add_edge(u4, u2)
 
 write_dot("test1.dot", g)
-
 local reverse = remove_cycles(g)
+write_dot("test2.dot", g)
+
 assert(#reverse == 1)
 assert(reverse[1] == e2)
-
-write_dot("test2.dot", g)
 
 local g = graph()
 local u = g:add_vertex()
@@ -54,8 +53,8 @@ for i = 1, N do
 end
 
 write_dot("test3.dot", g)
-
 local reverse = remove_cycles(g)
+write_dot("test4.dot", g)
 
 if N % 2 == 0 then
   local n = N / 2
@@ -71,5 +70,3 @@ else
     assert(reverse[i] == i * 4 - 4)
   end
 end
-
-write_dot("test4.dot", g)
