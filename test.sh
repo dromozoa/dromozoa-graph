@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-LUA_PATH="?.lua;;"
+LUA_PATH="test/?.lua;?.lua;;"
 export LUA_PATH
 
 for i in test/test*.lua
@@ -27,6 +27,8 @@ do
     *) "$@" "$i";;
   esac
 done
+
+rm -f test*.dot
 
 # (cd test && make)
 

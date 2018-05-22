@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -17,6 +17,7 @@
 
 local graph = require "dromozoa.graph"
 local greedy_cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
+local write_dot = require "write_dot"
 
 local N = ...
 local N = tonumber(N or 6)
@@ -32,9 +33,17 @@ local e3 = g:add_edge(u3, u1)
 local e4 = g:add_edge(u3, u4)
 local e5 = g:add_edge(u4, u2)
 
+write_dot("test1.dot", g)
+
 local reverse = greedy_cycle_removal(g)
 assert(#reverse == 1)
 assert(reverse[1] == e2)
+
+for i = 1, #reverse do
+  g:reverse_edge(reverse[1])
+end
+
+write_dot("test2.dot", g)
 
 local g = graph()
 local u = g:add_vertex()
