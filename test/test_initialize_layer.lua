@@ -36,7 +36,7 @@ g:add_edge(4, 5)
 g:add_edge(1, 5)
 
 local layer_map = longest_path(g)
-local dummy_min = introduce_dummy_vertices(g, layer_map)
+local dummy_min = introduce_dummy_vertices(g, layer_map, {})
 local layer = initialize_layer(g, layer_map)
 
 assert(table.concat(layer[4], " ") == "1")

@@ -41,7 +41,7 @@ assert(layer_map[u3] == 2)
 assert(layer_map[u4] == 2)
 assert(layer_map[u5] == 1)
 
-local dummy_min = introduce_dummy_vertices(g, layer_map)
+local dummy_min = introduce_dummy_vertices(g, layer_map, {})
 
 assert(dummy_min == 6)
 assert(g.u.last == 8)

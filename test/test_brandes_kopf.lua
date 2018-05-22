@@ -131,7 +131,7 @@ for i = 1, #layer do
   end
 end
 
-local dummy_uid = introduce_dummy_vertices(g, layer_map)
+local dummy_uid = introduce_dummy_vertices(g, layer_map, {})
 
 local layer = initialize_layer(g, layer_map)
 

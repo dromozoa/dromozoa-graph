@@ -17,10 +17,8 @@
 
 return function (g, layer_map, reversed_eids)
   local reverse_set = {}
-  if reversed_eids then
-    for i = 1, #reversed_eids do
-      reverse_set[reversed_eids[i]] = true
-    end
+  for i = 1, #reversed_eids do
+    reverse_set[reversed_eids[i]] = true
   end
 
   local u = g.u
