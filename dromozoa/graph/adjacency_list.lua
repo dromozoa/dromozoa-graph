@@ -22,11 +22,11 @@ function class:add_edge(eid, uid, vid)
   local last = self.last
 
   local prev_eid = last[uid]
-  if not prev_eid then
-    self.first[uid] = eid
-  else
+  if prev_eid then
     self.before[eid] = prev_eid
     self.after[prev_eid] = eid
+  else
+    self.first[uid] = eid
   end
 
   last[uid] = eid
@@ -38,11 +38,11 @@ function class:insert_edge(next_eid, eid, uid, vid)
   local after = self.after
 
   local prev_eid = before[next_eid]
-  if not prev_eid then
-    self.first[uid] = eid
-  else
+  if prev_eid then
     before[eid] = prev_eid
     after[prev_eid] = eid
+  else
+    self.first[uid] = eid
   end
 
   before[next_eid] = eid
@@ -56,15 +56,15 @@ function class:remove_edge(eid, uid)
 
   local prev_eid = before[eid]
   local next_eid = after[eid]
-  if not prev_eid then
-    self.first[uid] = next_eid
-  else
+  if prev_eid then
     after[prev_eid] = next_eid
-  end
-  if not next_eid then
-    self.last[uid] = prev_eid
   else
+    self.first[uid] = next_eid
+  end
+  if next_eid then
     before[next_eid] = prev_eid
+  else
+    self.last[uid] = prev_eid
   end
 
   before[eid] = nil
