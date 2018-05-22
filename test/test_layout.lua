@@ -29,6 +29,7 @@ local g = graph()
 for i = 1, 8 do
   g:add_vertex()
 end
+g:add_edge(1, 1)
 g:add_edge(1, 2)
 g:add_edge(1, 5)
 g:add_edge(1, 6)

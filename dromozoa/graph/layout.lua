@@ -22,8 +22,33 @@ local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertice
 local initialize_layer = require "dromozoa.graph.initialize_layer"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
+local function remove_loop_edges(g)
+  local e = g.e
+  local e_after = e.after
+  local source = g.vu.target
+  local target = g.uv.target
+
+  local remove = {}
+  local n = 0
+
+  local eid = e.first
+  while eid do
+    if source[eid] == target[eid] then
+      n = n + 1
+      remove[n] = eid
+    end
+    eid = e_after[eid]
+  end
+
+  return remove
+end
+
 return function (g)
-  -- remove loop-edges
+  local remove = remove_loop_edges(g)
+  for i = 1, #remove do
+    g:remove_edge(remove[i])
+  end
+
   -- remove multi-edges
 
   local reverse = greedy_cycle_removal(g)
@@ -37,6 +62,7 @@ return function (g)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
 
   -- undo reverse
+  -- undo remove
 
   return dummy_min, layer_map, x
 end
