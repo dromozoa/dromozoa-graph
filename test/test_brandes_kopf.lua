@@ -20,8 +20,8 @@ local element = require "dromozoa.dom.element"
 local colors = require "dromozoa.css.colors"
 
 local graph = require "dromozoa.graph"
-local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
-local initialize_layer = require "dromozoa.graph.initialize_layer"
+local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
+local make_layers = require "dromozoa.graph.make_layers"
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 local write_dot = require "write_dot"
 
@@ -131,9 +131,9 @@ for i = 1, #layer do
   end
 end
 
-local dummy_uid = introduce_dummy_vertices(g, layer_map, {})
+local dummy_uid = make_dummy_vertices(g, layer_map, {})
 
-local layer = initialize_layer(g, layer_map)
+local layer = make_layers(g, layer_map)
 
 -- fix
 local order = layer[3]

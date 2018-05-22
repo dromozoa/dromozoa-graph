@@ -16,20 +16,20 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
-local initialize_layer = require "dromozoa.graph.initialize_layer"
-local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
+local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
+local make_layers = require "dromozoa.graph.make_layers"
+local promote_vertices = require "dromozoa.graph.promote_vertices"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
-local promote_vertices = require "dromozoa.graph.promote_vertices"
 
 return function (g)
   local removed_eids, removed_uids = remove_self_edges(g)
   local reversed_eids = remove_cycles(g)
 
   local layer_map = promote_vertices(g, longest_path(g))
-  local dummy_min = introduce_dummy_vertices(g, layer_map, reversed_eids)
-  local layer = initialize_layer(g, layer_map)
+  local dummy_min = make_dummy_vertices(g, layer_map, reversed_eids)
+  local layer = make_layers(g, layer_map)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
 
   for i = 1, #reversed_eids do
