@@ -184,17 +184,21 @@ return function (g)
   local source = g.vu.target
   local target = g.uv.target
 
-  local reverse = {}
+  local reverse_eids = {}
   local n = 0
 
   local eid = e.first
   while eid do
     if order_map[source[eid]] > order_map[target[eid]] then
       n = n + 1
-      reverse[n] = eid
+      reverse_eids[n] = eid
     end
     eid = e_after[eid]
   end
 
-  return reverse
+  for i = 1, n do
+    g:reverse_edge(reverse_eids[i])
+  end
+
+  return reverse_eids
 end

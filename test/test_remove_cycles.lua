@@ -39,10 +39,6 @@ local reverse = remove_cycles(g)
 assert(#reverse == 1)
 assert(reverse[1] == e2)
 
-for i = 1, #reverse do
-  g:reverse_edge(reverse[i])
-end
-
 write_dot("test2.dot", g)
 
 local g = graph()
@@ -74,10 +70,6 @@ else
   for i = 2, n do
     assert(reverse[i] == i * 4 - 4)
   end
-end
-
-for i = 1, #reverse do
-  g:reverse_edge(reverse[i])
 end
 
 write_dot("test4.dot", g)
