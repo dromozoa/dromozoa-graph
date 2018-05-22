@@ -40,7 +40,7 @@ assert(#reverse == 1)
 assert(reverse[1] == e2)
 
 for i = 1, #reverse do
-  g:reverse_edge(reverse[1])
+  g:reverse_edge(reverse[i])
 end
 
 write_dot("test2.dot", g)
@@ -56,6 +56,8 @@ for i = 1, N do
   u = v
   v = w
 end
+
+write_dot("test3.dot", g)
 
 local reverse = greedy_cycle_removal(g)
 
@@ -74,15 +76,8 @@ else
   end
 end
 
--- io.write("digraph {\n")
--- local uid = g.u.first
--- while uid do
---   local eid = g.uv.first[uid]
---   while eid do
---     local vid = g.uv.target[eid]
---     io.write(uid, "->", vid, ";\n")
---     eid = g.uv.after[eid]
---   end
---   uid = g.u.after[uid]
--- end
--- io.write("}\n")
+for i = 1, #reverse do
+  g:reverse_edge(reverse[i])
+end
+
+write_dot("test4.dot", g)
