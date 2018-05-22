@@ -17,7 +17,7 @@
 
 local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
-local vertex_promotion = require "dromozoa.graph.vertex_promotion"
+local promote_vertices = require "dromozoa.graph.promote_vertices"
 local clone = require "clone"
 
 local function check(result, expect)
@@ -42,7 +42,7 @@ g:add_edge(1, 7)
 local layer_map1 = longest_path(g)
 check(layer_map1, { 4, 3, 2, 1, 1, 1, 1 })
 
-local layer_map2 = vertex_promotion(g, layer_map1)
+local layer_map2 = promote_vertices(g, layer_map1)
 check(layer_map2, { 4, 3, 2, 1, 1, 2, 3 })
 
 -- Fig.6
@@ -59,7 +59,7 @@ g:add_edge(5, 7)
 g:add_edge(5, 8)
 
 local layer_map1 = longest_path(g)
-local layer_map2 = vertex_promotion(g, clone(layer_map1))
+local layer_map2 = promote_vertices(g, clone(layer_map1))
 for k, v in pairs(layer_map1) do
   assert(v == layer_map2[k])
 end

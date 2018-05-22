@@ -21,13 +21,13 @@ local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertice
 local longest_path = require "dromozoa.graph.longest_path"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
-local vertex_promotion = require "dromozoa.graph.vertex_promotion"
+local promote_vertices = require "dromozoa.graph.promote_vertices"
 
 return function (g)
   local removed_eids, removed_uids = remove_self_edges(g)
   local reversed_eids = remove_cycles(g)
 
-  local layer_map = vertex_promotion(g, longest_path(g))
+  local layer_map = promote_vertices(g, longest_path(g))
   local dummy_min = introduce_dummy_vertices(g, layer_map, reversed_eids)
   local layer = initialize_layer(g, layer_map)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
