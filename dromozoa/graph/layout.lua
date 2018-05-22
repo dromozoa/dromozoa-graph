@@ -15,42 +15,16 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local greedy_cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
-local longest_path = require "dromozoa.graph.longest_path"
-local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
+local greedy_cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
 local initialize_layer = require "dromozoa.graph.initialize_layer"
+local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
+local longest_path = require "dromozoa.graph.longest_path"
+local remove_self_edges = require "dromozoa.graph.remove_self_edges"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
-local function remove_loop_edges(g)
-  local e = g.e
-  local e_after = e.after
-  local source = g.vu.target
-  local target = g.uv.target
-
-  local remove_eids = {}
-  local remove_uids = {}
-  local n = 0
-
-  local eid = e.first
-  while eid do
-    local uid = source[eid]
-    if uid == target[eid] then
-      n = n + 1
-      remove_eids[n] = eid
-      remove_uids[n] = uid
-    end
-    eid = e_after[eid]
-  end
-
-  return remove_eids, remove_uids
-end
-
 return function (g)
-  local remove_eids, remove_uids = remove_loop_edges(g)
-  for i = 1, #remove_eids do
-    g:remove_edge(remove_eids[i])
-  end
+  local removed_eids, removed_uids = remove_self_edges(g)
 
   local reverse_eids = greedy_cycle_removal(g)
   local reverse_set = {}
@@ -69,9 +43,9 @@ return function (g)
     g:reverse_edge(reverse_eids[i])
   end
 
-  for i = 1, #remove_eids do
-    local uid = remove_uids[i]
-    g:set_edge(remove_eids[i], uid, uid)
+  for i = 1, #removed_eids do
+    local uid = removed_uids[i]
+    g:set_edge(removed_eids[i], uid, uid)
   end
 
   return dummy_min, layer_map, x
