@@ -16,17 +16,17 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
-local greedy_cycle_removal = require "dromozoa.graph.greedy_cycle_removal"
 local initialize_layer = require "dromozoa.graph.initialize_layer"
 local introduce_dummy_vertices = require "dromozoa.graph.introduce_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
+local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
 local vertex_promotion = require "dromozoa.graph.vertex_promotion"
 
 return function (g)
   local removed_eids, removed_uids = remove_self_edges(g)
 
-  local reverse_eids = greedy_cycle_removal(g)
+  local reverse_eids = remove_cycles(g)
   local reverse_set = {}
   for i = 1, #reverse_eids do
     local eid = reverse_eids[i]
