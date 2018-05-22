@@ -27,8 +27,8 @@ return function (g)
 
   local eid = e.first
   while eid do
-    local uid = vu_target[eid]
-    if uid == uv_target[eid] then
+    local uid = uv_target[eid]
+    if uid == vu_target[eid] then
       n = n + 1
       remove_eids[n] = eid
       remove_uids[n] = uid
