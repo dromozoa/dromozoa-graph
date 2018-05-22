@@ -36,6 +36,12 @@ function class:add_edge(uid, vid)
   return eid
 end
 
+function class:set_edge(eid, uid, vid)
+  self.e:add(eid)
+  self.uv:add_edge(eid, uid, vid)
+  self.vu:add_edge(eid, vid, uid)
+end
+
 function class:remove_edge(eid)
   local uv = self.uv
   local vu = self.vu
