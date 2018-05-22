@@ -28,7 +28,7 @@ do
   esac
 done
 
-rm -f test*.dot
+rm -f test*.dot test*.svg
 
 # (cd test && make)
 
