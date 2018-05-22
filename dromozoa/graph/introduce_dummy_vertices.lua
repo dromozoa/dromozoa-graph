@@ -15,7 +15,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, layer_map)
+return function (g, layer_map, reverse_eids, reverse_set)
+  if not reverse_set then
+    reverse_set = {}
+  end
+
   local u = g.u
 
   local e = g.e
@@ -34,10 +38,14 @@ return function (g, layer_map)
     local w_min = layer_map[uv_target[eid]] + 1
     do
       local eid = eid
+      local reverse = reverse_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
+        if reverse then
+          reverse_eids[#reverse_eids + 1] = eid
+        end
       end
     end
 
@@ -46,10 +54,14 @@ return function (g, layer_map)
       local w_max = layer_map[vu_target[eid]] - 1
       local w_min = layer_map[uv_target[eid]] + 1
       local eid = eid
+      local reverse = reverse_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
+        if reverse then
+          reverse_eids[#reverse_eids + 1] = eid
+        end
       end
     end
   end

@@ -52,20 +52,22 @@ return function (g)
     g:remove_edge(remove_eids[i])
   end
 
-  -- remove multi-edges
-
-  local reverse = greedy_cycle_removal(g)
-  for i = 1, #reverse do
-    g:reverse_edge(reverse[i])
+  local reverse_eids = greedy_cycle_removal(g)
+  local reverse_set = {}
+  for i = 1, #reverse_eids do
+    local eid = reverse_eids[i]
+    reverse_set[eid] = true
+    g:reverse_edge(eid)
   end
 
   local layer_map = vertex_promotion(g, longest_path(g))
-  local dummy_min = introduce_dummy_vertices(g, layer_map)
+  local dummy_min = introduce_dummy_vertices(g, layer_map, reverse_eids, reverse_set)
   local layer = initialize_layer(g, layer_map)
   local x = brandes_kopf(g, layer_map, layer, dummy_min)
 
-  -- restore reverse
-  -- restore removed edge
+  for i = 1, #reverse_eids do
+    g:reverse_edge(reverse_eids[i])
+  end
 
   for i = 1, #remove_eids do
     local uid = remove_uids[i]
