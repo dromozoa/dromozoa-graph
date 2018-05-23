@@ -16,9 +16,9 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 return function (g, layer_map, reversed_eids)
-  local reverse_set = {}
+  local reversed = {}
   for i = 1, #reversed_eids do
-    reverse_set[reversed_eids[i]] = true
+    reversed[reversed_eids[i]] = true
   end
 
   local u = g.u
@@ -39,7 +39,7 @@ return function (g, layer_map, reversed_eids)
     local w_min = layer_map[uv_target[eid]] + 1
     do
       local eid = eid
-      local reverse = reverse_set[eid]
+      local reverse = reversed[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
@@ -55,7 +55,7 @@ return function (g, layer_map, reversed_eids)
       local w_max = layer_map[vu_target[eid]] - 1
       local w_min = layer_map[uv_target[eid]] + 1
       local eid = eid
-      local reverse = reverse_set[eid]
+      local reverse = reversed[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
