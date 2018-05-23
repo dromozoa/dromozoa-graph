@@ -47,22 +47,47 @@ g:add_edge(7, 6)
 
 g:add_edge(7, 8)
 
-local dummy_min, layer_map, x = layout(g)
+local dummy_uid, layer_map, x = layout(g)
+
+local y_min
+local y_max
+for _, y in pairs(layer_map) do
+  if not y_min or y < y_min then
+    y_min = y
+  end
+  if not y_max or y > y_max then
+    y_max = y
+  end
+end
+
+local x_min
+local x_max
+for _, x in pairs(x) do
+  if not x_min or x < x_min then
+    x_min = x
+  end
+  if not x_max or x > x_max then
+    x_max = x
+  end
+end
+
+local width = (x_max - x_min + 1) * 50
+local height = (y_max - y_min + 1) * 50
 
 local function calc_x(x)
-  return x * 50 + 50
+  return (x - x_min) * 50 + 25
 end
 
 local function calc_y(y)
-  return 400 - y * 50
+  return height - (y - y_min) * 50 - 25
 end
 
 local _ = element
 local svg = _"svg" {
   xmlns = "http://www.w3.org/2000/svg";
   version = "1.1";
-  width = 300;
-  height = 400;
+  width = width;
+  height = height;
   _"defs" {
     _"marker" {
       id = "triangle";
@@ -126,7 +151,7 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(layer_map[uid])
-  if uid < dummy_min then
+  if uid < dummy_uid then
     svg[#svg + 1] = _"circle" {
       cx = cx;
       cy = cy;
