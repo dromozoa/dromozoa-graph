@@ -16,8 +16,8 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 local longest_path = require "dromozoa.graph.longest_path"
+local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 
 local g = graph()
 
@@ -49,3 +49,10 @@ assert(g.u.last == 8)
 assert(layer_map[6] == 3)
 assert(layer_map[7] == 3)
 assert(layer_map[8] == 2)
+
+local g = graph()
+local u1 = g:add_vertex()
+local layer_map = longest_path(g)
+assert(layer_map[u1] == 1)
+local dummy_min = make_dummy_vertices(g, layer_map, {})
+assert(not dummy_min)
