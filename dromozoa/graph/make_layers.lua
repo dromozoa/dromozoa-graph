@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function visit(first, after, target, layer_map, layer, color, uid)
+local function visit(first, after, target, layer_map, layers, color, uid)
   color[uid] = 1
 
   local eid = first[uid]
@@ -23,7 +23,7 @@ local function visit(first, after, target, layer_map, layer, color, uid)
     local vid = target[eid]
     local c = color[vid]
     if not c then
-      visit(first, after, target, layer_map, layer, color, vid)
+      visit(first, after, target, layer_map, layers, color, vid)
     elseif c == 1 then
       error "not a dag"
     end
@@ -33,9 +33,9 @@ local function visit(first, after, target, layer_map, layer, color, uid)
   color[uid] = 2
 
   local u = layer_map[uid]
-  local order = layer[u]
+  local order = layers[u]
   if not order then
-    layer[u] = { uid }
+    layers[u] = { uid }
   else
     order[#order + 1] = uid
   end
@@ -44,22 +44,21 @@ end
 return function (g, layer_map)
   local u = g.u
   local u_after = u.after
-
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local layer = {}
+  local layers = {}
   local color = {}
 
   local uid = u.first
   while uid do
     if not color[uid] then
-      visit(uv_first, uv_after, uv_target, layer_map, layer, color, uid)
+      visit(uv_first, uv_after, uv_target, layer_map, layers, color, uid)
     end
     uid = u_after[uid]
   end
 
-  return layer
+  return layers
 end

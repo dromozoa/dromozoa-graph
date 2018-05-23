@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local next = next
+
 local function promote(vu_first, vu_after, vu_target, layer_map, d_map, uid)
   local d = d_map[uid]
   local u_layer = layer_map[uid] + 1
@@ -33,20 +35,16 @@ local function promote(vu_first, vu_after, vu_target, layer_map, d_map, uid)
 end
 
 return function (g, layer_map)
-  local next = next
-
   local u = g.u
   local u_first = u.first
   local u_after = u.after
-
   local uv = g.uv
-
   local vu = g.vu
   local vu_first = vu.first
   local vu_after = vu.after
   local vu_target = vu.target
 
-  local new_layer_map = setmetatable({}, { __index = layer_map })
+  local layer_map_transaction = setmetatable({}, { __index = layer_map })
 
   local d_map = {}
   local uid = u_first
@@ -60,15 +58,17 @@ return function (g, layer_map)
     local uid = u_first
     while uid do
       if vu_first[uid] then
-        if promote(vu_first, vu_after, vu_target, new_layer_map, d_map, uid) < 0 then
+        if promote(vu_first, vu_after, vu_target, layer_map_transaction, d_map, uid) < 0 then
           promoted = true
-          for vid, v_layer in next, new_layer_map do
+          -- commit
+          for vid, v_layer in next, layer_map_transaction do
             layer_map[vid] = v_layer
-            new_layer_map[vid] = nil
+            layer_map_transaction[vid] = nil
           end
         else
-          for vid, v_layer in next, new_layer_map do
-            new_layer_map[vid] = nil
+          -- rollback
+          for vid, v_layer in next, layer_map_transaction do
+            layer_map_transaction[vid] = nil
           end
         end
       end

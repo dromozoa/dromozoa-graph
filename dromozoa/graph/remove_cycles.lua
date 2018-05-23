@@ -20,12 +20,10 @@ local binary_heap = require "dromozoa.graph.binary_heap"
 local function greedy_linear_ordering(g)
   local u = g.u
   local u_after = u.after
-
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
-
   local vu = g.vu
   local vu_first = vu.first
   local vu_after = vu.after
@@ -33,15 +31,12 @@ local function greedy_linear_ordering(g)
 
   local odeg = {}
   local ideg = {}
-
   local sink_queue = {}
   local sink_min = 0
   local sink_max = 0
-
   local source_queue = {}
   local source_min = 0
   local source_max = 0
-
   local queue = binary_heap()
 
   local order_map = {}

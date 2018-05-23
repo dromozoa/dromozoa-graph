@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -50,7 +50,6 @@ end
 return function (g)
   local u = g.u
   local u_after = u.after
-
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
