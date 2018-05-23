@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,152 +15,89 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
-local property_map = require "dromozoa.commons.property_map"
-local push = require "dromozoa.commons.push"
-local sequence = require "dromozoa.commons.sequence"
-local dfs = require "dromozoa.graph.dfs"
-local edge = require "dromozoa.graph.edge"
-local graphviz = require "dromozoa.graph.graphviz"
-local model = require "dromozoa.graph.model"
-local vertex = require "dromozoa.graph.vertex"
-
-local function id(item)
-  if type(item) == "table" then
-    return item.id
-  else
-    return item
-  end
-end
-
-local function each(self, constructor, iterator, context)
-  return coroutine.wrap(function ()
-    for id in iterator, context do
-      coroutine.yield(constructor(self, id))
-    end
-  end)
-end
+local adjacency_list = require "dromozoa.graph.adjacency_list"
+local linked_list = require "dromozoa.graph.linked_list"
 
 local class = {}
+local metatable = { __index = class }
 
-function class.new()
-  local self = {
-    model = model();
-    vprops = property_map();
-    eprops = property_map();
-  }
-  return self
+function class:add_vertex()
+  return self.u:add()
 end
 
-function class:empty()
-  return self.model:empty()
+function class:remove_vertex(uid)
+  self.u:remove(uid)
 end
 
-function class:create_vertex(...)
-  local u = vertex(self, self.model:create_vertex())
-  push(u, 0, ...)
-  return u
+function class:add_edge(uid, vid)
+  local eid = self.e:add()
+  self.uv:add_edge(eid, uid, vid)
+  self.vu:add_edge(eid, vid, uid)
+  return eid
 end
 
-function class:get_vertex(u)
-  return vertex(self, id(u))
+function class:set_edge(eid, uid, vid)
+  self.e:add(eid)
+  self.uv:add_edge(eid, uid, vid)
+  self.vu:add_edge(eid, vid, uid)
 end
 
-function class:each_vertex(key)
-  if key == nil then
-    return each(self, class.get_vertex, self.model:each_vertex())
+function class:remove_edge(eid)
+  local uv = self.uv
+  local vu = self.vu
+  local uid = vu.target[eid]
+  local vid = uv.target[eid]
+  self.e:remove(eid)
+  uv:remove_edge(eid, uid)
+  vu:remove_edge(eid, vid)
+end
+
+function class:reverse_edge(eid)
+  local uv = self.uv
+  local vu = self.vu
+  local uid = vu.target[eid]
+  local vid = uv.target[eid]
+
+  uv:remove_edge(eid, uid)
+  uv:add_edge(eid, vid, uid)
+
+  vu:remove_edge(eid, vid)
+  vu:add_edge(eid, uid, vid)
+end
+
+function class:subdivide_edge(eid, wid)
+  local uv = self.uv
+  local vu = self.vu
+  local uid = vu.target[eid]
+  local vid = uv.target[eid]
+  local new_eid = self.e:add()
+
+  local next_eid = uv:remove_edge(eid, uid)
+  if not next_eid then
+    uv:add_edge(eid, uid, wid)
   else
-    return each(self, class.get_vertex, self.vprops:each_item(key))
+    uv:insert_edge(next_eid, eid, uid, wid)
   end
-end
+  uv:add_edge(new_eid, wid, vid)
 
-function class:count_vertex(key)
-  if key == nil then
-    return self.model:count_vertex()
+  local next_eid = vu:remove_edge(eid, vid)
+  if not next_eid then
+    vu:add_edge(new_eid, vid, wid)
   else
-    return self.vprops:count_item(key)
+    vu:insert_edge(next_eid, new_eid, vid, wid)
   end
-end
+  vu:add_edge(eid, wid, uid)
 
-function class:clear_vertex_properties(key)
-  self.vprops:clear(key)
+  return new_eid
 end
-
-function class:create_edge(u, v)
-  local uid = id(u)
-  local vid = id(v)
-  return edge(self, self.model:create_edge(uid, vid), uid, vid)
-end
-
-function class:get_edge(e)
-  return edge(self, id(e))
-end
-
-function class:each_edge(key)
-  if key == nil then
-    return each(self, class.get_edge, self.model:each_edge())
-  else
-    return each(self, class.get_edge, self.eprops:each_item(key))
-  end
-end
-
-function class:count_edge(key)
-  if key == nil then
-    return self.model:count_edge()
-  else
-    return self.eprops:count_item(key)
-  end
-end
-
-function class:clear_edge_properties(key)
-  self.eprops:clear(key)
-end
-
-function class:dfs(visitor, start)
-  dfs(self, visitor, nil, start)
-end
-
-function class:write_graphviz(out, visitor)
-  return graphviz.write(out, self, visitor)
-end
-
-function class:merge(that)
-  local map = {}
-  for a in that:each_vertex() do
-    local b = self:create_vertex()
-    map[a.id] = b.id
-    for k, v in a:each_property() do
-      b[clone(k)] = clone(v)
-    end
-  end
-  for a in that:each_edge() do
-    local b = self:create_edge(map[a.uid], map[a.vid])
-    for k, v in a:each_property() do
-      b[clone(k)] = clone(v)
-    end
-  end
-  return map
-end
-
-function class:tsort(start)
-  local vertices = sequence()
-  self:dfs({
-    back_edge = function (_, g, e, u, v)
-      error("found back edge " .. e.id)
-    end;
-    finish_vertex = function (_, g, u)
-      vertices:push(u)
-    end;
-  }, start)
-  return vertices
-end
-
-local metatable = {
-  __index = class;
-}
 
 return setmetatable(class, {
   __call = function ()
-    return setmetatable(class.new(), metatable)
+    return setmetatable({
+      u = linked_list();
+      e = linked_list();
+      uv = adjacency_list();
+      vu = adjacency_list();
+    }, metatable)
   end;
 })

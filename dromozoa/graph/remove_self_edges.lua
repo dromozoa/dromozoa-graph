@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,25 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
+return function (g)
+  local e = g.e
+  local e_after = e.after
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
-local g = graph()
+  local remove_eids = {}
+  local remove_uids = {}
+  local n = 0
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
-local v4 = g:create_vertex()
-local v5 = g:create_vertex()
-local v6 = g:create_vertex()
+  local eid = e.first
+  while eid do
+    local uid = uv_target[eid]
+    if uid == vu_target[eid] then
+      n = n + 1
+      remove_eids[n] = eid
+      remove_uids[n] = uid
+    end
+    eid = e_after[eid]
+  end
 
-g:create_edge(v1, v2)
-g:create_edge(v3, v5)
-g:create_edge(v3, v6)
-g:create_edge(v1, v4)
-g:create_edge(v2, v5)
-g:create_edge(v5, v4)
+  for i = 1, n do
+    g:remove_edge(remove_eids[i])
+  end
 
-local result = g:tsort("v")
-for i = 1, #result do
-  print(result[i].id)
+  return remove_eids, remove_uids
 end

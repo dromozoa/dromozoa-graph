@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,42 +16,41 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local write_dot = require "write_dot"
+
+local function check(uv, uid, expect)
+  local n = #expect
+
+  local result = {}
+  local eid = uv.first[uid]
+  while eid do
+    result[#result + 1] = uv.target[eid]
+    eid = uv.after[eid]
+  end
+  assert(n == #result)
+  for i = 1, n do
+    assert(result[i] == expect[i])
+  end
+end
 
 local g = graph()
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
+local u1 = g:add_vertex()
+local u2 = g:add_vertex()
+local u3 = g:add_vertex()
 
-v1.foo = 42
-v1.bar = false
-v2.foo = 69
+local e1 = g:add_edge(u1, u2)
+local e2 = g:add_edge(u1, u2)
+local e3 = g:add_edge(u2, u3)
+local e4 = g:add_edge(u3, u1)
 
-print(v2.id)
-print(v2.foo)
+write_dot("test1.dot", g)
 
-local count = 0
-for k, v in v1:each_property() do
-  count = count + 1
-  print("v1", k, v)
-end
-for k, v in v2:each_property() do
-  count = count + 1
-  print("v2", k, v)
-end
-for k, v in v3:each_property() do
-  count = count + 1
-  print("v3", k, v)
-end
-assert(count == 3)
+g:reverse_edge(e2, u2, u1)
 
-local e1 = g:create_edge(v1, v2)
-e1.foo = 42
-e1.bar = false
+write_dot("test2.dot", g)
 
-local count = 0
-for k, v in e1:each_property() do
-  count = count + 1
-  print("e1", k, v)
-end
-assert(count == 2)
+g:remove_edge(e2)
+g:set_edge(e2, u1, u1)
+
+write_dot("test3.dot", g)

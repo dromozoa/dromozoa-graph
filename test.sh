@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
-# Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+# Copyright (C) 2015,2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 #
 # This file is part of dromozoa-graph.
 #
@@ -17,13 +17,52 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-case x$1 in
-  x) lua=lua;;
-  *) lua=$1;;
-esac
+LUA_PATH="test/?.lua;?.lua;;"
+export LUA_PATH
 
 for i in test/test*.lua
 do
-  "$lua" "$i"
+  case X$# in
+    X0) lua "$i";;
+    *) "$@" "$i";;
+  esac
 done
-rm -f test*.dot
+
+rm -f test*.dot test*.svg
+
+# (cd test && make)
+
+# mkdir -p out
+
+# for i in data/undirected*.txt
+# do
+#   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
+#   test/boost_graph undirected "$i" >"out/$name-boost.txt"
+#   lua test/graph.lua undirected "$i" >"out/$name.txt"
+#   diff -u "out/$name-boost.txt" "out/$name.txt"
+# done
+
+# for i in data/directed*.txt
+# do
+#   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
+#   test/boost_graph directed "$i" >"out/$name-boost.txt"
+#   lua test/graph.lua directed "$i" >"out/$name.txt"
+#   diff -u "out/$name-boost.txt" "out/$name.txt"
+# done
+
+# for i in data/cycle_removal*.txt
+# do
+#   lua test/cycle_removal.lua "$i"
+# done
+
+# for i in data/layer_assignment*.txt
+# do
+#   lua test/layer_assignment.lua "$i"
+# done
+
+# for i in data/transitive_reduction*.txt
+# do
+#   lua test/transitive_reduction.lua "$i"
+# done
+
+# rm -f -r out

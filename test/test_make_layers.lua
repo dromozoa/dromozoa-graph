@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,22 +16,30 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
+local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
+local longest_path = require "dromozoa.graph.longest_path"
+local make_layers = require "dromozoa.graph.make_layers"
 
 local g = graph()
 
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
+g:add_vertex()
 
-local e1 = g:create_edge(v1, v2)
-local e2 = g:create_edge(v1, v3)
+g:add_edge(1, 2)
+g:add_edge(2, 3)
+g:add_edge(3, 5)
+g:add_edge(1, 4)
+g:add_edge(4, 5)
+g:add_edge(1, 5)
 
-local n = 0
-for v, e in v1:each_adjacent_vertex(v1) do
-  print(v.id, e.id)
-  n = n + 1
-  e:remove()
-end
-assert(n == 2)
+local layer_map = longest_path(g)
+local dummy_min = make_dummy_vertices(g, layer_map, {})
+local layer = make_layers(g, layer_map)
 
-g:write_graphviz(io.stdout)
+assert(table.concat(layer[4], " ") == "1")
+assert(table.concat(layer[3], " ") == "2 6 7")
+assert(table.concat(layer[2], " ") == "3 4 8")
+assert(table.concat(layer[1], " ") == "5")

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>グラフの階層的描画</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css">
+</head>
+<style>
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+}
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+</style>
+<body>
+<div class="markdown-body">
+
+<h1>グラフの階層的描画</h1>
+
+<p>
+状態遷移図を対象としたグラフの階層的描画の実装を目的とした<a href="https://cs.brown.edu/~rt/gdhandbook/chapters/hierarchical.pdf">教科書</a>のメモ。
+</p>
+
+<ol>
+  <li>Cycle Removeal</li>
+  <li>Layer Assignment</li>
+  <li>Edge Concenctration</li>
+  <li>Vertex Ordering</li>
+  <li>\(x\)-Coordinate Assignment</li>
+</ol>
+
+<ol>
+  <li>グラフの非閉路化</li>
+  <li>頂点集合の階層への分割</li>
+  <li>各階層上での頂点順序の決定</li>
+  <li>各頂点の座標の決定</li>
+</ol>
+
+<ul>
+  <li>論文・教科書
+    <ol>
+      <li><a href="https://cs.brown.edu/~rt/gdhandbook/chapters/hierarchical.pdf">Hierarchical Drawing Algorithms</a></li>
+      <li><a href="http://www.graphviz.org/Documentation/TSE93.pdf">A Technique for Drawing Directed Graph</a></li>
+      <li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.64.4457&rep=rep1&type=pdf">Fast and Simple Horizontal Coordinate Assignment</a></li>
+      <li><a href="http://jgaa.info/accepted/2004/BarthMutzelJuenger2004.8.2.pdf">Simple and Efficient Bilayer Cross Counting</a></li>
+      <li><a href="http://www.researchgate.net/profile/Petra_Mutzel/publication/30508315_2-Layer_Straightline_Crossing_Minimization_Performance_of_Exact_and_Heuristic_Algorithms/links/09e4150eabaf4cc7bd000000.pdf">2-Layer Straightline Crossing Minimization</a></li>
+      <li><a href="https://core.ac.uk/download/pdf/82207433.pdf">Graph layering by promotion of nodes</a></li>
+      <li><a href="http://www.lib.kobe-u.ac.jp/repository/thesis2/d1/D1005931.pdf">階層グラフの描画アルゴリズムに関する研究</a></li>
+    </ol>
+  </li>
+  <li>スライド
+    <ol>
+      <li><a href="https://www.slideshare.net/nikolovn/gd-2001-ver2">How to Layer a Directed Acyclic Graph</a></li>
+    </ol>
+  </li>
+  <li>ウェブページ
+    <ol>
+      <li><a href="https://kaken.nii.ac.jp/ja/grant/KAKENHI-PROJECT-19500029/">有向グラフの階層的描画を求めるアルゴリズムの設計</a></li>
+      <li><a href="http://www2.kobe-u.ac.jp/~ky/labo/research/graph-drawing.htm">グラフ描画アルゴリズムの設計</a></li>
+      <li><a href="http://interprism.hatenablog.com/entry/layered_graph">有向グラフの階層表示</a></li>
+    </ol>
+  </li>
+  <li>Wikipedia
+    <ol>
+      <li><a href="https://en.wikipedia.org/wiki/Layered_graph_drawing">Layered graph drawing</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Transitive_reduction">Transitive reduction</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Coffman%E2%80%93Graham_algorithm">Coffman-Graham algorithm</a></li>
+    </ol>
+  </li>
+  <li>プログラム
+    <ol>
+      <li><a href="http://www.rw.cdl.uni-saarland.de/~sander/html/gsvcg1.html">VCG</a></li>
+      <li><a href="http://www.graphviz.org/">Graphviz</a></li>
+      <li><a href="https://github.com/cpettitt/dagre-d3">dagre-d3</a></li>
+      <li><a href="https://github.com/cpettitt/dagre/wiki">dagre (wiki)</a></li>
+    </ol>
+  </li>
+</ul>
+
+<h2>13.2 Cycle Removeal</h2>
+
+<p>
+アルゴリズムの適用前に自己ループエッジを取りのぞき、多重エッジをまとめる。
+</p>
+
+<ul>
+  <li>feedback arc set (FAS) 取りのぞくと有向非巡回グラフになるようなエッジの集合。</li>
+  <li>feedback set (FS) 向きを反転させると有向非巡回グラフになるようなエッジの集合。</li>
+  <li>FSはFASだが、逆は常に成りたつとは限らない。</li>
+</ul>
+
+<p>
+頂点の線形順序が与えられたら、エッジ集合をふたつの部分集合に分割できる。
+\(\mathrm{order}(v)\)が与えられているとき、エッジ集合\(E\)の要素\(e=(u,v)\)について、\(\mathrm{order}(u)\lt\mathrm{order}(v)\)を満たす集合と満たさない集合に分割する。
+ふたつの部分集合はどちらもFSである。
+</p>
+
+<h2>13.3 Layer Assignment</h2>
+
+<ul>
+  <li>The Longest-Path Algorithm</li>
+  <li>The Coffman-Graham Algorithm</li>
+  <li>Layering with the Minimum Width</li>
+  <li>Improvement by Promotion of Vertices</li>
+  <li>Network-Simplex Layering Algorithm</li>
+  <li>Healy-Nikolov's Branch-and-Cut Algorithm</li>
+</ul>
+
+<h3>The Coffman-Graham Algorithm</h3>
+
+<p>
+Coffman-Grahamアルゴリズムはふたつのステップからなる。
+最初のステップで\(G\)の全頂点に一意なラベル\(\lambda : V \to \mathbb{N}\)を計算する。
+第二ステップで頂点を階層に配置する際、ラベルを優先順位として用いる。
+最初のステップのラベルの計算は、下記に定義される頂点集合同士の比較を伴う。
+下記が成り立つとき、ふたつの頂点集合\(U_1\)と\(U_2\)は\(U_1 \lt U_2\)である。
+</p>
+
+<ul>
+  <li>\(U_1 = \varnothing\)かつ\(U_2 \ne \varnothing\)。または、</li>
+  <li>\(U_1 \ne \varnothing, U_2 \ne \varnothing\)かつ\(\max\{\lambda(v) : v \in U_1\} \lt \max\{\lambda(v) : v \in U_2\}\)。または、</li>
+  <li>
+    \(U_1 \ne \varnothing, U_2 \ne \varnothing, \max\{\lambda(v) : v \in U_1\} = \max\{\lambda(v) : v \in U_2\}\)かつ
+    \(U_1 \setminus \{v : \lambda(v) = \max\{\lambda(v) : v \in U_1\}\} \lt U_2 \setminus \{v : \lambda(v) = \max\{\lambda(v) : v \in U_2\}\}\)。</li>
+</ul>
+
+<p>
+第二ステップで、下層から上層に向かって各頂点に階層を配置する。
+このとき、階層内の頂点数を上限\(W\)以内に保つ。
+</p>
+
+<h3>The Coffman-Graham Algorithm (Wikipedia)</h3>
+
+<p>
+\(G\)のトポロジカルな順序付けを構築する。
+頂点を、それらの入力近傍の位置集合について辞書順に並べる。
+このような順序付けを行うためには、
+次の条件を満たす頂点\(v\)を択び、ひとつずつ頂点を順序に加える。
+まず、\(v\)の入力近傍がすべて既に半順序に加えられていること。
+このような頂点の候補は複数存在しえるので、それらの入力近傍で一番最近追加された入力近傍がもっともearlierであること。
+ふたつの頂点の候補が同じ入力近傍を共有している場合、二番めに最近追加された入力近傍がearlierであるほうを択ぶ。
+以下、この条件を続ける。
+</p>
+
+<h3>Improvement by Promotion Vertex</h3>
+
+<p>
+ダミー頂点を少なくすることを目的とする。ダミー頂点が少なければ、エッジは短く保たれる。
+</p>
+
+<p>
+関数\(\mathrm{PromoteVertex}(v)\)は、\(v\)の入力頂点のなかで、一階層上に位置する頂点\(u\)の\(\mathrm{PromoteVertex}(u)\)を積算する。
+これに\(v\)の出力次数と入力次数の差を加えた値を返す。
+また、\(v\)の階層をひとつ上に移動する。
+</p>
+
+<p>
+頂点の格上げヒューリスティクスでは、ランク移動が発生しなくなるまで、すべての頂点\(v \in V\)について、次に述べる操作をくりかえす。
+\(v\)の入力次数が\(0\)でなければ、\(\mathrm{PromoteVertex}(v)\)を行う。
+ただし、結果が正の場合、移動は発生しなかったものとする。
+</p>
+
+<h3>Graphviz</h3>
+
+<p>
+初期ランクは厳密にはLongest-Pathアルゴリズムで求めていないように見える。
+トポロジカルな順序に従って、ランクを割り振っていく。
+その後、短くすることが可能なエッジを短くする。
+</p>
+
+<p>
+全域木はソースから開始したほうがよいのか？
+</p>
+
+<p>
+エッジの重みが\(1\)である場合のカット値の計算を考える。
+ツリーエッジの向きと、対応するグラフエッジの向きが逆転している場合、末尾要素と先頭要素が入れ替わるので、カット値の符号を反転させる。
+エッジ\(e\)について、ツリーエッジの向きとグラフエッジの向きが同じ場合は\(+1\)を、向きが逆転している場合は\(-1\)を与えるような変数を\(R_e\)で表すとする。
+</p>
+
+<p>
+頂点\(x\)について、非ツリーエッジだけを考慮した入力次数と出力次数の差を\(d_x\)で表すとする。
+全域木のツリーエッジ\((u,v)\)の端点\(v\)が葉であるとき、カット値は、
+\[\begin{eqnarray}
+  C_{(u,v)} &amp;=&amp; R_{(u,v)} (d_v + R_{(u,v)}) \\
+            &amp;=&amp; R_{(u,v)} d_v + 1
+\end{eqnarray}\]
+と表せる。
+\((u,v)\)以外の\(v\)の全近接エッジが非ツリーエッジであるため、ここで、\(d_v + R_{(u,v)}\)は入力次数と出力次数の差に等しい。
+</p>
+
+<p>
+あるツリーエッジ\((u,v)\)について、端点\(v\)が子ツリーエッジ\((v,w_i)\)を持つとき、
+\[
+  D_v = d_v + \sum_i D_{w_i}
+\]
+を定義する。\(D_v\)は端点\(v\)側の要素に対して、入力する非ツリーエッジの数と出力する非ツリーエッジの差である。
+このような値は、全域木を子から走査しながら積算することで容易に求まる。
+このとき、ツリーエッジ\((u,v)\)のカット値は、
+\[\begin{eqnarray}
+  C_{(u,v)} &amp;=&amp; R_{(u,v)} (D_v + R_{(u,v)}) \\
+            &amp;=&amp; R_{(u,v)} D_v + 1
+\end{eqnarray}\]
+</p>
+
+<p>
+あるツリーエッジ\((u_1,v_1)\)を全域木から除去し、新しいツリーエッジ\((u_2,v_2)\)を加えたとき、\(d_{v_1}\)と\(d_{v_2}\)が更新される（インクリメントまたはデクリメントする）。
+全域木上で\(v_1,v_2\)自体とその祖先の頂点\(\{x\}\)について、\(D_x\)を更新する。
+</p>
+
+<h2>13.5 Vertex Ordering</h2>
+
+<h3>13.5.1 One-Sided Crossing Minimization</h3>
+
+<ul>
+  <li>OLCM = one-layerd crossing minimization</li>
+</ul>
+
+<h4>Counting Crossings</h4>
+
+<p>
+\(u, v \in V_2\)で、\(u\)が\(v\)の左にあるとき、\(u,v\)に接続するエッジの交差数を\(c_{uv}\)とする。
+交差数行列は\(c_{uv}\)を要素に持つ。
+\(V_1\)の頂点は固定されていると仮定するので、この行列はOLCMだけに関係する。
+</p>
+
+<h4>Exact Methods</h4>
+
+<p>
+\(\delta_{ij}^k\)を、階層\(k=1,2\)上の頂点\(i,j\)の順序を表すような0-1変数とする。
+この変数から、最小化の目的関数となるような順列\(\pi_i\)のペアの交差数の式を導出する。
+つまり、\(\pi_k(i) \lt \pi_k(j)\)ならば\(\delta_{ij}^k = 1\)、そうでなければ\(0\)。
+\(\delta_{ij} = 1 - \delta_{ji}\)であることは明らかである。
+\[
+  \mathrm{C}(\pi_1, \pi_2) = \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} \sum_{k\in\mathrm{N}(i)} \sum_{l\in\mathrm{N}(j)}
+    \delta_{kl}^1 \delta_{ji}^2 + \delta_{lk}^1 \delta_{ij}^2
+\]
+OLCMの場合、\(\pi_1\)が固定されていると仮定し、交差を最小化するような\(V_2\)の順序\(\pi_2\)を探す。
+つまり、下記を最小化したい。
+\[
+  \mathrm{C}(\pi_2) = \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} \sum_{k\in\mathrm{N}(i)} \sum_{l\in\mathrm{N}(j)}
+    \delta_{kl}^1 \delta_{ji}^2 + \delta_{lk}^1 \delta_{ij}^2
+\]
+この\(\mathrm{C}(\pi_2)\)は二次項を含むので解くのが難しい。
+しかし、\(V_2\)の頂点\(i\)と\(j\)のペアの交差数
+\[
+  c_{ij} = \sum_{k\in\mathrm{N}(i)} \sum_{l\in\mathrm{N}(j)} \delta_{lk}^1
+\]
+を用いて、
+\[\begin{align}
+  \mathrm{C}(\pi_2)
+    &amp;= \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} c_{ji} \delta_{ji}^2 + c_{ij} \delta_{ij}^2 \\
+    &amp;= \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} c_{ji} (1 - \delta_{ij}^2) + c_{ij} \delta_{ij}^2 \\
+    &amp;= \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} (c_{ij} - c_{ji}) \delta_{ij}^2 + c_{ji} \\
+    &amp;= \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} (c_{ij} - c_{ji}) \delta_{ij}^2 + \sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} c_{ji}
+\end{align}\]
+のように書きなおすことができる。
+こうして問題は、頂点を順序づけるようなベクトル\(\delta^2 \in \{0, 1\}^{\begin{pmatrix} n_2 \\ n \end{pmatrix}}\)を探すことに帰着した。
+一貫した順序を頂点に与えるために、「3-cycle」制約を強制する。
+これは、頂点\(i\)の優先度が頂点\(j\)より高く、頂点\(j\)の優先度が頂点\(k\)より高ければ、頂点\(i\)は頂点\(k\)に優先しなければならないという制約である。
+</p>
+
+<p>
+\(c_{ij}\)と\(c_{ji}\)は前もって決定することができ、\(\sum_{i=1}^{n_2-1} \sum_{j=i+1}^{n_2} c_{ji}\)は定数なので、問題は下記のように線形計画として書くことができる。
+ここで、\(\delta_{ij}^2\)はより一般的な\(x_{ij}\)で置きかえる。
+</p>
+
+<p>
+\[
+  \sum_{i=1}^{n_2} \sum_{j=i+1}^{n_2} a_{ij} x_{ij}を最小化する。
+\]
+ただし、
+\[\begin{align}
+    &amp; 0 \le x_{ij} + x_{jk} - x_{ik} \le 1 &amp; 1 \le i \lt j \lt k \le n_2 \\
+    &amp; 0 \le x_{ij} \le 1 &amp; 1 \le i \lt j \le n_2 \\
+    &amp; x_{ij}は整数 &amp;
+\end{align}\]
+</p>
+
+<h2>13.6 \(x\)-Coordinate Assignment</h2>
+
+<h3>Fast and Simple Horizontal Coordinate Assignment</h3>
+
+<p>
+ダミー頂点間のsegmentをinner segmentsと呼ぶ。
+</p>
+
+</div>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    undefinedFamily: "sans-serif"
+  }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+</body>
+</html>

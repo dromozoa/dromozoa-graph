@@ -1,4 +1,4 @@
--- Copyright (C) 2015 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,21 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local clone = require "dromozoa.commons.clone"
-local graph = require "dromozoa.graph"
-
-local g = graph()
-
-local v1 = g:create_vertex()
-local v2 = g:create_vertex()
-local v3 = g:create_vertex()
-
-v1.foo = 42
-v1.bar = false
-v2.foo = 69
-
-g:create_edge(v1, v2)
-g:create_edge(v2, v3)
-g:merge(clone(g))
-
-g:write_graphviz(assert(io.open("test.dot", "w"))):close()
+return function (filename, g)
+  local out = assert(io.open(filename, "w"))
+  out:write "digraph {\n"
+  local uid = g.u.first
+  while uid do
+    local eid = g.uv.first[uid]
+    while eid do
+      local vid = g.uv.target[eid]
+      out:write(uid, "->", vid, "[label=", eid, "];\n")
+      eid = g.uv.after[eid]
+    end
+    uid = g.u.after[uid]
+  end
+  out:write "}\n"
+  out:close()
+end

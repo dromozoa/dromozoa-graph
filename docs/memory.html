@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Lua 5.3のメモリとデータ構造</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css">
+<style>
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+}
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="markdown-body">
+
+<h1>Lua 5.3のメモリとデータ構造</h1>
+
+<h2>値</h2>
+<p>
+ほとんどの環境において、値のサイズ\(S_v\)は16バイトである。
+</p>
+
+<h2>空のテーブル</h2>
+<p>
+空のテーブルのサイズ\(S_t\)は、ILP32では32バイト、LP64/LLP64では56バイトである。
+</p>
+
+<h2>配列としてのテーブル</h2>
+<p>
+1以上の連続した整数だけをインデックスに使うとき、テーブルは配列のように、つまり、C++のstd::vectorのようにふるまう。
+倍々でメモリが確保されるので、要素数\(n\)のとき、およそ\(S_a(n) = S_v 2^{\mathrm{ceil}(\log_2(n))}\)バイトが必要になる。
+当然、\(S_v n \le S_a(n) \lt 2 S_v n\)である。
+</p>
+
+<h2>クロージャ</h2>
+<p>
+値を束縛することにより、クロージャをデータ構造として利用できる。
+必要なメモリの量はテーブルよりも増える。
+</p>
+
+<h2>リンクリスト</h2>
+<p>
+リンクリストの素朴な実装は
+</p>
+<pre>template &lt;typename T&gt;
+struct node {
+  node* next;
+  node* prev;
+  T value;
+};</pre>
+<p>
+のように与えられる。要素数\(n\)のとき、C++の構造体をLuaのテーブルで表現する場合、およそ\((S_t + 3 S_v) n\)バイトが必要になる（実際の値はこれよりも大きくなる）。
+</p>
+<p>
+以下のように、前後のノードへのポインタと値を個々のテーブルに分解して保存する場合、すくなくともおよそ\(3 S_a(n)\)バイトが必要になる。
+</p>
+<pre>local next = {}
+local prev = {}
+local value = {}</pre>
+<p>
+LP64/LLP64では、あきらかに\(3 S_a(n) \lt (S_t + 3 S_v) n\)が成立する。
+配列が伸長した直後などILP32ではかならずしも成立しない。
+</p>
+
+<h2>m個の要素を持つ場合のテーブルへの分解</h2>
+<p>
+\(m\)個の要素を持つ場合について、\(m S_a(n)\)と\((S_t + m S_v) n\)を比較すると、
+\[
+  \mathrm{ceil}(\log_2(n)) - \log_2(n) \lt \log_2(\frac{1}{m} \frac{S_t}{S_v} + 1) \\
+\]
+個々のテーブルに分解して保存したほうが有利になる確率を下表に示す。
+</p>
+<table>
+  <tr><th>m</th><th>ILP32</th><th>LP64/LLP64</th></tr>
+  <tr><td>1</td><td>100.0%</td><td>100.0%</td></tr>
+  <tr><td>2</td><td>100.0%</td><td>100.0%</td></tr>
+  <tr><td>3</td><td>80.0%</td><td>100.0%</td></tr>
+  <tr><td>4</td><td>66.7%</td><td>93.3%</td></tr>
+  <tr><td>5</td><td>57.1%</td><td>82.4%</td></tr>
+  <tr><td>6</td><td>50.0%</td><td>73.7%</td></tr>
+  <tr><td>7</td><td>44.4%</td><td>66.7%</td></tr>
+  <tr><td>8</td><td>40.0%</td><td>60.9%</td></tr>
+  <tr><td>9</td><td>36.4%</td><td>56.0%</td></tr>
+  <tr><td>10</td><td>33.3%</td><td>51.9%</td></tr>
+  <tr><td>11</td><td>30.8%</td><td>48.3%</td></tr>
+  <tr><td>12</td><td>28.6%</td><td>45.2%</td></tr>
+</table>
+<p>
+なお、前後のノードへのポインタと値を個々のテーブルに分解して保存するほうが、GC対象が減る点において有利であると考えられる。
+また、C++の構造体をLuaのテーブルで表現する際に文字列キーを用いる場合、そのコストにも注意する必要がある。
+</p>
+
+<h2>行列</h2>
+
+<p>
+\(m\)行\(n\)列の密な行列を考える。
+1次元で表現する場合、\(S_1(m, n) = S_t + S_a(m n)\)バイトが必要になる。
+2次元で表現する場合、\(S_2(m, n) = S_t + S_a(m) + m (S_t + S_a(n))\)バイトが必要になる。
+\(S_1\)の上限は\(S_t + 2 S_v m n\)で、\(S_2\)の下限は\(S_t m + S_v m + S_v m n\)なので、
+\(S_1\)が常に有利になるのは\(\frac{S_t}{S_v} \gt \frac{m}{m - 1}(n - 1)\)のときだけである。
+つまり、基本的な議論は前節に準じたものとなる。
+</p>
+
+<h2>DOM</h2>
+
+<p>
+MicroXMLが示したように、単純化されたDOMノードは名前と属性マップと子要素のリストで構成できる。
+Luaではひとつのテーブルで表現することもできる。
+</p>
+
+<h2>木構造</h2>
+
+<p>
+木構造の素朴な実装は、
+</p>
+
+<pre>template &lt;typename T&gt;
+struct node {
+  node* parent;
+  node* child;
+  node* next;
+  node* prev;
+  T value;
+};</pre>
+
+<p>
+のように与えられるので、リンクリストと同様に考察ができる。
+</p>
+
+</div>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    undefinedFamily: "sans-serif"
+  }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+</body>
+</html>
