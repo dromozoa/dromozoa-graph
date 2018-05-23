@@ -22,14 +22,13 @@ return function (g, layer_map, reversed_eids)
   local prev_eid = e.last
 
   if prev_eid then
-    local n = #reversed_eids
     local reversed = {}
+    local n = #reversed_eids
     for i = 1, n do
       reversed[reversed_eids[i]] = true
     end
 
     local e_after = e.after
-
     local uv_target = g.uv.target
     local vu_target = g.vu.target
 

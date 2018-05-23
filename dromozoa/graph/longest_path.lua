@@ -50,7 +50,6 @@ end
 return function (g)
   local u = g.u
   local u_after = u.after
-
   local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
