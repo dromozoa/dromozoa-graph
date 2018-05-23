@@ -16,36 +16,37 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 return function (g, layer_map, reversed_eids)
-  local reversed = {}
-  for i = 1, #reversed_eids do
-    reversed[reversed_eids[i]] = true
-  end
-
   local u = g.u
-
   local e = g.e
-  local e_after = e.after
-
-  local uv_target = g.uv.target
-  local vu_target = g.vu.target
-
   local prev_uid = u.last
   local prev_eid = e.last
 
   if prev_eid then
-    local eid = e.first
+    local n = #reversed_eids
+    local reversed_set = {}
+    for i = 1, n do
+      reversed_set[reversed_eids[i]] = true
+    end
 
+    local e_after = e.after
+
+    local uv_target = g.uv.target
+    local vu_target = g.vu.target
+
+    local eid = e.first
     local w_max = layer_map[vu_target[eid]] - 1
     local w_min = layer_map[uv_target[eid]] + 1
+
     do
       local eid = eid
-      local reverse = reversed[eid]
+      local reversed = reversed_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
-        if reverse then
-          reversed_eids[#reversed_eids + 1] = eid
+        if reversed then
+          n = n + 1
+          reversed_eids[n] = eid
         end
       end
     end
@@ -55,13 +56,14 @@ return function (g, layer_map, reversed_eids)
       local w_max = layer_map[vu_target[eid]] - 1
       local w_min = layer_map[uv_target[eid]] + 1
       local eid = eid
-      local reverse = reversed[eid]
+      local reversed = reversed_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
-        if reverse then
-          reversed_eids[#reversed_eids + 1] = eid
+        if reversed then
+          n = n + 1
+          reversed_eids[n] = eid
         end
       end
     end
