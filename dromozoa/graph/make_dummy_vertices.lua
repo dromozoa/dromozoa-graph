@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,7 +15,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, layer_map)
+return function (g, layer_map, reversed_eids)
+  local reverse_set = {}
+  for i = 1, #reversed_eids do
+    reverse_set[reversed_eids[i]] = true
+  end
+
   local u = g.u
 
   local e = g.e
@@ -34,10 +39,14 @@ return function (g, layer_map)
     local w_min = layer_map[uv_target[eid]] + 1
     do
       local eid = eid
+      local reverse = reverse_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
+        if reverse then
+          reversed_eids[#reversed_eids + 1] = eid
+        end
       end
     end
 
@@ -46,10 +55,14 @@ return function (g, layer_map)
       local w_max = layer_map[vu_target[eid]] - 1
       local w_min = layer_map[uv_target[eid]] + 1
       local eid = eid
+      local reverse = reverse_set[eid]
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
+        if reverse then
+          reversed_eids[#reversed_eids + 1] = eid
+        end
       end
     end
   end

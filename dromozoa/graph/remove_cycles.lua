@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -181,20 +181,24 @@ return function (g)
 
   local e = g.e
   local e_after = e.after
-  local source = g.vu.target
-  local target = g.uv.target
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
-  local reverse = {}
+  local reverse_eids = {}
   local n = 0
 
   local eid = e.first
   while eid do
-    if order_map[source[eid]] > order_map[target[eid]] then
+    if order_map[uv_target[eid]] < order_map[vu_target[eid]] then
       n = n + 1
-      reverse[n] = eid
+      reverse_eids[n] = eid
     end
     eid = e_after[eid]
   end
 
-  return reverse
+  for i = 1, n do
+    g:reverse_edge(reverse_eids[i])
+  end
+
+  return reverse_eids
 end

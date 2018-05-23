@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,19 +15,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function clone(source)
-  -- not check recursion
-  if type(source) == "table" then
-    local result = {}
-    -- avoid __pairs metamethod
-    for k, v in next, source do
-      rawset(result, clone(k), clone(v))
-    end
-    -- not clone metatable
-    return setmetatable(result, getmetatable(source))
-  else
-    return source
-  end
-end
+return function (g)
+  local e = g.e
+  local e_after = e.after
+  local uv_target = g.uv.target
+  local vu_target = g.vu.target
 
-return clone
+  local remove_eids = {}
+  local remove_uids = {}
+  local n = 0
+
+  local eid = e.first
+  while eid do
+    local uid = uv_target[eid]
+    if uid == vu_target[eid] then
+      n = n + 1
+      remove_eids[n] = eid
+      remove_uids[n] = uid
+    end
+    eid = e_after[eid]
+  end
+
+  for i = 1, n do
+    g:remove_edge(remove_eids[i])
+  end
+
+  return remove_eids, remove_uids
+end

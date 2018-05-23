@@ -32,13 +32,19 @@ end
 g:add_edge(1, 1)
 g:add_edge(1, 2)
 g:add_edge(1, 5)
-g:add_edge(1, 6)
+
+-- g:add_edge(1, 6)
+g:add_edge(6, 1)
+
 g:add_edge(2, 3)
 g:add_edge(3, 4)
 g:add_edge(4, 8)
 g:add_edge(4, 8)
 g:add_edge(5, 7)
-g:add_edge(6, 7)
+
+-- g:add_edge(6, 7)
+g:add_edge(7, 6)
+
 g:add_edge(7, 8)
 
 local dummy_min, layer_map, x = layout(g)
@@ -48,7 +54,7 @@ local function calc_x(x)
 end
 
 local function calc_y(y)
-  return 300 - y * 50
+  return 400 - y * 50
 end
 
 local _ = element
@@ -56,7 +62,7 @@ local svg = _"svg" {
   xmlns = "http://www.w3.org/2000/svg";
   version = "1.1";
   width = 300;
-  height = 300;
+  height = 400;
   _"defs" {
     _"marker" {
       id = "triangle";
@@ -79,29 +85,40 @@ local eid = g.e.first
 while eid do
   local uid = g.vu.target[eid]
   local vid = g.uv.target[eid]
-  local x1 = calc_x(x[uid])
-  local y1 = calc_y(layer_map[uid])
-  local x2 = calc_x(x[vid])
-  local y2 = calc_y(layer_map[vid])
-  local x3 = (x1 + x2) * 0.5
-  local y3 = (y1 + y2) * 0.5
-  --[[
-  svg[#svg + 1] = _"line" {
-    x1 = x1;
-    y1 = y1;
-    x2 = x2;
-    y2 = y2;
-    stroke = colors.black;
-    fill = "none";
-    ["marker-end"] = "url(#triangle)";
-  }
-  ]]
-  svg[#svg + 1] = _"path" {
-    d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
-    stroke = colors.black;
-    fill = "none";
-    ["marker-end"] = "url(#triangle)";
-  }
+  if uid == vid then
+    local x = calc_x(x[uid])
+    local y = calc_y(layer_map[uid])
+    svg[#svg + 1] = _"path" {
+      d = path_data():M(x, y):A(10, 10, 0, 0, 0, x + 20, y):A(10, 10, 0, 0, 0, x, y);
+      stroke = colors.black;
+      fill = "none";
+      ["marker-end"] = "url(#triangle)";
+    }
+  else
+    local x1 = calc_x(x[uid])
+    local y1 = calc_y(layer_map[uid])
+    local x2 = calc_x(x[vid])
+    local y2 = calc_y(layer_map[vid])
+    local x3 = (x1 + x2) * 0.5
+    local y3 = (y1 + y2) * 0.5
+    svg[#svg + 1] = _"line" {
+      x1 = x1;
+      y1 = y1;
+      x2 = x2;
+      y2 = y2;
+      stroke = colors.black;
+      fill = "none";
+      ["marker-end"] = "url(#triangle)";
+    }
+    --[[
+    svg[#svg + 1] = _"path" {
+      d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
+      stroke = colors.black;
+      fill = "none";
+      ["marker-end"] = "url(#triangle)";
+    }
+    ]]
+  end
   eid = g.e.after[eid]
 end
 
