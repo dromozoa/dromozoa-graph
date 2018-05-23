@@ -23,9 +23,9 @@ return function (g, layer_map, reversed_eids)
 
   if prev_eid then
     local n = #reversed_eids
-    local reversed_set = {}
+    local reversed = {}
     for i = 1, n do
-      reversed_set[reversed_eids[i]] = true
+      reversed[reversed_eids[i]] = true
     end
 
     local e_after = e.after
@@ -34,36 +34,49 @@ return function (g, layer_map, reversed_eids)
     local vu_target = g.vu.target
 
     local eid = e.first
-    local w_max = layer_map[vu_target[eid]] - 1
-    local w_min = layer_map[uv_target[eid]] + 1
-
-    do
+    if reversed[eid] then
       local eid = eid
-      local reversed = reversed_set[eid]
+      local w_max = layer_map[vu_target[eid]] - 1
+      local w_min = layer_map[uv_target[eid]] + 1
       for w = w_max, w_min, -1 do
         local wid = g:add_vertex()
         layer_map[wid] = w
         eid = g:subdivide_edge(eid, wid)
-        if reversed then
-          n = n + 1
-          reversed_eids[n] = eid
-        end
+        n = n + 1
+        reversed_eids[n] = eid
+      end
+    else
+      local eid = eid
+      local w_max = layer_map[vu_target[eid]] - 1
+      local w_min = layer_map[uv_target[eid]] + 1
+      for w = w_max, w_min, -1 do
+        local wid = g:add_vertex()
+        layer_map[wid] = w
+        eid = g:subdivide_edge(eid, wid)
       end
     end
 
     while eid ~= prev_eid do
       eid = e_after[eid]
-      local w_max = layer_map[vu_target[eid]] - 1
-      local w_min = layer_map[uv_target[eid]] + 1
-      local eid = eid
-      local reversed = reversed_set[eid]
-      for w = w_max, w_min, -1 do
-        local wid = g:add_vertex()
-        layer_map[wid] = w
-        eid = g:subdivide_edge(eid, wid)
-        if reversed then
+      if reversed[eid] then
+        local eid = eid
+        local w_max = layer_map[vu_target[eid]] - 1
+        local w_min = layer_map[uv_target[eid]] + 1
+        for w = w_max, w_min, -1 do
+          local wid = g:add_vertex()
+          layer_map[wid] = w
+          eid = g:subdivide_edge(eid, wid)
           n = n + 1
           reversed_eids[n] = eid
+        end
+      else
+        local eid = eid
+        local w_max = layer_map[vu_target[eid]] - 1
+        local w_min = layer_map[uv_target[eid]] + 1
+        for w = w_max, w_min, -1 do
+          local wid = g:add_vertex()
+          layer_map[wid] = w
+          eid = g:subdivide_edge(eid, wid)
         end
       end
     end
