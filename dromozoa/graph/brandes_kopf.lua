@@ -105,6 +105,13 @@ local function vertical_alignment(u, vu, layers, index_map, mark, layer_first, l
   local first
   local last
   local step
+  if left then
+    first = 1
+    step = 1
+  else
+    last = 1
+    step = -1
+  end
 
   local eids = {}
   local condition
@@ -113,13 +120,9 @@ local function vertical_alignment(u, vu, layers, index_map, mark, layer_first, l
     local uids = layers[i]
 
     if left then
-      first = 1
       last = #uids
-      step = 1
     else
       first = #uids
-      last = 1
-      step = -1
     end
 
     local a
