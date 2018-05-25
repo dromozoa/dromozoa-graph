@@ -38,7 +38,6 @@ local function greedy_linear_ordering(g)
   local source_min = 0
   local source_max = 0
   local queue = binary_heap()
-
   local order_map = {}
   local order_min = 1
   local order_max = u.n
