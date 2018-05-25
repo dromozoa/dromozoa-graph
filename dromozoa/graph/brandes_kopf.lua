@@ -223,25 +223,15 @@ local function vertical_alignment_right(u, vu, layers, index_map, mark, layer_fi
   return root, align
 end
 
-local function place_block(layer_map, layers, index_map, root, align, left, sink, shift, x, vid)
+local function place_block_left(layer_map, layers, index_map, root, align, sink, shift, x, vid)
   if not x[vid] then
     x[vid] = 0
     local wid = vid
     repeat
       local i = index_map[wid]
-      local wids = layers[layer_map[wid]]
-      local uid
-      if left then
-        if i > 1 then
-          uid = root[wids[i - 1]]
-        end
-      else
-        if i < #wids then
-          uid = root[wids[i + 1]]
-        end
-      end
-      if uid then
-        place_block(layer_map, layers, index_map, root, align, left, sink, shift, x, uid)
+      if i > 1 then
+        local uid = root[layers[layer_map[wid]][i - 1]]
+        place_block_left(layer_map, layers, index_map, root, align, sink, shift, x, uid)
         local u_sink = sink[uid]
         local v_sink = sink[vid]
         if v_sink == vid then
@@ -268,7 +258,43 @@ local function place_block(layer_map, layers, index_map, root, align, left, sink
   end
 end
 
-local function horizontal_compaction(u, layer_map, layers, index_map, root, align, left)
+local function place_block_right(layer_map, layers, index_map, root, align, sink, shift, x, vid)
+  if not x[vid] then
+    x[vid] = 0
+    local wid = vid
+    repeat
+      local i = index_map[wid]
+      local wids = layers[layer_map[wid]]
+      if i < #wids then
+        local uid = root[wids[i + 1]]
+        place_block_right(layer_map, layers, index_map, root, align, sink, shift, x, uid)
+        local u_sink = sink[uid]
+        local v_sink = sink[vid]
+        if v_sink == vid then
+          sink[vid] = u_sink
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        elseif v_sink == u_sink then
+          local b = x[uid] + 1
+          if x[vid] < b then
+            x[vid] = b
+          end
+        else
+          local a = shift[u_sink]
+          local b = x[vid] - x[uid] - 1
+          if not a or a > b then
+            shift[u_sink] = b
+          end
+        end
+      end
+      wid = align[wid]
+    until wid == vid
+  end
+end
+
+local function horizontal_compaction_left(u, layer_map, layers, index_map, root, align)
   local u_first = u.first
   local u_after = u.after
 
@@ -286,48 +312,72 @@ local function horizontal_compaction(u, layer_map, layers, index_map, root, alig
   local uid = u_first
   while uid do
     if root[uid] == uid then
-      place_block(layer_map, layers, index_map, root, align, left, sink, shift, rx, uid)
+      place_block_left(layer_map, layers, index_map, root, align, sink, shift, rx, uid)
     end
     uid = u_after[uid]
   end
 
-  if left then
-    local uid = u_first
-    while uid do
-      local vid = root[uid]
-      local s = shift[sink[vid]]
-      if s then
-        ax[uid] = rx[vid] + s
-      else
-        ax[uid] = rx[vid]
-      end
-      uid = u_after[uid]
+  local uid = u_first
+  while uid do
+    local vid = root[uid]
+    local s = shift[sink[vid]]
+    if s then
+      ax[uid] = rx[vid] + s
+    else
+      ax[uid] = rx[vid]
     end
-  else
-    local x
-    local max = 0
+    uid = u_after[uid]
+  end
 
-    local uid = u_first
-    while uid do
-      local vid = root[uid]
-      local s = shift[sink[vid]]
-      if s then
-        x = rx[vid] + s
-      else
-        x = rx[vid]
-      end
-      ax[uid] = x
-      if max < x then
-        max = x
-      end
-      uid = u_after[uid]
-    end
+  return ax
+end
 
-    local uid = u_first
-    while uid do
-      ax[uid] = max - ax[uid]
-      uid = u_after[uid]
+local function horizontal_compaction_right(u, layer_map, layers, index_map, root, align)
+  local u_first = u.first
+  local u_after = u.after
+
+  local sink = {}
+  local shift = {}
+  local rx = {}
+  local ax = {}
+
+  local uid = u_first
+  while uid do
+    sink[uid] = uid
+    uid = u_after[uid]
+  end
+
+  local uid = u_first
+  while uid do
+    if root[uid] == uid then
+      place_block_right(layer_map, layers, index_map, root, align, sink, shift, rx, uid)
     end
+    uid = u_after[uid]
+  end
+
+  local x
+  local max = 0
+
+  local uid = u_first
+  while uid do
+    local vid = root[uid]
+    local s = shift[sink[vid]]
+    if s then
+      x = rx[vid] + s
+    else
+      x = rx[vid]
+    end
+    ax[uid] = x
+    if max < x then
+      max = x
+    end
+    uid = u_after[uid]
+  end
+
+  local uid = u_first
+  while uid do
+    ax[uid] = max - ax[uid]
+    uid = u_after[uid]
   end
 
   return ax
@@ -350,15 +400,10 @@ return function (g, layer_map, layers, dummy_uid)
   end
 
   local mark = preprocessing(g, layers, index_map, dummy_uid)
-
-  local root, align = vertical_alignment_left(u, vu, layers, index_map, mark, layer_max, 1, -1)
-  local xul = horizontal_compaction(u, layer_map, layers, index_map, root, align, true)
-  local root, align = vertical_alignment_right(u, vu, layers, index_map, mark, layer_max, 1, -1, false)
-  local xur = horizontal_compaction(u, layer_map, layers, index_map, root, align, false)
-  local root, align = vertical_alignment_left(u, uv, layers, index_map, mark, 1, layer_max, 1)
-  local xll = horizontal_compaction(u, layer_map, layers, index_map, root, align, true)
-  local root, align = vertical_alignment_right(u, uv, layers, index_map, mark, 1, layer_max, 1, false)
-  local xlr = horizontal_compaction(u, layer_map, layers, index_map, root, align, false)
+  local xul = horizontal_compaction_left(u, layer_map, layers, index_map, vertical_alignment_left(u, vu, layers, index_map, mark, layer_max, 1, -1))
+  local xll = horizontal_compaction_left(u, layer_map, layers, index_map, vertical_alignment_left(u, uv, layers, index_map, mark, 1, layer_max, 1))
+  local xur = horizontal_compaction_right(u, layer_map, layers, index_map, vertical_alignment_right(u, vu, layers, index_map, mark, layer_max, 1, -1))
+  local xlr = horizontal_compaction_right(u, layer_map, layers, index_map, vertical_alignment_right(u, uv, layers, index_map, mark, 1, layer_max, 1))
 
   local x = {}
 
