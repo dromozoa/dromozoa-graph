@@ -139,176 +139,27 @@ local function vertical_alignment(u, vu, layers, index_map, mark, layer_first, l
       end
 
       if en > 0 then
-        if align[uid] == uid then
-          if en > 1 then
-            if en == 2 then
-              local eid1 = eids[1]
-              local eid2 = eids[2]
-              if not compare(eid1, eid2) then
-                eids[1] = eid2
-                eids[2] = eid1
-              end
-            else
-              for k = en + 1, #eids do
-                eids[k] = nil
-              end
-              sort(eids, compare)
-            end
-          end
-
-          if en % 2 == 1 then
-            local m = (en + 1) / 2
-            local eid = eids[m]
-            if not mark[eid] then
-              local vid = vu_target[eid]
-              local b = index_map[vid]
-              local condition
-              if not a then
-                condition = true
-              elseif left then
-                condition = a < b
-              else
-                condition = a > b
-              end
-              if condition then
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                a = b
-              end
-            end
-          else
-            local m = en / 2
-            local eid = eids[m]
-            if not mark[eid] then
-              local vid = vu_target[eid]
-              local b = index_map[vid]
-              local condition
-              if not a then
-                condition = true
-              elseif left then
-                condition = a < b
-              else
-                condition = a > b
-              end
-              if condition then
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                a = b
-              end
-            end
-
-            if align[uid] == uid then
-              local eid = eids[m + 1]
-              if not mark[eid] then
-                local vid = vu_target[eid]
-                local b = index_map[vid]
-                if not a then
-                  condition = true
-                elseif left then
-                  condition = a < b
-                else
-                  condition = a > b
-                end
-                if condition then
-                  local wid = root[vid]
-                  root[uid] = wid
-                  align[vid] = uid
-                  align[uid] = wid
-                  a = b
-                end
-              end
-            end
-          end
+        for k = en + 1, #eids do
+          eids[k] = nil
         end
-      end
-    end
-  end
+        sort(eids, compare)
 
-  return root, align
-end
+        local m1
+        local m2
+        if en % 2 == 0 then
+          m1 = en / 2
+          m2 = m1 + 1
+        else
+          m1 = (en + 1) / 2
+          m2 = m1
+        end
 
-
-local function vertical_alignment(u, vu, layers, index_map, mark, layer_first, layer_last, layer_step, left)
-  local u_after = u.after
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
-
-  local compare
-  if left then
-    compare = function (eid1, eid2)
-      return index_map[vu_target[eid1]] < index_map[vu_target[eid2]]
-    end
-  else
-    compare = function (eid1, eid2)
-      return index_map[vu_target[eid1]] > index_map[vu_target[eid2]]
-    end
-  end
-
-  local root = {}
-  local align = {}
-
-  local uid = u.first
-  while uid do
-    root[uid] = uid
-    align[uid] = uid
-    uid = u_after[uid]
-  end
-
-  local first
-  local last
-  local step
-  if left then
-    first = 1
-    step = 1
-  else
-    last = 1
-    step = -1
-  end
-
-  local eids = {}
-  local condition
-
-  for i = layer_first, layer_last, layer_step do
-    local uids = layers[i]
-
-    if left then
-      last = #uids
-    else
-      first = #uids
-    end
-
-    local a
-
-    for j = first, last, step do
-      local uid = uids[j]
-      local en = 0
-
-      local eid = vu_first[uid]
-      while eid do
-        en = en + 1
-        eids[en] = eid
-        eid = vu_after[eid]
-      end
-
-      if en > 0 then
-        if align[uid] == uid then
-          for k = en + 1, #eids do
-            eids[k] = nil
-          end
-          sort(eids, compare)
-
-          if en % 2 == 1 then
-            local m = (en + 1) / 2
+        for m = m1, m2 do
+          if align[uid] == uid then
             local eid = eids[m]
             if not mark[eid] then
               local vid = vu_target[eid]
               local b = index_map[vid]
-              local condition
               if not a then
                 condition = true
               elseif left then
@@ -322,50 +173,6 @@ local function vertical_alignment(u, vu, layers, index_map, mark, layer_first, l
                 align[vid] = uid
                 align[uid] = wid
                 a = b
-              end
-            end
-          else
-            local m = en / 2
-            local eid = eids[m]
-            if not mark[eid] then
-              local vid = vu_target[eid]
-              local b = index_map[vid]
-              local condition
-              if not a then
-                condition = true
-              elseif left then
-                condition = a < b
-              else
-                condition = a > b
-              end
-              if condition then
-                local wid = root[vid]
-                root[uid] = wid
-                align[vid] = uid
-                align[uid] = wid
-                a = b
-              end
-            end
-
-            if align[uid] == uid then
-              local eid = eids[m + 1]
-              if not mark[eid] then
-                local vid = vu_target[eid]
-                local b = index_map[vid]
-                if not a then
-                  condition = true
-                elseif left then
-                  condition = a < b
-                else
-                  condition = a > b
-                end
-                if condition then
-                  local wid = root[vid]
-                  root[uid] = wid
-                  align[vid] = uid
-                  align[uid] = wid
-                  a = b
-                end
               end
             end
           end
