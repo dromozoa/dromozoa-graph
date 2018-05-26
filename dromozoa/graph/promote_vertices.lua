@@ -60,13 +60,11 @@ return function (g, layer_map)
       if vu_first[uid] then
         if promote(vu_first, vu_after, vu_target, layer_map_transaction, d_map, uid) < 0 then
           promoted = true
-          -- commit
           for vid, v_layer in next, layer_map_transaction do
             layer_map[vid] = v_layer
             layer_map_transaction[vid] = nil
           end
         else
-          -- rollback
           for vid, v_layer in next, layer_map_transaction do
             layer_map_transaction[vid] = nil
           end
