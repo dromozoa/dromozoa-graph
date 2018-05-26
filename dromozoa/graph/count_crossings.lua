@@ -22,20 +22,20 @@ local function count(uv, order1, order2)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local order2_map = {}
+  local order_map = {}
   for i = 1, #order2 do
-    order2_map[order2[i]] = i
+    order_map[order2[i]] = i
   end
 
   local sequence = {}
   local p = {}
   for i = 1, #order1 do
     local uid = order1[i]
-    local eid = uv_first[uid]
     local n = 0
+    local eid = uv_first[uid]
     while eid do
       n = n + 1
-      p[n] = order2_map[uv_target[eid]]
+      p[n] = order_map[uv_target[eid]]
       eid = uv_after[eid]
     end
     sort(p)
@@ -45,31 +45,31 @@ local function count(uv, order1, order2)
     end
   end
 
-  local first_index = 1
-  while first_index < #order2 do
-    first_index = first_index * 2
+  local index = 1
+  while index < #order2 do
+    index = index * 2
   end
-  local tree_size = 2 * first_index - 1
+  local tree_size = 2 * index - 1
   local tree = {}
   for i = 1, tree_size do
     tree[i] = 0
   end
 
-  local cross_count = 0
+  local count = 0
   for i = 1, #sequence do
-    local index = sequence[i] + first_index
-    tree[index] = tree[index] + 1
-    while index > 1 do
-      if index % 2 == 0 then
-        cross_count = cross_count + tree[index + 1]
+    local j = sequence[i] + index
+    tree[j] = tree[j] + 1
+    while j > 1 do
+      if j % 2 == 0 then
+        count = count + tree[j + 1]
       end
-      index = index / 2
-      index = index - index % 1
-      tree[index] = tree[index] + 1
+      j = j / 2
+      j = j - j % 1
+      tree[j] = tree[j] + 1
     end
   end
 
-  return cross_count
+  return count
 end
 
 return function (g, order1, order2)
