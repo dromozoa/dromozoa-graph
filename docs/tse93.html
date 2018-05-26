@@ -289,6 +289,19 @@ end
 <h2>Vertex Ordering Within Ranks</h2>
 
 <p>
+頂点重みづけによる手法として重心法 (the median function) と中央値法 (the median function) が有名である。
+頂点\(v\)について、隣接するランクの接続頂点の位置のリストを\(P\)とする。
+近接ノードの位置は、現在の順序における序数で表される。
+重心法では、\(P\)の要素の平均を\(v\)の重みと定義する。
+中央値法では、\(P\)の要素の中央値を\(v\)の重みと定義する。
+\(P\)の要素数が偶数である場合、中央値は2個存在する。
+そのため、常に左の中央値を用いるか、常に右の中央値を用いるかの2個の中央値法が存在しうる。
+中央値法は重心法よりも常に良い結果になる。
+二階層グラフにおいて中央値法の結果は最小交差数の三倍以上にならないとEadesとWolmaldが示したように、若干理論的に有利である。
+重心法はこのような下限を持たない。
+</p>
+
+<p>
 ランクの割りあての後、1ランクよりも離れたノード間のエッジは、一時的または仮想ノード間の単位長エッジの連鎖に置き換えられる。
 仮想ノードは中間ランクに配置され、元のグラフを近接するランクのノードだけに接続するエッジを持つグラフに変換する。
 このパスでは自己エッジは無視され、多重エッジは前パスと同様にマージされる。
@@ -302,9 +315,52 @@ end
     transpose(order);
     if crossing(order) &lt; crossing(best) then
       best = order;
-    end
   end
   return best;
+end</pre>
+
+<pre>procedure wmedian(order, iter)
+  if iter mod 2 == 0 then
+    for r = 1 to Max_rank do
+      for v in order[r] do
+        median[v] = median_value(v, r - 1);
+      sort(order[r], median);
+    end
+  else ...
+  endif
+end
+
+procedure median_value(v, adj_rank)
+  P = adj_position(v, adj_rank);
+  m = |P| / 2;
+  if |P| == 0 then
+    return -1.0;
+  elseif |P| mod 2 == 1 then
+    return P[m];
+  elseif |P| == 2 then
+    return (P[0] + P[1]) / 2;
+  else
+    left = P[m - 1] - P[0];
+    right = P[|P| - 1] - P[m]
+    return (P[m - 1] * right + P[m] * left) / (left + right)
+  endif
+end</pre>
+
+<pre>procedure transpose(rank)
+  improved = True;
+  while improved do
+    improved = False;
+    for r = 0 to Max_rank do
+      for i = 0 to |rank[r]| - 2 do
+        v = rank[r][i];
+        w = rank[r][i + 1];
+        if crossing(v, w) &gt; crossing(w, v) then
+          improved = True;
+          exchange(rank[r][i], rank[r][i + 1]);
+        endif
+      end
+    end
+  end
 end</pre>
 
 </div>
