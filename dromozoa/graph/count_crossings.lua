@@ -22,37 +22,28 @@ local function count(uv, order1, order2)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local order1_map = {}
-  for i = 1, #order1 do
-    order1_map[order1[i]] = i
-  end
-
   local order2_map = {}
   for i = 1, #order2 do
     order2_map[order2[i]] = i
   end
 
   local sequence = {}
+  local p = {}
   for i = 1, #order1 do
     local uid = order1[i]
-    local eid = uv.first[uid]
+    local eid = uv_first[uid]
+    local n = 0
     while eid do
-      sequence[#sequence + 1] = {
-        eid = eid;
-        u = order1_map[uid];
-        v = order2_map[uv_target[eid]];
-      }
-      eid = uv.after[eid]
+      n = n + 1
+      p[n] = order2_map[uv_target[eid]]
+      eid = uv_after[eid]
+    end
+    sort(p)
+    for i = 1, n do
+      sequence[#sequence + 1] = p[i]
+      p[i] = nil
     end
   end
-
-  sort(sequence, function (a, b)
-    if a.u == b.u then
-      return a.v < b.v
-    else
-      return a.u < b.u
-    end
-  end)
 
   local first_index = 1
   while first_index < #order2 do
@@ -66,7 +57,7 @@ local function count(uv, order1, order2)
 
   local cross_count = 0
   for i = 1, #sequence do
-    local index = sequence[i].v + first_index
+    local index = sequence[i] + first_index
     tree[index] = tree[index] + 1
     while index > 1 do
       if index % 2 == 0 then
