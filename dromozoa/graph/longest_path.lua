@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function visit(uv_first, uv_after, uv_target, color, layer_map, uid)
+local function visit(uv_first, uv_after, uv_target, layer_map, color, uid)
   color[uid] = 1
 
   local u_layer = 0
@@ -25,7 +25,7 @@ local function visit(uv_first, uv_after, uv_target, color, layer_map, uid)
     local vid = uv_target[eid]
     local c = color[vid]
     if not c then
-      local v_layer = visit(uv_first, uv_after, uv_target, color, layer_map, vid)
+      local v_layer = visit(uv_first, uv_after, uv_target, layer_map, color, vid)
       if u_layer < v_layer then
         u_layer = v_layer
       end
@@ -61,7 +61,7 @@ return function (g)
   local uid = u.first
   while uid do
     if not color[uid] then
-      visit(uv_first, uv_after, uv_target, color, layer_map, uid)
+      visit(uv_first, uv_after, uv_target, layer_map, color, uid)
     end
     uid = u_after[uid]
   end

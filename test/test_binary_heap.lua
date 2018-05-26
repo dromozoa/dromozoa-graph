@@ -19,16 +19,16 @@ local binary_heap = require "dromozoa.graph.binary_heap"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
-local function check(x, expect)
+local function check(source, expect)
   if verbose then
-    print("result", table.concat(x.heap, " "))
+    print("result", table.concat(source.heap, " "))
     print("expect", table.concat(expect, " "))
   end
   local n = #expect
-  assert(n == x.n)
-  assert(n == #x.heap)
+  assert(n == source.n)
+  assert(n == #source.heap)
   for i = 1, n do
-    assert(x.heap[i] == expect[i])
+    assert(source.heap[i] == expect[i])
   end
 end
 
