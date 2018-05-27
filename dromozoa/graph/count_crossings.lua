@@ -22,9 +22,20 @@ local function count(uv, order1, order2)
   local uv_after = uv.after
   local uv_target = uv.target
 
+  local n = #order2
+
   local order_map = {}
-  for i = 1, #order2 do
+  for i = 1, n do
     order_map[order2[i]] = i
+  end
+
+  local index = 1
+  while index < n do
+    index = index * 2
+  end
+  local tree = {}
+  for i = 1, index * 2 - 1 do
+    tree[i] = 0
   end
 
   local positions = {}
@@ -47,16 +58,6 @@ local function count(uv, order1, order2)
       positions[n + j] = p[j]
     end
     n = n + m
-  end
-
-  local index = 1
-  while index < #order2 do
-    index = index * 2
-  end
-  local tree_size = 2 * index - 1
-  local tree = {}
-  for i = 1, tree_size do
-    tree[i] = 0
   end
 
   local count = 0
