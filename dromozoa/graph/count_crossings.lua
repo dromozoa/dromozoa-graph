@@ -18,11 +18,11 @@
 local sort = table.sort
 
 local function count(uv, order1, order2)
-  local uv_first = uv.first
-  local uv_after = uv.after
-  local uv_target = uv.target
-
   local n = #order2
+  if n < 2 then
+    return 0
+  end
+
   local order_map = {}
   for i = 1, n do
     order_map[order2[i]] = i
@@ -35,6 +35,10 @@ local function count(uv, order1, order2)
   for i = 1, index * 2 - 1 do
     tree[i] = 0
   end
+
+  local uv_first = uv.first
+  local uv_after = uv.after
+  local uv_target = uv.target
 
   local positions = {}
   local n = 0
