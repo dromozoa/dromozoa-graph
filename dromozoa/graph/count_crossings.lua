@@ -27,7 +27,7 @@ local function count(uv, order1, order2)
     order_map[order2[i]] = i
   end
 
-  local sequence = {}
+  local positions = {}
   local p = {}
   for i = 1, #order1 do
     local uid = order1[i]
@@ -38,10 +38,12 @@ local function count(uv, order1, order2)
       p[n] = order_map[uv_target[eid]]
       eid = uv_after[eid]
     end
+    for j = n + 1, #p do
+      p[j] = nil
+    end
     sort(p)
-    for i = 1, n do
-      sequence[#sequence + 1] = p[i]
-      p[i] = nil
+    for j = 1, n do
+      positions[#positions + 1] = p[j]
     end
   end
 
@@ -56,15 +58,16 @@ local function count(uv, order1, order2)
   end
 
   local count = 0
-  for i = 1, #sequence do
-    local j = sequence[i] + index
+  for i = 1, #positions do
+    local j = positions[i] + index
     tree[j] = tree[j] + 1
     while j > 1 do
       if j % 2 == 0 then
         count = count + tree[j + 1]
+        j = j / 2
+      else
+        j = (j - 1) / 2
       end
-      j = j / 2
-      j = j - j % 1
       tree[j] = tree[j] + 1
     end
   end
