@@ -28,23 +28,25 @@ local function count(uv, order1, order2)
   end
 
   local positions = {}
+  local n = 0
   local p = {}
   for i = 1, #order1 do
     local uid = order1[i]
-    local n = 0
+    local m = 0
     local eid = uv_first[uid]
     while eid do
-      n = n + 1
-      p[n] = order_map[uv_target[eid]]
+      m = m + 1
+      p[m] = order_map[uv_target[eid]]
       eid = uv_after[eid]
     end
-    for j = n + 1, #p do
+    for j = m + 1, #p do
       p[j] = nil
     end
     sort(p)
-    for j = 1, n do
-      positions[#positions + 1] = p[j]
+    for j = 1, m do
+      positions[n + j] = p[j]
     end
+    n = n + m
   end
 
   local index = 1
