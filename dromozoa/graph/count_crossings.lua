@@ -23,12 +23,10 @@ local function count(uv, order1, order2)
   local uv_target = uv.target
 
   local n = #order2
-
   local order_map = {}
   for i = 1, n do
     order_map[order2[i]] = i
   end
-
   local index = 1
   while index < n do
     index = index * 2
