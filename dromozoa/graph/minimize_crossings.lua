@@ -29,14 +29,14 @@ local function copy(source_orders, target_orders)
   end
 end
 
-local function wmedian(uv, orders, order_first, order_last, order_step)
+local function wmedian(uv, layers, order_first, order_last, order_step)
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
 
   for i = order_first + order_step, order_last, order_step do
-    local north = orders[i]
-    local south = orders[i - order_step]
+    local north = layers[i]
+    local south = layers[i - order_step]
 
     local order_map = {}
     for j = 1, #south do
@@ -96,34 +96,34 @@ local function wmedian(uv, orders, order_first, order_last, order_step)
       end
     end
 
-    orders[i] = order
+    layers[i] = order
   end
 end
 
-local function crossing(g, order, orders, i)
+local function crossing(g, order, layers, i)
   local count = 0
-  if i < #orders then
-    count = count + count_crossings(g, order, orders[i + 1])
+  if i < #layers then
+    count = count + count_crossings(g, order, layers[i + 1])
   end
   if i > 1 then
-    count = count + count_crossings(g, orders[i - 1], order)
+    count = count + count_crossings(g, layers[i - 1], order)
   end
   return count
 end
 
-local function transpose(g, orders)
+local function transpose(g, layers)
   local improved = true
   while improved do
     improved = false
-    for i = 1, #orders do
-      local order = orders[i]
+    for i = 1, #layers do
+      local order = layers[i]
       for j = 1, #order - 1 do
         local uid = order[j]
         local vid = order[j + 1]
-        local c1 = crossing(g, order, orders, i)
+        local c1 = crossing(g, order, layers, i)
         order[j] = vid
         order[j + 1] = uid
-        local c2 = crossing(g, order, orders, i)
+        local c2 = crossing(g, order, layers, i)
         if c1 > c2 then
           improved = true
         else
@@ -135,36 +135,36 @@ local function transpose(g, orders)
   end
 end
 
-local function crossing_g(g, orders)
+local function crossing_g(g, layers)
   local count = 0
-  local order1 = orders[1]
-  for i = 2, #orders do
-    local order2 = orders[i]
+  local order1 = layers[1]
+  for i = 2, #layers do
+    local order2 = layers[i]
     count = count + count_crossings(g, order1, order2)
     order1 = order2
   end
   return count
 end
 
-return function (g, orders)
-  local n = #orders
+return function (g, layers)
+  local n = #layers
 
   local best = {}
   for i = 1, n do
     best[i] = {}
   end
-  copy(orders, best)
+  copy(layers, best)
 
   for i = 1, 12 do
-    wmedian(g.uv, orders, 1, n, 1)
-    transpose(g, orders)
-    if crossing_g(g, orders) < crossing_g(g, best) then
-      copy(orders, best)
+    wmedian(g.uv, layers, 1, n, 1)
+    transpose(g, layers)
+    if crossing_g(g, layers) < crossing_g(g, best) then
+      copy(layers, best)
     end
-    wmedian(g.vu, orders, n, 1, -1)
-    transpose(g, orders)
-    if crossing_g(g, orders) < crossing_g(g, best) then
-      copy(orders, best)
+    wmedian(g.vu, layers, n, 1, -1)
+    transpose(g, layers)
+    if crossing_g(g, layers) < crossing_g(g, best) then
+      copy(layers, best)
     end
   end
 
