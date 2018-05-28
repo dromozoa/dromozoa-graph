@@ -64,7 +64,7 @@ local function count(uv, order1, order2)
 
   local count = 0
   for i = 1, #positions do
-    local j = positions[i] + index
+    local j = positions[i] + index - 1
     tree[j] = tree[j] + 1
     while j > 1 do
       if j % 2 == 0 then
