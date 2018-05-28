@@ -16,7 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local count_crossings = require "dromozoa.graph.count_crossings"
+local count_crossings_bilayer = require "dromozoa.graph.count_crossings_bilayer"
 local minimize_crossings = require "dromozoa.graph.minimize_crossings"
 
 local verbose = os.getenv "VERBOSE" == "1"
@@ -59,17 +59,17 @@ local layers = {
   { v1 };
 }
 
-assert(count_crossings(g, layers[1], layers[2]) == 3)
-assert(count_crossings(g, layers[2], layers[3]) == 2)
-assert(count_crossings(g, layers[3], layers[4]) == 0)
-assert(count_crossings(g, layers[4], layers[5]) == 0)
+assert(count_crossings_bilayer(g, layers[1], layers[2]) == 3)
+assert(count_crossings_bilayer(g, layers[2], layers[3]) == 2)
+assert(count_crossings_bilayer(g, layers[3], layers[4]) == 0)
+assert(count_crossings_bilayer(g, layers[4], layers[5]) == 0)
 
 local layers = minimize_crossings(g, layers)
 
-assert(count_crossings(g, layers[1], layers[2]) == 0)
-assert(count_crossings(g, layers[2], layers[3]) == 0)
-assert(count_crossings(g, layers[3], layers[4]) == 0)
-assert(count_crossings(g, layers[4], layers[5]) == 0)
+assert(count_crossings_bilayer(g, layers[1], layers[2]) == 0)
+assert(count_crossings_bilayer(g, layers[2], layers[3]) == 0)
+assert(count_crossings_bilayer(g, layers[3], layers[4]) == 0)
+assert(count_crossings_bilayer(g, layers[4], layers[5]) == 0)
 
 if verbose then
   for i = 1, #layers do

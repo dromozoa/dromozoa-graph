@@ -48,5 +48,5 @@ local layers = {
   { n0, n1, n2, n3, n4, n5 };
 }
 
-local count = count_crossings(g, layers[1], layers[2])
+local count = count_crossings(g, layers)
 assert(count == 12)
