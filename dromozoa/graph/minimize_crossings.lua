@@ -34,7 +34,6 @@ local function wmedian(uv, orders, order_first, order_last, order_step)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  -- 最初の階層はなにもしない
   for i = order_first + order_step, order_last, order_step do
     local north = orders[i]
     local south = orders[i - order_step]
@@ -122,12 +121,10 @@ local function transpose(g, orders)
         local uid = order[j]
         local vid = order[j + 1]
         local c1 = crossing(g, order, orders, i)
-        -- exchange
         order[j] = vid
         order[j + 1] = uid
         local c2 = crossing(g, order, orders, i)
         if c1 > c2 then
-          -- print("tr", i, j, uid, vid)
           improved = true
         else
           order[j] = uid
