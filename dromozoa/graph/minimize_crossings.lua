@@ -19,10 +19,10 @@ local count_crossings = require "dromozoa.graph.count_crossings"
 
 local sort = table.sort
 
-local function copy(source_orders, target_orders)
-  for i = 1, #source_orders do
-    local source_order = source_orders[i]
-    local target_order = target_orders[i]
+local function copy(source_layers, target_layers)
+  for i = 1, #source_layers do
+    local source_order = source_layers[i]
+    local target_order = target_layers[i]
     for j = 1, #source_order do
       target_order[j] = source_order[j]
     end
