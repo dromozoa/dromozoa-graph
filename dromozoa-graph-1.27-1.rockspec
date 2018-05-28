@@ -27,6 +27,5 @@ build = {
     ["dromozoa.graph.promote_vertices"] = "dromozoa/graph/promote_vertices.lua";
     ["dromozoa.graph.remove_cycles"] = "dromozoa/graph/remove_cycles.lua";
     ["dromozoa.graph.remove_self_edges"] = "dromozoa/graph/remove_self_edges.lua";
-    ["dromozoa.graph.topological_sort"] = "dromozoa/graph/topological_sort.lua";
   };
 }
