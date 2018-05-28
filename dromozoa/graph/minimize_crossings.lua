@@ -29,14 +29,14 @@ local function copy(source_layers, target_layers)
   end
 end
 
-local function wmedian(uv, layers, order_first, order_last, order_step)
+local function wmedian(uv, layers, layer_first, layer_last, layer_step)
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
 
-  for i = order_first + order_step, order_last, order_step do
+  for i = layer_first + layer_step, layer_last, layer_step do
     local north = layers[i]
-    local south = layers[i - order_step]
+    local south = layers[i - layer_step]
 
     local order_map = {}
     for j = 1, #south do
