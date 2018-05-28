@@ -19,7 +19,7 @@ local count_crossings = require "dromozoa.graph.count_crossings"
 
 local sort = table.sort
 
-local function copy(source_layers, target_layers)
+local function save(source_layers, target_layers)
   for i = 1, #source_layers do
     local source_order = source_layers[i]
     local target_order = target_layers[i]
@@ -34,6 +34,11 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
   local uv_after = uv.after
   local uv_target = uv.target
 
+  local median_map = {}
+  local compare = function (uid, vid)
+    return median_map[uid] < median_map[vid]
+  end
+
   local south = layers[layer_first]
   for i = layer_first + layer_step, layer_last, layer_step do
     local north = layers[i]
@@ -46,7 +51,6 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
     local p = {}
     local n = 0
     local order = {}
-    local median_map = {}
     for j = 1, #north do
       local uid = north[j]
       local p = {}
@@ -84,9 +88,7 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
       end
     end
 
-    sort(order, function (a, b)
-      return median_map[a] < median_map[b]
-    end)
+    sort(order, compare)
 
     local j = 0
     for k = 1, #order do
@@ -103,42 +105,7 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
   end
 end
 
-local function crossing(g, order, layers, i)
-  local count = 0
-  if i < #layers then
-    count = count + count_crossings(g, order, layers[i + 1])
-  end
-  if i > 1 then
-    count = count + count_crossings(g, layers[i - 1], order)
-  end
-  return count
-end
-
-local function transpose(g, layers)
-  local improved = true
-  while improved do
-    improved = false
-    for i = 1, #layers do
-      local order = layers[i]
-      for j = 1, #order - 1 do
-        local uid = order[j]
-        local vid = order[j + 1]
-        local c1 = crossing(g, order, layers, i)
-        order[j] = vid
-        order[j + 1] = uid
-        local c2 = crossing(g, order, layers, i)
-        if c1 > c2 then
-          improved = true
-        else
-          order[j] = uid
-          order[j + 1] = vid
-        end
-      end
-    end
-  end
-end
-
-local function crossing_g(g, layers)
+local function count(g, layers)
   local count = 0
   local order1 = layers[1]
   for i = 2, #layers do
@@ -156,18 +123,21 @@ return function (g, layers)
   for i = 1, n do
     best[i] = {}
   end
-  copy(layers, best)
+  save(layers, best)
+  local b = count(g, best)
 
   for i = 1, 12 do
     median(g.uv, layers, 1, n, 1)
-    transpose(g, layers)
-    if crossing_g(g, layers) < crossing_g(g, best) then
-      copy(layers, best)
+    local c = count(g, layers)
+    if c < b then
+      save(layers, best)
+      b = c
     end
     median(g.vu, layers, n, 1, -1)
-    transpose(g, layers)
-    if crossing_g(g, layers) < crossing_g(g, best) then
-      copy(layers, best)
+    local c = count(g, layers)
+    if c < b then
+      save(layers, best)
+      b = c
     end
   end
 
