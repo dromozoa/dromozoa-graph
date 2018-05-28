@@ -66,15 +66,10 @@ assert(count_crossings(g, layers[4], layers[5]) == 0)
 
 local layers = minimize_crossings(g, layers)
 
-print(count_crossings(g, layers[1], layers[2]))
-print(count_crossings(g, layers[2], layers[3]))
-print(count_crossings(g, layers[3], layers[4]))
-print(count_crossings(g, layers[4], layers[5]))
-
--- assert(count_crossings(g, orders[1], orders[2]) == 0)
--- assert(count_crossings(g, orders[2], orders[3]) == 0)
--- assert(count_crossings(g, orders[3], orders[4]) == 0)
--- assert(count_crossings(g, orders[4], orders[5]) == 0)
+assert(count_crossings(g, layers[1], layers[2]) == 0)
+assert(count_crossings(g, layers[2], layers[3]) == 0)
+assert(count_crossings(g, layers[3], layers[4]) == 0)
+assert(count_crossings(g, layers[4], layers[5]) == 0)
 
 if verbose then
   for i = 1, #layers do

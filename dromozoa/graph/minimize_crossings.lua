@@ -123,12 +123,10 @@ return function (g, orders)
 
   for i = 1, 12 do
     wmedian(g.uv, orders, 1, n, 1)
-    print("[1]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
     end
     wmedian(g.vu, orders, n, 1, -1)
-    print("[2]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
     end
