@@ -44,7 +44,7 @@ return function (g, layer_map)
   local vu_after = vu.after
   local vu_target = vu.target
 
-  local layer_map_transaction = setmetatable({}, { __index = layer_map })
+  local new_layer_map = setmetatable({}, { __index = layer_map })
 
   local d_map = {}
   local uid = u_first
@@ -58,15 +58,15 @@ return function (g, layer_map)
     local uid = u_first
     while uid do
       if vu_first[uid] then
-        if promote(vu_first, vu_after, vu_target, layer_map_transaction, d_map, uid) < 0 then
+        if promote(vu_first, vu_after, vu_target, new_layer_map, d_map, uid) < 0 then
           promoted = true
-          for vid, v_layer in next, layer_map_transaction do
+          for vid, v_layer in next, new_layer_map do
             layer_map[vid] = v_layer
-            layer_map_transaction[vid] = nil
+            new_layer_map[vid] = nil
           end
         else
-          for vid, v_layer in next, layer_map_transaction do
-            layer_map_transaction[vid] = nil
+          for vid, v_layer in next, new_layer_map do
+            new_layer_map[vid] = nil
           end
         end
       end
