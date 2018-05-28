@@ -19,9 +19,6 @@ local sort = table.sort
 
 local function count(uv, order1, order2)
   local n = #order2
-  if n < 2 then
-    return 0
-  end
 
   local order_map = {}
   for i = 1, n do

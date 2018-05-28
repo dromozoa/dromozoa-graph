@@ -106,9 +106,12 @@ local function crossing(g, orders)
   local order1 = orders[1]
   for i = 2, #orders do
     local order2 = orders[i]
+    print("<", i, table.concat(order1, " "))
+    print(">", i, table.concat(order2, " "))
     count = count + count_crossings(g, order1, order2)
     order1 = order2
   end
+  print("?", count)
   return count
 end
 
@@ -123,10 +126,12 @@ return function (g, orders)
 
   for i = 1, 12 do
     wmedian(g.vu, orders, 1, n, 1)
+    print("[1]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
     end
     wmedian(g.uv, orders, n, 1, -1)
+    print("[2]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
     end

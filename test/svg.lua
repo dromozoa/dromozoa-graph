@@ -185,5 +185,5 @@ end
 
 local doc = xml_document(svg)
 local out = assert(io.open("test.svg", "w"))
-doc:serialize(io.stdout)
-io.write "\n"
+doc:serialize(out)
+out:write "\n"
