@@ -43,10 +43,10 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
       order_map[south[j]] = j
     end
 
+    local p = {}
+    local n = 0
     local order = {}
     local median_map = {}
-    local p = {}
-
     for j = 1, #north do
       local uid = north[j]
       local p = {}
@@ -60,30 +60,26 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
       for k = m + 1, #p do
         p[k] = nil
       end
-      north[j] = nil
-      if m < 3 then
-        if m == 0 then
-          north[j] = uid
-        elseif m == 1 then
-          order[#order + 1] = uid
+      if m > 0 then
+        n = n + 1
+        north[j] = nil
+        order[n] = uid
+        if m == 1 then
           median_map[uid] = p[1]
-        else
-          order[#order + 1] = uid
+        elseif m == 2 then
           median_map[uid] = (p[1] + p[2]) / 2
-        end
-      else
-        sort(p)
-        if m % 2 == 1 then
-          order[#order + 1] = uid
-          median_map[uid] = p[(m + 1) / 2]
         else
-          local n = m / 2
-          local a = p[n]
-          local b = p[n + 1]
-          local left = a - p[1]
-          local right = p[m] - b
-          order[#order + 1] = uid
-          median_map[uid] = (a * right + b * left) / (left + right)
+          sort(p)
+          if m % 2 == 1 then
+            median_map[uid] = p[(m + 1) / 2]
+          else
+            local n = m / 2
+            local a = p[n]
+            local b = p[n + 1]
+            local left = a - p[1]
+            local right = p[m] - b
+            median_map[uid] = (a * right + b * left) / (left + right)
+          end
         end
       end
     end
@@ -92,12 +88,12 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
       return median_map[a] < median_map[b]
     end)
 
-    local n = 0
-    for j = 1, #order do
+    local j = 0
+    for k = 1, #order do
       while true do
-        n = n + 1
-        if not north[n] then
-          north[n] = order[j]
+        j = j + 1
+        if not north[j] then
+          north[j] = order[k]
           break
         end
       end
