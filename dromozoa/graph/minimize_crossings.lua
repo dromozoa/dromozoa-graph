@@ -101,7 +101,44 @@ local function wmedian(uv, orders, order_first, order_last, order_step)
   end
 end
 
-local function crossing(g, orders)
+local function crossing(g, order, orders, i)
+  local count = 0
+  if i < #orders then
+    count = count + count_crossings(g, order, orders[i + 1])
+  end
+  if i > 1 then
+    count = count + count_crossings(g, orders[i - 1], order)
+  end
+  return count
+end
+
+local function transpose(g, orders)
+  local improved = true
+  while improved do
+    improved = false
+    for i = 1, #orders do
+      local order = orders[i]
+      for j = 1, #order - 1 do
+        local uid = order[j]
+        local vid = order[j + 1]
+        local c1 = crossing(g, order, orders, i)
+        -- exchange
+        order[j] = vid
+        order[j + 1] = uid
+        local c2 = crossing(g, order, orders, i)
+        if c1 > c2 then
+          -- print("tr", i, j, uid, vid)
+          improved = true
+        else
+          order[j] = uid
+          order[j + 1] = vid
+        end
+      end
+    end
+  end
+end
+
+local function crossing_g(g, orders)
   local count = 0
   local order1 = orders[1]
   for i = 2, #orders do
@@ -123,11 +160,13 @@ return function (g, orders)
 
   for i = 1, 12 do
     wmedian(g.uv, orders, 1, n, 1)
-    if crossing(g, orders) < crossing(g, best) then
+    transpose(g, orders)
+    if crossing_g(g, orders) < crossing_g(g, best) then
       copy(orders, best)
     end
     wmedian(g.vu, orders, n, 1, -1)
-    if crossing(g, orders) < crossing(g, best) then
+    transpose(g, orders)
+    if crossing_g(g, orders) < crossing_g(g, best) then
       copy(orders, best)
     end
   end
