@@ -29,36 +29,36 @@ local function copy(source_orders, target_orders)
   end
 end
 
-local function wmedian(vu, orders, order_first, order_last, order_step)
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
+local function wmedian(uv, orders, order_first, order_last, order_step)
+  local uv_first = uv.first
+  local uv_after = uv.after
+  local uv_target = uv.target
 
   -- 最初の階層はなにもしない
   for i = order_first + order_step, order_last, order_step do
-    local order1 = orders[i - order_step]
-    local order2 = orders[i]
+    local north = orders[i]
+    local south = orders[i - order_step]
 
     local order_map = {}
-    for j = 1, #order1 do
-      order_map[order1[j]] = j
+    for j = 1, #south do
+      order_map[south[j]] = j
     end
 
-    local new_order = {}
+    local order = {}
     local sequence = {}
 
-    for j = 1, #order2 do
-      local uid = order2[j]
+    for j = 1, #north do
+      local uid = north[j]
       local s = {}
-      local eid = vu_first[uid]
+      local eid = uv_first[uid]
       while eid do
-        s[#s + 1] = order_map[vu_target[eid]]
-        eid = vu_after[eid]
+        s[#s + 1] = order_map[uv_target[eid]]
+        eid = uv_after[eid]
       end
       sort(s)
       local m = #s
       if m == 0 then
-        new_order[j] = uid
+        order[j] = uid
       elseif m % 2 == 1 then
         sequence[#sequence + 1] = {
           uid = uid;
@@ -90,14 +90,14 @@ local function wmedian(vu, orders, order_first, order_last, order_step)
     for j = 1, #sequence do
       while true do
         n = n + 1
-        if not new_order[n] then
-          new_order[n] = sequence[j].uid
+        if not order[n] then
+          order[n] = sequence[j].uid
           break
         end
       end
     end
 
-    orders[i] = new_order
+    orders[i] = order
   end
 end
 
@@ -106,12 +106,9 @@ local function crossing(g, orders)
   local order1 = orders[1]
   for i = 2, #orders do
     local order2 = orders[i]
-    print("<", i, table.concat(order1, " "))
-    print(">", i, table.concat(order2, " "))
     count = count + count_crossings(g, order1, order2)
     order1 = order2
   end
-  print("?", count)
   return count
 end
 
@@ -125,12 +122,12 @@ return function (g, orders)
   copy(orders, best)
 
   for i = 1, 12 do
-    wmedian(g.vu, orders, 1, n, 1)
+    wmedian(g.uv, orders, 1, n, 1)
     print("[1]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
     end
-    wmedian(g.uv, orders, n, 1, -1)
+    wmedian(g.vu, orders, n, 1, -1)
     print("[2]", i, crossing(g, orders), crossing(g, best))
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)

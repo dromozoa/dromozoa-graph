@@ -43,8 +43,10 @@ g:add_edge(n4, s3)
 g:add_edge(n5, s2)
 g:add_edge(n5, s4)
 
-local order1 = { n0, n1, n2, n3, n4, n5 }
-local order2 = { s0, s1, s2, s3, s4 }
+local layers = {
+  { s0, s1, s2, s3, s4 };
+  { n0, n1, n2, n3, n4, n5 };
+}
 
-local count = count_crossings(g, order1, order2)
+local count = count_crossings(g, layers[1], layers[2])
 assert(count == 12)
