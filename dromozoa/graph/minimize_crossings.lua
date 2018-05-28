@@ -96,6 +96,8 @@ local function wmedian(vu, orders, order_first, order_last, order_step)
         end
       end
     end
+
+    orders[i] = new_order
   end
 end
 
@@ -119,7 +121,7 @@ return function (g, orders)
   end
   copy(orders, best)
 
-  for i = 1, 1 do
+  for i = 1, 12 do
     wmedian(g.vu, orders, 1, n, 1)
     if crossing(g, orders) < crossing(g, best) then
       copy(orders, best)
