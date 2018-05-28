@@ -43,5 +43,20 @@ return function (g)
     g:set_edge(removed_eids[i], uid, uid)
   end
 
-  return dummy_uid, layer_map, x
+  local max = 0
+  for _, v in pairs(x) do
+    if max < v then
+      max = v
+    end
+  end
+  x.max = max
+
+  local h = #layers
+  local y = {
+    max = h - 1;
+  }
+  for k, v in pairs(layer_map) do
+    y[k] = h - v
+  end
+  return dummy_uid, x, y
 end

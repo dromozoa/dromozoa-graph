@@ -105,17 +105,6 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
   end
 end
 
-local function count(g, layers)
-  local count = 0
-  local order1 = layers[1]
-  for i = 2, #layers do
-    local order2 = layers[i]
-    count = count + count_crossings(g, order1, order2)
-    order1 = order2
-  end
-  return count
-end
-
 return function (g, layers)
   local n = #layers
 
@@ -124,17 +113,17 @@ return function (g, layers)
     best[i] = {}
   end
   save(layers, best)
-  local b = count(g, best)
+  local b = count_crossings(g, best)
 
   for i = 1, 12 do
     median(g.uv, layers, 1, n, 1)
-    local c = count(g, layers)
+    local c = count_crossings(g, layers)
     if c < b then
       save(layers, best)
       b = c
     end
     median(g.vu, layers, n, 1, -1)
-    local c = count(g, layers)
+    local c = count_crossings(g, layers)
     if c < b then
       save(layers, best)
       b = c

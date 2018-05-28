@@ -47,39 +47,16 @@ g:add_edge(7, 6)
 
 g:add_edge(7, 8)
 
-local dummy_uid, layer_map, x = layout(g)
-
-local y_min
-local y_max
-for _, y in pairs(layer_map) do
-  if not y_min or y < y_min then
-    y_min = y
-  end
-  if not y_max or y > y_max then
-    y_max = y
-  end
-end
-
-local x_min
-local x_max
-for _, x in pairs(x) do
-  if not x_min or x < x_min then
-    x_min = x
-  end
-  if not x_max or x > x_max then
-    x_max = x
-  end
-end
-
-local width = (x_max - x_min + 1) * 50
-local height = (y_max - y_min + 1) * 50
+local dummy_uid, x, y = layout(g)
+local width = (x.max + 1) * 50
+local height = (y.max + 1) * 50
 
 local function calc_x(x)
-  return (x - x_min) * 50 + 25
+  return x * 50 + 25
 end
 
 local function calc_y(y)
-  return height - (y - y_min) * 50 - 25
+  return y * 50 + 25
 end
 
 local _ = element
@@ -112,7 +89,7 @@ while eid do
   local vid = g.uv.target[eid]
   if uid == vid then
     local x = calc_x(x[uid])
-    local y = calc_y(layer_map[uid])
+    local y = calc_y(y[uid])
     svg[#svg + 1] = _"path" {
       d = path_data():M(x, y):A(10, 10, 0, 0, 0, x + 20, y):A(10, 10, 0, 0, 0, x, y);
       stroke = colors.black;
@@ -121,9 +98,9 @@ while eid do
     }
   else
     local x1 = calc_x(x[uid])
-    local y1 = calc_y(layer_map[uid])
+    local y1 = calc_y(y[uid])
     local x2 = calc_x(x[vid])
-    local y2 = calc_y(layer_map[vid])
+    local y2 = calc_y(y[vid])
     local x3 = (x1 + x2) * 0.5
     local y3 = (y1 + y2) * 0.5
     svg[#svg + 1] = _"line" {
@@ -150,7 +127,7 @@ end
 local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
-  local cy = calc_y(layer_map[uid])
+  local cy = calc_y(y[uid])
   if uid < dummy_uid then
     svg[#svg + 1] = _"circle" {
       cx = cx;
