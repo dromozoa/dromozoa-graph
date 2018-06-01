@@ -47,7 +47,8 @@ g:add_edge(7, 6)
 
 g:add_edge(7, 8)
 
-local dummy_uid, x, y = layout(g)
+local last_uid = g.u.last
+local x, y = layout(g)
 local width = (x.max + 1) * 50
 local height = (y.max + 1) * 50
 
@@ -128,7 +129,7 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(y[uid])
-  if uid < dummy_uid then
+  if uid <= last_uid then
     svg[#svg + 1] = _"circle" {
       cx = cx;
       cy = cy;

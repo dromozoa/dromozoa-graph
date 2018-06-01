@@ -17,19 +17,22 @@
 
 local sort = table.sort
 
-local function preprocessing(g, layers, index_map, dummy_uid)
+local function preprocessing(g, layers, index_map, last_uid)
+  if last_uid == g.u.last then
+    return {}
+  end
+
+  local layer_max = #layers
+  if layer_max < 3 then
+    return {}
+  end
+
   local vu = g.vu
   local vu_first = vu.first
   local vu_after = vu.after
   local vu_target = vu.target
 
-  local layer_max = #layers
-
   local mark = {}
-
-  if not dummy_uid or layer_max < 3 then
-    return mark
-  end
 
   local vn = #layers[layer_max - 2]
   for i = layer_max - 1, 2, -1 do
@@ -46,9 +49,9 @@ local function preprocessing(g, layers, index_map, dummy_uid)
       if b == un then
         d = vn
       end
-      if uid >= dummy_uid then
+      if uid > last_uid then
         local vid = vu_target[vu_first[uid]]
-        if vid >= dummy_uid then
+        if vid > last_uid then
           d = index_map[vid]
         end
       end
@@ -383,7 +386,7 @@ local function horizontal_compaction_right(u, layer_map, layers, index_map, root
   return ax
 end
 
-return function (g, layer_map, layers, dummy_uid)
+return function (g, layer_map, layers, last_uid)
   local u = g.u
   local u_after = u.after
   local uv = g.uv
@@ -399,7 +402,7 @@ return function (g, layer_map, layers, dummy_uid)
     end
   end
 
-  local mark = preprocessing(g, layers, index_map, dummy_uid)
+  local mark = preprocessing(g, layers, index_map, last_uid)
   local xul = horizontal_compaction_left(u, layer_map, layers, index_map, vertical_alignment_left(u, vu, layers, index_map, mark, layer_max, 1, -1))
   local xll = horizontal_compaction_left(u, layer_map, layers, index_map, vertical_alignment_left(u, uv, layers, index_map, mark, 1, layer_max, 1))
   local xur = horizontal_compaction_right(u, layer_map, layers, index_map, vertical_alignment_right(u, vu, layers, index_map, mark, layer_max, 1, -1))

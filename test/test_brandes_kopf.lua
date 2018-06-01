@@ -39,7 +39,7 @@ g:add_edge(2, 8)
 g:add_edge(3, 9)
 g:add_edge(3, 10)
 g:add_edge(3, 11)
-local dummy_uid = 12
+local last_uid = 11
 
 local layer = {
   { 1 };
@@ -61,7 +61,7 @@ for i = 1, #layer do
   end
 end
 
-local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+local x = brandes_kopf(g, layer_map, layer, last_uid)
 
 local uid = g.u.first
 while uid do
@@ -131,7 +131,7 @@ for i = 1, #layer do
   end
 end
 
-local dummy_uid = g.u.last + 1
+local last_uid = g.u.last
 make_dummy_vertices(g, layer_map, {})
 
 local layer = make_layers(g, layer_map)
@@ -145,7 +145,7 @@ order[6] = 20
 
 write_dot("test1.dot", g)
 
-local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+local x = brandes_kopf(g, layer_map, layer, last_uid)
 
 local expect = {
   [0.0] = { 13, 17 };
@@ -169,7 +169,7 @@ end
 local uid = g.u.first
 while uid do
   assert(x[uid] >= 0)
-  if uid < dummy_uid then
+  if uid <= last_uid then
     assert(x[uid] == expect_map[uid])
   end
   uid = g.u.after[uid]
@@ -209,7 +209,7 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(layer_map[uid])
-  if uid < dummy_uid then
+  if uid <= last_uid then
     svg[#svg + 1] = _"circle" {
       cx = cx;
       cy = cy;

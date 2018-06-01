@@ -66,7 +66,8 @@ add_edge(u7, u5, "S(a)")
 add_edge(u8, u6, "S(b)")
 add_edge(u8, u5, "S(a)")
 
-local dummy_uid, x, y = layout(g)
+local last_uid = g.u.last
+local x, y = layout(g)
 
 -- local edges = {}
 -- local eid = g.e.first
@@ -154,7 +155,7 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(y[uid])
-  if uid < dummy_uid then
+  if uid <= last_uid then
     svg[#svg + 1] = _"circle" {
       cx = cx;
       cy = cy;
