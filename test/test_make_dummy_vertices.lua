@@ -41,10 +41,9 @@ assert(layer_map[u3] == 2)
 assert(layer_map[u4] == 2)
 assert(layer_map[u5] == 1)
 
-local dummy_uid = g.u.last + 1
+local last_uid = g.u.last
+assert(g.u.last == 5)
 make_dummy_vertices(g, layer_map, {})
-
-assert(dummy_uid == 6)
 assert(g.u.last == 8)
 
 assert(layer_map[6] == 3)
@@ -55,4 +54,6 @@ local g = graph()
 local u1 = g:add_vertex()
 local layer_map = longest_path(g)
 assert(layer_map[u1] == 1)
+assert(g.u.last == 1)
 make_dummy_vertices(g, layer_map, {})
+assert(g.u.last == 1)
