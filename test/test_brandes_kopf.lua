@@ -131,7 +131,8 @@ for i = 1, #layer do
   end
 end
 
-local dummy_uid = make_dummy_vertices(g, layer_map, {})
+local dummy_uid = g.u.last + 1
+make_dummy_vertices(g, layer_map, {})
 
 local layer = make_layers(g, layer_map)
 

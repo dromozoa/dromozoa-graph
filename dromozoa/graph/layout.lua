@@ -29,7 +29,8 @@ return function (g)
   local reversed_eids = remove_cycles(g)
 
   local layer_map = promote_vertices(g, longest_path(g))
-  local dummy_uid = make_dummy_vertices(g, layer_map, reversed_eids)
+  local dummy_uid = g.u.last + 1
+  make_dummy_vertices(g, layer_map, reversed_eids)
   local layers = make_layers(g, layer_map)
   local layers = minimize_crossings(g, layers)
   local x = brandes_kopf(g, layer_map, layers, dummy_uid)
