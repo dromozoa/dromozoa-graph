@@ -25,6 +25,8 @@ local path_data = require "dromozoa.svg.path_data"
 local graph = require "dromozoa.graph"
 local layout = require "dromozoa.graph.layout"
 
+local unpack = table.unpack or unpack
+
 local g = graph()
 
 local utexts = {}
@@ -67,24 +69,49 @@ add_edge(u8, u6, "S(b)")
 add_edge(u8, u5, "S(a)")
 
 local last_uid = g.u.last
-local x, y = layout(g)
+local last_eid = g.e.last
+local x_map, y_map = layout(g)
 
--- local edges = {}
--- local eid = g.e.first
--- while eid do
---   eid = g.e.after[eid]
--- end
+local paths = {}
 
-local width = (x.max + 1) * 50
-local height = (y.max + 1) * 50
+local eid = g.e.first
+while eid do
+  if eid <= last_eid then
+    local eid = eid
+    local uid = g.vu.target[eid]
+    while uid > last_uid do
+      eid = g.vu.first[uid]
+      uid = g.vu.target[eid]
+    end
+    local vid = g.uv.target[eid]
 
-local function calc_x(x)
-  return x * 50 + 25
+    local eids = { eid }
+    local uids = { uid, vid }
+    local path = {
+      eids = eids;
+      uids = uids;
+    }
+    paths[eid] = path
+
+    while vid > last_uid do
+      eid = g.uv.first[vid]
+      vid = g.uv.target[eid]
+      eids[#eids + 1] = eid
+      uids[#uids + 1] = vid
+      paths[eid] = path
+    end
+  end
+  eid = g.e.after[eid]
 end
 
-local function calc_y(y)
-  return y * 50 + 25
+local unit = 100
+local r = 20
+
+local function transform(x, y)
+  return (x + 0.5) * unit, (y + 0.5) * unit
 end
+
+local width, height = transform(x_map.max + 0.5, y_map.max + 0.5)
 
 local _ = element
 local svg = _"svg" {
@@ -95,14 +122,14 @@ local svg = _"svg" {
   _"defs" {
     _"marker" {
       id = "triangle";
-      viewBox = space_separated { 0, 0, 4, 2 };
-      refX = 4;
-      refY = 1;
-      markerWidth = 8;
-      markerHeight = 8;
+      viewBox = space_separated { 0, 0, 7, 7 };
+      refX = 7;
+      refY = 3.5;
+      markerWidth = 7;
+      markerHeight = 7;
       orient = "auto";
-      _"path" {
-        d = path_data():M(0,0):L(0,2):L(4,1):Z();
+      _"polygon" {
+        points = space_separated { 0, 0, 7, 3, 7, 4, 0, 7 };
         fill = colors.black;
         stroke = "none";
       };
@@ -112,70 +139,110 @@ local svg = _"svg" {
 
 local eid = g.e.first
 while eid do
-  local uid = g.vu.target[eid]
-  local vid = g.uv.target[eid]
-  if uid == vid then
---    local x = calc_x(x[uid])
---    local y = calc_y(y[uid])
---    svg[#svg + 1] = _"path" {
---      d = path_data():M(x, y):A(10, 10, 0, 0, 0, x + 20, y):A(10, 10, 0, 0, 0, x, y);
---      stroke = colors.black;
---      fill = "none";
---      ["marker-end"] = "url(#triangle)";
---    }
-  else
-    local x1 = calc_x(x[uid])
-    local y1 = calc_y(y[uid])
-    local x2 = calc_x(x[vid])
-    local y2 = calc_y(y[vid])
-    local x3 = (x1 + x2) * 0.5
-    local y3 = (y1 + y2) * 0.5
-    svg[#svg + 1] = _"line" {
-      x1 = x1;
-      y1 = y1;
-      x2 = x2;
-      y2 = y2;
-      stroke = colors.black;
-      fill = "none";
-      ["marker-end"] = "url(#triangle)";
-    }
-    --[[
-    svg[#svg + 1] = _"path" {
-      d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
-      stroke = colors.black;
-      fill = "none";
-      ["marker-end"] = "url(#triangle)";
-    }
-    ]]
+  if eid <= last_eid then
+    local path = paths[eid]
+    local uids = path.uids
+    local eids = path.eids
+
+    local n = #uids
+    local uid = uids[1]
+    if uid == uids[2] then
+    else
+      local points = { { transform(x_map[uid], y_map[uid]) } }
+      for i = 2, n - 1 do
+        local uid = uids[i]
+        points[#points + 1] = { transform(x_map[uid], y_map[uid]) }
+      end
+      local uid = uids[n - 1]
+      local vid = uids[n]
+      local x1, y1 = transform(x_map[uid], y_map[uid])
+      local x2, y2 = transform(x_map[vid], y_map[vid])
+      local dx = x2 - x1
+      local dy = y2 - y1
+      local d = math.sqrt(dx * dx + dy * dy)
+      local s = (d - r) / d
+      points[#points + 1] = { x1 + dx * s, y1 + dy * s }
+
+      local m = #points
+      local d
+      if m == 2 then
+        d = path_data():M(unpack(points[1])):L(unpack(points[2]))
+      else
+        d = path_data():M(unpack(points[1]))
+        for i = 1, m - 1 do
+          local p = {
+            points[i - 1];
+            points[i];
+            points[i + 1];
+            points[i + 2];
+          }
+          if i == 1 then
+            p[1] = points[1]
+          end
+          if i == m - 1 then
+            p[4] = points[m]
+          end
+          if i == m then
+            p[3] = points[m]
+            p[4] = points[m]
+          end
+          local v = 8
+          local x1 = (-p[1][1] + p[2][1] * v + p[3][1]) / v
+          local y1 = (-p[1][2] + p[2][2] * v + p[3][2]) / v
+          local x2 = (p[2][1] + p[3][1] * v - p[4][1]) / v
+          local y2 = (p[2][2] + p[3][2] * v - p[4][2]) / v
+          d:C(x1, y1, x2, y2, unpack(p[3]))
+        end
+
+        -- d = path_data():M(unpack(points[1]))
+        -- for i = 2, m - 1 do
+        --   local x1, y1 = unpack(points[i - 1])
+        --   local x2, y2 = unpack(points[i])
+        --   local x3, y3 = unpack(points[i + 1])
+
+        --   local a = 0.5
+        --   local b = 1 - a
+
+        --   local ax = x1 * b + x2 * a
+        --   local ay = y1 * b + y2 * a
+        --   local bx = x2 * a + x3 * b
+        --   local by = y2 * a + y3 * b
+        --   d:L(ax, ay):L(bx, by)
+        -- end
+        -- d:L(unpack(points[m]))
+      end
+
+      svg[#svg + 1] = _"path" {
+        d = d;
+        stroke = colors.black;
+        ["stroke-width"] = 1;
+        fill = "none";
+        ["marker-end"] = "url(#triangle)";
+      }
+    end
   end
   eid = g.e.after[eid]
 end
 
 local uid = g.u.first
 while uid do
-  local cx = calc_x(x[uid])
-  local cy = calc_y(y[uid])
   if uid <= last_uid then
+    local cx, cy = transform(x_map[uid], y_map[uid])
     svg[#svg + 1] = _"circle" {
       cx = cx;
       cy = cy;
-      r = 2;
-      stroke = colors.black;
-      fill = colors.black;
-    }
-    svg[#svg + 1] = _"text" {
-      x = cx + 5;
-      y = cy - 5;
-      fill = colors.black;
-      uid;
-    }
-  else
-    svg[#svg + 1] = _"circle" {
-      cx = cx;
-      cy = cy;
-      r = 2;
+      r = r;
       stroke = colors.black;
       fill = colors.white;
+    }
+    svg[#svg + 1] = _"text" {
+      x = cx;
+      y = cy;
+      fill = colors.black;
+      ["font-size"] = 10;
+      ["dominant-baseline"] = "middle";
+      ["text-anchor"] = "middle";
+      utexts[uid];
     }
   end
   uid = g.u.after[uid]
