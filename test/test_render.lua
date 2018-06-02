@@ -114,28 +114,56 @@ end
 local width, height = transform(x_map.max + 0.5, y_map.max + 0.5)
 
 local _ = element
+
+local defs = _"defs" {
+  _"marker" {
+    id = "triangle";
+    viewBox = space_separated { 0, 0, 7, 7 };
+    refX = 7;
+    refY = 3.5;
+    markerWidth = 7;
+    markerHeight = 7;
+    orient = "auto";
+    _"polygon" {
+      points = space_separated { 0, 0, 7, 3, 7, 4, 0, 7 };
+      fill = colors.black;
+      stroke = "none";
+    };
+  }
+}
+
 local svg = _"svg" {
   xmlns = "http://www.w3.org/2000/svg";
+  ["xmlns:xlink"] ="http://www.w3.org/1999/xlink";
   version = "1.1";
   width = width;
   height = height;
-  _"defs" {
-    _"marker" {
-      id = "triangle";
-      viewBox = space_separated { 0, 0, 7, 7 };
-      refX = 7;
-      refY = 3.5;
-      markerWidth = 7;
-      markerHeight = 7;
-      orient = "auto";
-      _"polygon" {
-        points = space_separated { 0, 0, 7, 3, 7, 4, 0, 7 };
-        fill = colors.black;
-        stroke = "none";
-      };
-    }
-  };
+  defs;
 }
+
+local function move_first_point(p1, p2)
+  local x1 = p1[1]
+  local y1 = p1[2]
+  local x2 = p2[1]
+  local y2 = p2[2]
+  local dx = x2 - x1
+  local dy = y2 - y1
+  local d = math.sqrt(dx * dx + dy * dy)
+  local s = (d - r) / d
+  return x2 - dx * s, y2 - dy * s
+end
+
+local function move_last_point(p1, p2)
+  local x1 = p1[1]
+  local y1 = p1[2]
+  local x2 = p2[1]
+  local y2 = p2[2]
+  local dx = x2 - x1
+  local dy = y2 - y1
+  local d = math.sqrt(dx * dx + dy * dy)
+  local s = (d - r) / d
+  return x1 + dx * s, y1 + dy * s
+end
 
 local eid = g.e.first
 while eid do
@@ -148,77 +176,73 @@ while eid do
     local uid = uids[1]
     if uid == uids[2] then
     else
-      local points = { { transform(x_map[uid], y_map[uid]) } }
-      for i = 2, n - 1 do
+      local points = {}
+      for i = 1, n do
         local uid = uids[i]
-        points[#points + 1] = { transform(x_map[uid], y_map[uid]) }
+        points[#points + 1] = { x_map[uid], y_map[uid] }
       end
-      local uid = uids[n - 1]
-      local vid = uids[n]
-      local x1, y1 = transform(x_map[uid], y_map[uid])
-      local x2, y2 = transform(x_map[vid], y_map[vid])
-      local dx = x2 - x1
-      local dy = y2 - y1
-      local d = math.sqrt(dx * dx + dy * dy)
-      local s = (d - r) / d
-      points[#points + 1] = { x1 + dx * s, y1 + dy * s }
 
       local m = #points
-      local d
+      local d = path_data()
       if m == 2 then
-        d = path_data():M(unpack(points[1])):L(unpack(points[2]))
+        local p1 = { transform(unpack(points[1])) }
+        local p2 = { transform(unpack(points[2])) }
+        d:M(move_first_point(p1, p2)):L(move_last_point(p1, p2))
       else
-        d = path_data():M(unpack(points[1]))
-        for i = 1, m - 1 do
-          local p = {
-            points[i - 1];
-            points[i];
-            points[i + 1];
-            points[i + 2];
-          }
-          if i == 1 then
-            p[1] = points[1]
-          end
-          if i == m - 1 then
-            p[4] = points[m]
-          end
-          if i == m then
-            p[3] = points[m]
-            p[4] = points[m]
-          end
-          local v = 8
-          local x1 = (-p[1][1] + p[2][1] * v + p[3][1]) / v
-          local y1 = (-p[1][2] + p[2][2] * v + p[3][2]) / v
-          local x2 = (p[2][1] + p[3][1] * v - p[4][1]) / v
-          local y2 = (p[2][2] + p[3][2] * v - p[4][2]) / v
-          d:C(x1, y1, x2, y2, unpack(p[3]))
+        local a = 0.5
+        local b = 1 - a
+
+        local p1 = { transform(unpack(points[1])) }
+        local p2 = { transform(unpack(points[2])) }
+        d:M(move_first_point(p1, p2))
+
+        local x1, y1 = unpack(points[1])
+        local x2, y2 = unpack(points[2])
+        local ax, ay = transform(x1 * a + x2 * b, y1 * a + y2 * b, x2)
+        local bx, by = transform(x2, y1 * b + y2 * a)
+        d:C(ax, ay, bx, by, transform(x2, y2))
+
+        for i = 2, m - 1 do
+          d:L(transform(unpack(points[i])))
         end
 
-        -- d = path_data():M(unpack(points[1]))
-        -- for i = 2, m - 1 do
-        --   local x1, y1 = unpack(points[i - 1])
-        --   local x2, y2 = unpack(points[i])
-        --   local x3, y3 = unpack(points[i + 1])
-
-        --   local a = 0.5
-        --   local b = 1 - a
-
-        --   local ax = x1 * b + x2 * a
-        --   local ay = y1 * b + y2 * a
-        --   local bx = x2 * a + x3 * b
-        --   local by = y2 * a + y3 * b
-        --   d:L(ax, ay):L(bx, by)
-        -- end
-        -- d:L(unpack(points[m]))
+        local p1 = { transform(unpack(points[m - 1])) }
+        local p2 = { transform(unpack(points[m])) }
+        local x1, y1 = unpack(points[m - 1])
+        local x2, y2 = unpack(points[m])
+        local ax, ay = transform(x1, y1 * a + y2 * b)
+        local bx, by = transform(x1 * b + x2 * a, y1 * b + y2 * a)
+        d:C(ax, ay, bx, by, move_last_point(p1, p2))
       end
 
-      svg[#svg + 1] = _"path" {
+      defs[#defs + 1] = _"path" {
+        id = "e" .. eid;
         d = d;
         stroke = colors.black;
         ["stroke-width"] = 1;
         fill = "none";
         ["marker-end"] = "url(#triangle)";
       }
+
+      svg[#svg + 1] = _"use" {
+        ["xlink:href"] = "#e" .. eid;
+      }
+
+      local etext = etexts[eid]
+      if etext then
+        svg[#svg + 1] = _"text" {
+          ["font-size"] = 10;
+          ["text-anchor"] = "middle";
+          _"textPath" {
+            ["xlink:href"] = "#e" .. eid;
+            startOffset = "40%";
+            _"tspan" {
+              dy = -3;
+              etext;
+            };
+          };
+        }
+      end
     end
   end
   eid = g.e.after[eid]
@@ -233,7 +257,7 @@ while uid do
       cy = cy;
       r = r;
       stroke = colors.black;
-      fill = colors.white;
+      fill = "none"; -- colors.white;
     }
     svg[#svg + 1] = _"text" {
       x = cx;
