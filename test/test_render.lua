@@ -108,7 +108,9 @@ local unit = 100
 local r = 20
 
 local function transform(x, y)
-  return (x + 0.5) * unit, (y + 0.5) * unit
+  -- return (x + 0.5) * unit, (y + 0.5) * unit
+  return (y + 0.5) * unit, (x + 0.5) * unit
+  -- return (y + 0.5) * unit, (x + 0.5) * unit * 0.75
 end
 
 local width, height = transform(x_map.max + 0.5, y_map.max + 0.5)
@@ -172,18 +174,49 @@ while eid do
     local uids = path.uids
     local eids = path.eids
 
-    local n = #uids
     local uid = uids[1]
     if uid == uids[2] then
+      local d = path_data()
+
+      local x = x_map[uid]
+      local y = y_map[uid]
+      local p1 = { transform(x, y) }
+      local p2 = { transform(x - 0.5, y - 0.075) }
+      local p3 = { transform(x - 0.5, y + 0.075) }
+      local p4 = { transform(x, y) }
+      d:M(move_first_point(p1, p2))
+      local x1, y1 = unpack(p2)
+      local x2, y2 = unpack(p3)
+      d:C(x1, y1, x2, y2, move_last_point(p3, p4))
+
+      svg[#svg + 1] = _"path" {
+        d = d;
+        stroke = colors.black;
+        ["stroke-width"] = 1;
+        fill = "none";
+        ["marker-end"] = "url(#triangle)";
+      }
+
+      local etext = etexts[eid]
+      if etext then
+        local p = { transform(x - 0.5 * 0.9, y) }
+        svg[#svg + 1] = _"text" {
+          x = p[1];
+          y = p[2];
+          ["font-size"] = 10;
+          ["text-anchor"] = "middle";
+          etext;
+        }
+      end
     else
       local points = {}
-      for i = 1, n do
+      for i = 1, #uids do
         local uid = uids[i]
         points[#points + 1] = { x_map[uid], y_map[uid] }
       end
 
-      local m = #points
       local d = path_data()
+      local m = #points
       if m == 2 then
         local p1 = { transform(unpack(points[1])) }
         local p2 = { transform(unpack(points[2])) }
@@ -232,10 +265,10 @@ while eid do
       if etext then
         svg[#svg + 1] = _"text" {
           ["font-size"] = 10;
-          ["text-anchor"] = "middle";
+          -- ["text-anchor"] = "middle";
           _"textPath" {
             ["xlink:href"] = "#e" .. eid;
-            startOffset = "40%";
+            startOffset = "5%";
             _"tspan" {
               dy = -3;
               etext;
