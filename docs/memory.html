@@ -26,23 +26,28 @@
 <h1>Lua 5.3のメモリとデータ構造</h1>
 
 <h2>値</h2>
+
 <p>
 ほとんどの環境において、値のサイズ\(S_v\)は16バイトである。
 </p>
 
 <h2>空のテーブル</h2>
+
 <p>
 空のテーブルのサイズ\(S_t\)は、ILP32では32バイト、LP64/LLP64では56バイトである。
 </p>
 
 <h2>配列としてのテーブル</h2>
+
 <p>
-1以上の連続した整数だけをインデックスに使うとき、テーブルは配列のように、つまり、C++のstd::vectorのようにふるまう。
+1以上の連続した整数だけをインデックスに使うとき、テーブルは配列のように、つまり、C++の<code>std::vector</code>のようにふるまう。
 倍々でメモリが確保されるので、要素数\(n\)のとき、およそ\(S_a(n) = S_v 2^{\mathrm{ceil}(\log_2(n))}\)バイトが必要になる。
 当然、\(S_v n \le S_a(n) \lt 2 S_v n\)である。
+<code>std::vector</code>の<code>reserve</code>と同様の機能は命令セットレベルでは提供されているが、言語レベルでは提供されていない。
 </p>
 
 <h2>クロージャ</h2>
+
 <p>
 値を束縛することにより、クロージャをデータ構造として利用できる。
 必要なメモリの量はテーブルよりも増える。
@@ -50,36 +55,50 @@
 
 <h2>リンクリスト</h2>
 <p>
+
 リンクリストの素朴な実装は
 </p>
-<pre>template &lt;typename T&gt;
+
+<pre>
+template &lt;class T&gt;
 struct node {
   node* next;
   node* prev;
   T value;
-};</pre>
+};
+</pre>
+
 <p>
 のように与えられる。要素数\(n\)のとき、C++の構造体をLuaのテーブルで表現する場合、およそ\((S_t + 3 S_v) n\)バイトが必要になる（実際の値はこれよりも大きくなる）。
 </p>
+
 <p>
 以下のように、前後のノードへのポインタと値を個々のテーブルに分解して保存する場合、すくなくともおよそ\(3 S_a(n)\)バイトが必要になる。
 </p>
-<pre>local next = {}
+
+<pre>
+local next = {}
 local prev = {}
-local value = {}</pre>
+local value = {}
+</pre>
+
 <p>
 LP64/LLP64では、あきらかに\(3 S_a(n) \lt (S_t + 3 S_v) n\)が成立する。
-配列が伸長した直後などILP32ではかならずしも成立しない。
+ILP32では、配列が伸長した直後など必ずしも成立しない。
 </p>
 
-<h2>m個の要素を持つ場合のテーブルへの分解</h2>
+<h2>\(m\)個の要素を持つ場合のテーブルへの分解</h2>
+
 <p>
 \(m\)個の要素を持つ場合について、\(m S_a(n)\)と\((S_t + m S_v) n\)を比較すると、
 \[
-  \mathrm{ceil}(\log_2(n)) - \log_2(n) \lt \log_2(\frac{1}{m} \frac{S_t}{S_v} + 1) \\
+  \mathrm{ceil}(\log_2(n)) - \log_2(n)
+  \lt
+  \log_2(\frac{1}{m} \frac{S_t}{S_v} + 1)
 \]
 個々のテーブルに分解して保存したほうが有利になる確率を下表に示す。
 </p>
+
 <table>
   <tr><th>m</th><th>ILP32</th><th>LP64/LLP64</th></tr>
   <tr><td>1</td><td>100.0%</td><td>100.0%</td></tr>
@@ -95,9 +114,10 @@ LP64/LLP64では、あきらかに\(3 S_a(n) \lt (S_t + 3 S_v) n\)が成立す�
   <tr><td>11</td><td>30.8%</td><td>48.3%</td></tr>
   <tr><td>12</td><td>28.6%</td><td>45.2%</td></tr>
 </table>
+
 <p>
 なお、前後のノードへのポインタと値を個々のテーブルに分解して保存するほうが、GC対象が減る点において有利であると考えられる。
-また、C++の構造体をLuaのテーブルで表現する際に文字列キーを用いる場合、そのコストにも注意する必要がある。
+また、C++の構造体をLuaのテーブルで表現する際に文字列キーを用いるならば、そのコストにも注意する必要がある。
 </p>
 
 <h2>行列</h2>
@@ -115,7 +135,7 @@ LP64/LLP64では、あきらかに\(3 S_a(n) \lt (S_t + 3 S_v) n\)が成立す�
 
 <p>
 MicroXMLが示したように、単純化されたDOMノードは名前と属性マップと子要素のリストで構成できる。
-Luaではひとつのテーブルで表現することもできる。
+Luaにおいてはひとつのテーブルで表現することもできる。
 </p>
 
 <h2>木構造</h2>
@@ -124,27 +144,23 @@ Luaではひとつのテーブルで表現することもできる。
 木構造の素朴な実装は、
 </p>
 
-<pre>template &lt;typename T&gt;
+<pre>
+template &lt;class T&gt;
 struct node {
   node* parent;
   node* child;
   node* next;
   node* prev;
   T value;
-};</pre>
+};
+</pre>
 
 <p>
 のように与えられるので、リンクリストと同様に考察ができる。
 </p>
 
 </div>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  CommonHTML: {
-    undefinedFamily: "sans-serif"
-  }
-});
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML"></script>
 </body>
 </html>
