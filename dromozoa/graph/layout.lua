@@ -53,9 +53,7 @@ return function (g)
   x.max = max
 
   local h = #layers
-  local y = {
-    max = h - 1;
-  }
+  local y = { max = h - 1 }
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
