@@ -21,6 +21,7 @@ local xml_document = require "dromozoa.dom.xml_document"
 local color4d = require "dromozoa.css.color4d"
 local colors = require "dromozoa.css.colors"
 local path_data = require "dromozoa.svg.path_data"
+local vecmath = require "dromozoa.vecmath"
 
 local graph = require "dromozoa.graph"
 local layout = require "dromozoa.graph.layout"
@@ -107,13 +108,41 @@ end
 local unit = 100
 local r = 20
 
+local x_max = x_map.max
+local y_max = y_map.max
+
+local transform_matrix = vecmath.matrix3(
+  unit, 0,    unit * 0.5,
+  0,    unit, unit * 0.5,
+  0,    0,    1
+)
+
+-- local transform_matrix = vecmath.matrix3(
+--    0,    unit, unit * 0.5,
+--   -unit, 0,    unit * (x_map.max + 0.5),
+--    0,    0,    1
+-- )
+
+print(tostring(transform_matrix))
+
 local function transform(x, y)
-  -- return (x + 0.5) * unit, (y + 0.5) * unit
-  return (y + 0.5) * unit, (x + 0.5) * unit
-  -- return (y + 0.5) * unit, (x + 0.5) * unit * 0.75
+  local p = vecmath.point3(x, y, 1)
+  transform_matrix:transform(p)
+  return p.x / p.z, p.y / p.z
 end
 
-local width, height = transform(x_map.max + 0.5, y_map.max + 0.5)
+local tl = vecmath.point3(-0.5, -0.5, 1)
+local tr = vecmath.point3(-0.5, y_max + 0.5, 1)
+local bl = vecmath.point3(x_max + 0.5, -0.5, 1)
+local br = vecmath.point3(x_max + 0.5, y_max + 0.5, 1)
+
+transform_matrix:transform(tl)
+transform_matrix:transform(tr)
+transform_matrix:transform(bl)
+transform_matrix:transform(br)
+
+local width = math.max(tl.x, tr.x, bl.x, br.x) - math.min(tl.x, tr.x, bl.x, br.x)
+local height = math.max(tl.y, tr.y, bl.y, br.y) - math.min(tl.y, tr.y, bl.y, br.y)
 
 local _ = element
 
