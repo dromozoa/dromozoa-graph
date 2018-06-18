@@ -71,35 +71,44 @@ add_edge(u8, u5, "S(a)")
 
 local last_uid = g.u.last
 local last_eid = g.e.last
-local x_map, y_map = layout(g)
+local x_map, y_map, reversed_eids = layout(g)
+
+local reversed = {}
+for i = 1, #reversed_eids do
+  reversed[reversed_eids[i]] = true
+end
 
 local paths = {}
 
 local eid = g.e.first
 while eid do
   if eid <= last_eid then
-    local eid = eid
     local uid = g.vu.target[eid]
-    while uid > last_uid do
-      eid = g.vu.first[uid]
-      uid = g.vu.target[eid]
-    end
     local vid = g.uv.target[eid]
-
-    local eids = { eid }
-    local uids = { uid, vid }
-    local path = {
-      eids = eids;
-      uids = uids;
-    }
-    paths[eid] = path
-
-    while vid > last_uid do
-      eid = g.uv.first[vid]
-      vid = g.uv.target[eid]
-      eids[#eids + 1] = eid
-      uids[#uids + 1] = vid
-      paths[eid] = path
+    if reversed[eid] then
+      local uids = { vid, uid }
+      while uid > last_uid do
+        uid = g.vu.target[g.vu.first[uid]]
+        uids[#uids + 1] = uid
+      end
+      local n = #uids
+      for i = 1, n / 2 do
+        local j = n - i + 1
+        uids[i], uids[j] = uids[j], uids[i]
+      end
+      paths[eid] = {
+        reversed = true;
+        uids = uids;
+      }
+    else
+      local uids = { uid, vid }
+      while vid > last_uid do
+        vid = g.uv.target[g.uv.first[vid]]
+        uids[#uids + 1] = vid
+      end
+      paths[eid] = {
+        uids = uids;
+      }
     end
   end
   eid = g.e.after[eid]
@@ -204,7 +213,6 @@ while eid do
   if eid <= last_eid then
     local path = paths[eid]
     local uids = path.uids
-    local eids = path.eids
 
     local uid = uids[1]
     if uid == uids[2] then
