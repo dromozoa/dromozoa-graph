@@ -111,6 +111,19 @@ local r = 20
 local x_max = x_map.max
 local y_max = y_map.max
 
+--[[
+  unit_x
+  unit_y
+
+  circle(r)
+  rect(w,h,r)
+
+  transform_matrix
+
+  path_class
+  text_class
+]]
+
 local transform_matrix = vecmath.matrix3(
   unit, 0,    unit * 0.5,
   0,    unit, unit * 0.5,
@@ -173,27 +186,19 @@ local svg = _"svg" {
 }
 
 local function move_first_point(p1, p2)
-  local x1 = p1[1]
-  local y1 = p1[2]
-  local x2 = p2[1]
-  local y2 = p2[2]
-  local dx = x2 - x1
-  local dy = y2 - y1
-  local d = math.sqrt(dx * dx + dy * dy)
-  local s = (d - r) / d
-  return x2 - dx * s, y2 - dy * s
+  local p1 = vecmath.point2(p1)
+  local p2 = vecmath.point2(p2)
+  local v = vecmath.vector2():sub(p2, p1)
+  p1:add(v:normalize():scale(r))
+  return p1.x, p1.y
 end
 
 local function move_last_point(p1, p2)
-  local x1 = p1[1]
-  local y1 = p1[2]
-  local x2 = p2[1]
-  local y2 = p2[2]
-  local dx = x2 - x1
-  local dy = y2 - y1
-  local d = math.sqrt(dx * dx + dy * dy)
-  local s = (d - r) / d
-  return x1 + dx * s, y1 + dy * s
+  local p1 = vecmath.point2(p1)
+  local p2 = vecmath.point2(p2)
+  local v = vecmath.vector2():sub(p1, p2)
+  p2:add(v:normalize():scale(r))
+  return p2.x, p2.y
 end
 
 local eid = g.e.first
@@ -241,22 +246,30 @@ while eid do
       local points = {}
       for i = 1, #uids do
         local uid = uids[i]
-        points[#points + 1] = { x_map[uid], y_map[uid] }
+        points[#points + 1] = vecmath.point3(x_map[uid], y_map[uid], 1)
       end
 
       local d = path_data()
       local m = #points
       if m == 2 then
-        local p1 = { transform(unpack(points[1])) }
-        local p2 = { transform(unpack(points[2])) }
+        local p1 = points[1]
+        local p2 = points[2]
+        transform_matrix:transform(p1)
+        transform_matrix:transform(p2)
         d:M(move_first_point(p1, p2)):L(move_last_point(p1, p2))
       else
         local a = 0.5
         local b = 1 - a
 
-        local p1 = { transform(unpack(points[1])) }
-        local p2 = { transform(unpack(points[2])) }
+        local p1 = vecmath.point3(points[1])
+        local p2 = vecmath.point3(points[2])
+        transform_matrix:transform(p1)
+        transform_matrix:transform(p2)
         d:M(move_first_point(p1, p2))
+
+        -- local p1 = { transform(unpack(points[1])) }
+        -- local p2 = { transform(unpack(points[2])) }
+        -- d:M(move_first_point(p1, p2))
 
         local x1, y1 = unpack(points[1])
         local x2, y2 = unpack(points[2])
