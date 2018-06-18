@@ -124,17 +124,17 @@ local y_max = y_map.max
   text_class
 ]]
 
-local transform_matrix = vecmath.matrix3(
-  unit, 0,    unit * 0.5,
-  0,    unit, unit * 0.5,
-  0,    0,    1
-)
-
 -- local transform_matrix = vecmath.matrix3(
---    0,    unit, unit * 0.5,
---   -unit, 0,    unit * (x_map.max + 0.5),
---    0,    0,    1
+--   unit, 0,    unit * 0.5,
+--   0,    unit, unit * 0.5,
+--   0,    0,    1
 -- )
+
+local transform_matrix = vecmath.matrix3(
+   0,    unit, unit * 0.5,
+  -unit, 0,    unit * (x_map.max + 0.5),
+   0,    0,    1
+)
 
 print(tostring(transform_matrix))
 
@@ -246,48 +246,77 @@ while eid do
       local points = {}
       for i = 1, #uids do
         local uid = uids[i]
-        points[#points + 1] = vecmath.point3(x_map[uid], y_map[uid], 1)
+        local p = vecmath.point3(x_map[uid], y_map[uid], 1)
+        transform_matrix:transform(p)
+        points[#points + 1] = vecmath.point2(p)
       end
+
+      local a = 0.5
+      local b = 1 - a
+      local v = vecmath.vector3(0, b, 0)
+      transform_matrix:transform(v)
 
       local d = path_data()
       local m = #points
       if m == 2 then
         local p1 = points[1]
         local p2 = points[2]
-        transform_matrix:transform(p1)
-        transform_matrix:transform(p2)
         d:M(move_first_point(p1, p2)):L(move_last_point(p1, p2))
       else
-        local a = 0.5
-        local b = 1 - a
-
-        local p1 = vecmath.point3(points[1])
-        local p2 = vecmath.point3(points[2])
-        transform_matrix:transform(p1)
-        transform_matrix:transform(p2)
+        local p1 = vecmath.point2(points[1])
+        local p2 = vecmath.point2(points[2])
         d:M(move_first_point(p1, p2))
 
         -- local p1 = { transform(unpack(points[1])) }
         -- local p2 = { transform(unpack(points[2])) }
         -- d:M(move_first_point(p1, p2))
 
-        local x1, y1 = unpack(points[1])
-        local x2, y2 = unpack(points[2])
-        local ax, ay = transform(x1 * a + x2 * b, y1 * a + y2 * b, x2)
-        local bx, by = transform(x2, y1 * b + y2 * a)
-        d:C(ax, ay, bx, by, transform(x2, y2))
+        local p1 = vecmath.point2(points[1])
+        local p2 = vecmath.point2(points[2])
+        local q1 = vecmath.point2():interpolate(p1, p2, b)
+
+        local v1 = vecmath.vector2(v)
+        if vecmath.vector2():sub(p2, p1):angle(v1) > math.pi * 0.5 then
+          v1:negate()
+        end
+        local q2 = vecmath.point2():sub(p2, v1)
+
+        -- local x1, y1 = unpack(points[1])
+        -- local x2, y2 = unpack(points[2])
+        -- local ax, ay = x1 * a + x2 * b, y1 * a + y2 * b, x2
+        -- local bx, by = x2, y1 * b + y2 * a
+        local ax, ay = q1.x, q1.y
+        local bx, by = q2.x, q2.y
+        d:C(ax, ay, bx, by, p2.x, p2.y)
+        -- d:L(ax, ay):L(bx, by):L(x2, y2)
+        -- print(q1.x, q1.y, q2.x, q2.y)
 
         for i = 2, m - 1 do
-          d:L(transform(unpack(points[i])))
+          d:L(unpack(points[i]))
         end
 
-        local p1 = { transform(unpack(points[m - 1])) }
-        local p2 = { transform(unpack(points[m])) }
+        local p1 = vecmath.point2(points[m - 1])
+        local p2 = vecmath.point2(points[m])
+        local q1 = vecmath.point2():interpolate(p1, p2, b)
+
+        local v1 = vecmath.vector2(v)
+        if vecmath.vector2():sub(p2, p1):angle(v1) > math.pi * 0.5 then
+          v1:negate()
+        end
+        local q2 = vecmath.point2():add(p1, v1)
+
+        -- local p1 = points[m - 1]
+        -- local p2 = points[m]
         local x1, y1 = unpack(points[m - 1])
         local x2, y2 = unpack(points[m])
-        local ax, ay = transform(x1, y1 * a + y2 * b)
-        local bx, by = transform(x1 * b + x2 * a, y1 * b + y2 * a)
+        -- local ax, ay = x1, y1 * a + y2 * b
+        -- local bx, by = x1 * b + x2 * a, y1 * b + y2 * a
+        local ax, ay = q2.x, q2.y
+        local bx, by = q1.x, q1.y
+        -- d:C(ax, ay, bx, by, move_last_point(p1, p2))
         d:C(ax, ay, bx, by, move_last_point(p1, p2))
+        -- d:L(ax, ay):L(bx, by):L(move_last_point(p1, p2))
+        -- d:L(ax, ay):L(bx, by):L(move_last_point(p1, p2))
       end
 
       defs[#defs + 1] = _"path" {
