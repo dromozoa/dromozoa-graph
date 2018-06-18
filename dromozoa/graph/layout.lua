@@ -57,5 +57,5 @@ return function (g)
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
-  return x, y
+  return x, y, reversed_eids
 end

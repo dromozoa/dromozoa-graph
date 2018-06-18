@@ -136,8 +136,6 @@ local transform_matrix = vecmath.matrix3(
    0,    0,    1
 )
 
-print(tostring(transform_matrix))
-
 local function transform(x, y)
   local p = vecmath.point3(x, y, 1)
   transform_matrix:transform(p)
@@ -267,10 +265,6 @@ while eid do
         local p2 = vecmath.point2(points[2])
         d:M(move_first_point(p1, p2))
 
-        -- local p1 = { transform(unpack(points[1])) }
-        -- local p2 = { transform(unpack(points[2])) }
-        -- d:M(move_first_point(p1, p2))
-
         local p1 = vecmath.point2(points[1])
         local p2 = vecmath.point2(points[2])
         local q1 = vecmath.point2():interpolate(p1, p2, b)
@@ -281,15 +275,9 @@ while eid do
         end
         local q2 = vecmath.point2():sub(p2, v1)
 
-        -- local x1, y1 = unpack(points[1])
-        -- local x2, y2 = unpack(points[2])
-        -- local ax, ay = x1 * a + x2 * b, y1 * a + y2 * b, x2
-        -- local bx, by = x2, y1 * b + y2 * a
         local ax, ay = q1.x, q1.y
         local bx, by = q2.x, q2.y
         d:C(ax, ay, bx, by, p2.x, p2.y)
-        -- d:L(ax, ay):L(bx, by):L(x2, y2)
-        -- print(q1.x, q1.y, q2.x, q2.y)
 
         for i = 2, m - 1 do
           d:L(unpack(points[i]))
@@ -305,18 +293,11 @@ while eid do
         end
         local q2 = vecmath.point2():add(p1, v1)
 
-        -- local p1 = points[m - 1]
-        -- local p2 = points[m]
         local x1, y1 = unpack(points[m - 1])
         local x2, y2 = unpack(points[m])
-        -- local ax, ay = x1, y1 * a + y2 * b
-        -- local bx, by = x1 * b + x2 * a, y1 * b + y2 * a
         local ax, ay = q2.x, q2.y
         local bx, by = q1.x, q1.y
-        -- d:C(ax, ay, bx, by, move_last_point(p1, p2))
         d:C(ax, ay, bx, by, move_last_point(p1, p2))
-        -- d:L(ax, ay):L(bx, by):L(move_last_point(p1, p2))
-        -- d:L(ax, ay):L(bx, by):L(move_last_point(p1, p2))
       end
 
       defs[#defs + 1] = _"path" {
