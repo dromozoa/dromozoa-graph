@@ -86,29 +86,28 @@ while eid do
     local uid = g.vu.target[eid]
     local vid = g.uv.target[eid]
     if reversed[eid] then
-      local uids = { vid, uid }
+      local path = { reversed = true, vid, uid }
+      local n = 2
       while uid > last_uid do
+        n = n + 1
         uid = g.vu.target[g.vu.first[uid]]
-        uids[#uids + 1] = uid
+        path[n] = uid
       end
-      local n = #uids
+      local m = n + 1
       for i = 1, n / 2 do
-        local j = n - i + 1
-        uids[i], uids[j] = uids[j], uids[i]
+        local j = m - i
+        path[i], path[j] = path[j], path[i]
       end
-      paths[eid] = {
-        reversed = true;
-        uids = uids;
-      }
+      paths[eid] = path
     else
-      local uids = { uid, vid }
+      local path = { uid, vid }
+      local n = 2
       while vid > last_uid do
+        n = n + 1
         vid = g.uv.target[g.uv.first[vid]]
-        uids[#uids + 1] = vid
+        path[#path + 1] = vid
       end
-      paths[eid] = {
-        uids = uids;
-      }
+      paths[eid] = path
     end
   end
   eid = g.e.after[eid]
@@ -208,14 +207,17 @@ local function move_last_point(p1, p2)
   return p2.x, p2.y
 end
 
+local alpha = 0.5
+local vy = vecmath.vector3(0, alpha, 0)
+transform_matrix:transform(vy)
+local vy = vecmath.vector2(vy)
+
 local eid = g.e.first
 while eid do
   if eid <= last_eid then
     local path = paths[eid]
-    local uids = path.uids
-
-    local uid = uids[1]
-    if uid == uids[2] then
+    local uid = path[1]
+    if uid == path[2] then
       local d = path_data()
 
       local x = x_map[uid]
@@ -250,16 +252,14 @@ while eid do
       end
     else
       local points = {}
-      for i = 1, #uids do
-        local uid = uids[i]
+      for i = 1, #path do
+        local uid = path[i]
         local p = vecmath.point3(x_map[uid], y_map[uid], 1)
         transform_matrix:transform(p)
         points[#points + 1] = vecmath.point2(p)
       end
 
-      local a = 0.5
-      local b = 1 - a
-      local v = vecmath.vector3(0, b, 0)
+      local v = vecmath.vector3(0, alpha, 0)
       transform_matrix:transform(v)
 
       local d = path_data()
@@ -269,43 +269,28 @@ while eid do
         local p2 = points[2]
         d:M(move_first_point(p1, p2)):L(move_last_point(p1, p2))
       else
-        local p1 = vecmath.point2(points[1])
-        local p2 = vecmath.point2(points[2])
-        d:M(move_first_point(p1, p2))
-
-        local p1 = vecmath.point2(points[1])
-        local p2 = vecmath.point2(points[2])
-        local q1 = vecmath.point2():interpolate(p1, p2, b)
-
-        local v1 = vecmath.vector2(v)
-        if vecmath.vector2():sub(p2, p1):angle(v1) > math.pi * 0.5 then
-          v1:negate()
+        local v = vecmath.vector2(vy)
+        if path.reversed then
+          v:negate()
         end
-        local q2 = vecmath.point2():sub(p2, v1)
 
-        local ax, ay = q1.x, q1.y
-        local bx, by = q2.x, q2.y
-        d:C(ax, ay, bx, by, p2.x, p2.y)
+        local p1 = vecmath.point2(points[1])
+        local p2 = vecmath.point2(points[2])
+        local q1 = vecmath.point2():interpolate(p1, p2, alpha)
+        local q2 = vecmath.point2():sub(p2, v)
+        d:M(move_first_point(p1, p2))
+        d:C(q1.x, q1.y, q2.x, q2.y, p2.x, p2.y)
 
         for i = 2, m - 1 do
-          d:L(unpack(points[i]))
+          p1 = points[i]
+          d:L(p1.x, p1.y)
         end
 
         local p1 = vecmath.point2(points[m - 1])
         local p2 = vecmath.point2(points[m])
-        local q1 = vecmath.point2():interpolate(p1, p2, b)
-
-        local v1 = vecmath.vector2(v)
-        if vecmath.vector2():sub(p2, p1):angle(v1) > math.pi * 0.5 then
-          v1:negate()
-        end
-        local q2 = vecmath.point2():add(p1, v1)
-
-        local x1, y1 = unpack(points[m - 1])
-        local x2, y2 = unpack(points[m])
-        local ax, ay = q2.x, q2.y
-        local bx, by = q1.x, q1.y
-        d:C(ax, ay, bx, by, move_last_point(p1, p2))
+        local q1 = vecmath.point2():interpolate(p1, p2, alpha)
+        local q2 = vecmath.point2():add(p1, v)
+        d:C(q2.x, q2.y, q1.x, q1.y, move_last_point(p1, p2))
       end
 
       defs[#defs + 1] = _"path" {
