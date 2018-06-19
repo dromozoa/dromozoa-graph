@@ -132,17 +132,17 @@ local y_max = y_map.max
   text_class
 ]]
 
--- local transform_matrix = vecmath.matrix3(
---   unit, 0,    unit * 0.5,
---   0,    unit, unit * 0.5,
---   0,    0,    1
--- )
-
 local transform_matrix = vecmath.matrix3(
-   0,    unit, unit * 0.5,
-  -unit, 0,    unit * (x_map.max + 0.5),
-   0,    0,    1
+  unit, 0,    unit * 0.5,
+  0,    unit, unit * 0.5,
+  0,    0,    1
 )
+
+-- local transform_matrix = vecmath.matrix3(
+--    0,    unit, unit * 0.5,
+--   -unit, 0,    unit * (x_map.max + 0.5),
+--    0,    0,    1
+-- )
 
 local function transform(x, y)
   local p = vecmath.point3(x, y, 1)
@@ -208,6 +208,16 @@ local function move_last_point(p1, p2)
 end
 
 local alpha = 0.5
+local beta = 1 - alpha
+
+local vx1 = vecmath.vector3(2/3, -1/8, 0)
+transform_matrix:transform(vx1)
+local vx1 = vecmath.vector2(vx1)
+
+local vx2 = vecmath.vector3(2/3, 1/8, 0)
+transform_matrix:transform(vx2)
+local vx2 = vecmath.vector2(vx2)
+
 local vy = vecmath.vector3(0, alpha, 0)
 transform_matrix:transform(vy)
 local vy = vecmath.vector2(vy)
@@ -220,16 +230,25 @@ while eid do
     if uid == path[2] then
       local d = path_data()
 
-      local x = x_map[uid]
-      local y = y_map[uid]
-      local p1 = { transform(x, y) }
-      local p2 = { transform(x - 0.5, y - 0.075) }
-      local p3 = { transform(x - 0.5, y + 0.075) }
-      local p4 = { transform(x, y) }
+      local p1 = vecmath.point3(x_map[uid], y_map[uid], 1)
+      transform_matrix:transform(p1)
+      local p1 = vecmath.point2(p1)
+      local p2 = vecmath.point2(p1):add(vx1)
+      local p3 = vecmath.point2(p1):add(vx2)
+      local p4 = p1
+
+      -- local x = x_map[uid]
+      -- local y = y_map[uid]
+      -- local p1 = { transform(x, y) }
+      -- local p2 = { transform(x + 0.5, y - 0.075) }
+      -- local p3 = { transform(x + 0.5, y + 0.075) }
+      -- local p4 = { transform(x, y) }
       d:M(move_first_point(p1, p2))
-      local x1, y1 = unpack(p2)
-      local x2, y2 = unpack(p3)
-      d:C(x1, y1, x2, y2, move_last_point(p3, p4))
+      -- d:L(p2.x, p2.y):L(p3.x, p3.y):L(move_last_point(p3, p4))
+      d:C(p2.x, p2.y, p3.x, p3.y, move_last_point(p3, p4))
+      -- local x1, y1 = unpack(p2)
+      -- local x2, y2 = unpack(p3)
+      -- d:C(x1, y1, x2, y2, move_last_point(p3, p4))
 
       svg[#svg + 1] = _"path" {
         d = d;
@@ -239,18 +258,20 @@ while eid do
         ["marker-end"] = "url(#triangle)";
       }
 
-      local etext = etexts[eid]
-      if etext then
-        local p = { transform(x - 0.5 * 0.9, y) }
-        svg[#svg + 1] = _"text" {
-          x = p[1];
-          y = p[2];
-          ["font-size"] = 10;
-          ["text-anchor"] = "middle";
-          etext;
-        }
-      end
+--      local etext = etexts[eid]
+--      if etext then
+--        local p = { transform(x - 0.5 * 0.9, y) }
+--        svg[#svg + 1] = _"text" {
+--          x = p[1];
+--          y = p[2];
+--          ["font-size"] = 10;
+--          ["text-anchor"] = "middle";
+--          etext;
+--        }
+--      end
+
     else
+
       local points = {}
       for i = 1, #path do
         local uid = path[i]
@@ -258,9 +279,6 @@ while eid do
         transform_matrix:transform(p)
         points[#points + 1] = vecmath.point2(p)
       end
-
-      local v = vecmath.vector3(0, alpha, 0)
-      transform_matrix:transform(v)
 
       local d = path_data()
       local m = #points
@@ -279,17 +297,19 @@ while eid do
         local q1 = vecmath.point2():interpolate(p1, p2, alpha)
         local q2 = vecmath.point2():sub(p2, v)
         d:M(move_first_point(p1, p2))
+        -- d:L(q1.x, q1.y):L(q2.x, q2.y):L(p2.x, p2.y)
         d:C(q1.x, q1.y, q2.x, q2.y, p2.x, p2.y)
 
-        for i = 2, m - 1 do
+        p1 = p2
+        for i = 3, m - 1 do
           p1 = points[i]
           d:L(p1.x, p1.y)
         end
 
-        local p1 = vecmath.point2(points[m - 1])
         local p2 = vecmath.point2(points[m])
-        local q1 = vecmath.point2():interpolate(p1, p2, alpha)
+        local q1 = vecmath.point2():interpolate(p1, p2, beta)
         local q2 = vecmath.point2():add(p1, v)
+        -- d:L(q2.x, q2.y):L(q1.x, q1.y):L(move_last_point(p1, p2))
         d:C(q2.x, q2.y, q1.x, q1.y, move_last_point(p1, p2))
       end
 
@@ -310,7 +330,6 @@ while eid do
       if etext then
         svg[#svg + 1] = _"text" {
           ["font-size"] = 10;
-          -- ["text-anchor"] = "middle";
           _"textPath" {
             ["xlink:href"] = "#e" .. eid;
             startOffset = "5%";
@@ -322,6 +341,7 @@ while eid do
         }
       end
     end
+
   end
   eid = g.e.after[eid]
 end
