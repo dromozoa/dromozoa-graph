@@ -218,6 +218,10 @@ local vx2 = vecmath.vector3(2/3, 1/8, 0)
 transform_matrix:transform(vx2)
 local vx2 = vecmath.vector2(vx2)
 
+local vx3 = vecmath.vector3(0.5, 0, 0)
+transform_matrix:transform(vx3)
+local vx3 = vecmath.vector2(vx3)
+
 local vy = vecmath.vector3(0, alpha, 0)
 transform_matrix:transform(vy)
 local vy = vecmath.vector2(vy)
@@ -228,27 +232,53 @@ while eid do
     local path = paths[eid]
     local uid = path[1]
     if uid == path[2] then
+
+      local r = vecmath.vector3(2/3, 1/12, 0):scale(0.5)
+      transform_matrix:transform(r)
+      local r = vecmath.vector2(r):absolute()
+
+      local v = vecmath.vector3(2/3, 0, 0)
+      transform_matrix:transform(v)
+      local v = vecmath.vector2(v)
+
       local d = path_data()
 
       local p1 = vecmath.point3(x_map[uid], y_map[uid], 1)
       transform_matrix:transform(p1)
       local p1 = vecmath.point2(p1)
+      local p2 = vecmath.point2(p1):add(v)
+      local p3 = vecmath.point2(p1)
+
+      local a = r.x
+      local b = r.y
+      local c = 20
+      local a2 = a * a
+      local b2 = b * b
+      local c2 = c * c
+      local a2b2 = a2 - b2
+      local d1 = a - a * (a2 - math.sqrt(a2b2 * c2 + b2 * b2)) / a2b2
+      local x = p1.x + d1
+      local d2 = math.sqrt(c2 - d1 * d1)
+      local y1 = p1.y - d2
+      local y2 = p2.y + d2
+
+      p1:set(x, y1)
+      p3:set(x, y2)
+
+      d:M(p1.x, p1.y)
+      d:A(r.x, r.y, 0, 0, 1, p2.x, p2.y)
+      d:A(r.x, r.y, 0, 0, 1, p3.x, p3.y)
+
+--[[
       local p2 = vecmath.point2(p1):add(vx1)
       local p3 = vecmath.point2(p1):add(vx2)
-      local p4 = p1
 
-      -- local x = x_map[uid]
-      -- local y = y_map[uid]
-      -- local p1 = { transform(x, y) }
-      -- local p2 = { transform(x + 0.5, y - 0.075) }
-      -- local p3 = { transform(x + 0.5, y + 0.075) }
-      -- local p4 = { transform(x, y) }
       d:M(move_first_point(p1, p2))
-      -- d:L(p2.x, p2.y):L(p3.x, p3.y):L(move_last_point(p3, p4))
-      d:C(p2.x, p2.y, p3.x, p3.y, move_last_point(p3, p4))
-      -- local x1, y1 = unpack(p2)
-      -- local x2, y2 = unpack(p3)
-      -- d:C(x1, y1, x2, y2, move_last_point(p3, p4))
+      -- d:M(p1.x, p1.y)
+      -- d:L(p2.x, p2.y):L(p3.x, p3.y):L(move_last_point(p3, p1))
+      d:C(p2.x, p2.y, p3.x, p3.y, move_last_point(p3, p1))
+      -- d:C(p2.x, p2.y, p3.x, p3.y, p1.x, p1.y)
+]]
 
       svg[#svg + 1] = _"path" {
         d = d;
@@ -258,17 +288,18 @@ while eid do
         ["marker-end"] = "url(#triangle)";
       }
 
---      local etext = etexts[eid]
---      if etext then
---        local p = { transform(x - 0.5 * 0.9, y) }
---        svg[#svg + 1] = _"text" {
---          x = p[1];
---          y = p[2];
---          ["font-size"] = 10;
---          ["text-anchor"] = "middle";
---          etext;
---        }
---      end
+--[[
+      local etext = etexts[eid]
+      if etext then
+        p1:add(vx3)
+        svg[#svg + 1] = _"text" {
+          x = p1.x;
+          y = p1.y;
+          ["font-size"] = 10;
+          etext;
+        }
+      end
+]]
 
     else
 
@@ -294,11 +325,11 @@ while eid do
 
         local p1 = vecmath.point2(points[1])
         local p2 = vecmath.point2(points[2])
-        local q1 = vecmath.point2():interpolate(p1, p2, alpha)
-        local q2 = vecmath.point2():sub(p2, v)
+        local p3 = vecmath.point2():interpolate(p1, p2, alpha)
+        local p4 = vecmath.point2():sub(p2, v)
         d:M(move_first_point(p1, p2))
-        -- d:L(q1.x, q1.y):L(q2.x, q2.y):L(p2.x, p2.y)
-        d:C(q1.x, q1.y, q2.x, q2.y, p2.x, p2.y)
+        -- d:L(p3.x, p3.y):L(p4.x, p4.y):L(p2.x, p2.y)
+        d:C(p3.x, p3.y, p4.x, p4.y, p2.x, p2.y)
 
         p1 = p2
         for i = 3, m - 1 do
@@ -307,10 +338,10 @@ while eid do
         end
 
         local p2 = vecmath.point2(points[m])
-        local q1 = vecmath.point2():interpolate(p1, p2, beta)
-        local q2 = vecmath.point2():add(p1, v)
-        -- d:L(q2.x, q2.y):L(q1.x, q1.y):L(move_last_point(p1, p2))
-        d:C(q2.x, q2.y, q1.x, q1.y, move_last_point(p1, p2))
+        local p3 = vecmath.point2():add(p1, v)
+        local p4 = vecmath.point2():interpolate(p1, p2, beta)
+        -- d:L(p3.x, p3.y):L(p4.x, p4.y):L(move_last_point(p1, p2))
+        d:C(p3.x, p3.y, p4.x, p4.y, move_last_point(p1, p2))
       end
 
       defs[#defs + 1] = _"path" {
