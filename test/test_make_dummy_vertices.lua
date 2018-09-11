@@ -19,6 +19,8 @@ local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
 local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 
+local verbose = os.getenv "VERBOSE" == "1"
+
 local g = graph()
 
 local u1 = g:add_vertex()
@@ -41,9 +43,9 @@ assert(layer_map[u3] == 2)
 assert(layer_map[u4] == 2)
 assert(layer_map[u5] == 1)
 
-local dummy_uid = make_dummy_vertices(g, layer_map, {})
-
-assert(dummy_uid == 6)
+local last_uid = g.u.last
+assert(g.u.last == 5)
+make_dummy_vertices(g, layer_map, {})
 assert(g.u.last == 8)
 
 assert(layer_map[6] == 3)
@@ -54,5 +56,23 @@ local g = graph()
 local u1 = g:add_vertex()
 local layer_map = longest_path(g)
 assert(layer_map[u1] == 1)
-local dummy_uid = make_dummy_vertices(g, layer_map, {})
-assert(not dummy_uid)
+assert(g.u.last == 1)
+make_dummy_vertices(g, layer_map, {})
+assert(g.u.last == 1)
+
+local g = graph()
+g:add_vertex()
+g:add_vertex()
+g:add_edge(1, 2)
+local layer_map = { 5, 1 }
+make_dummy_vertices(g, layer_map, {})
+
+assert(g.u.last == 5)
+assert(g.e.last == 4)
+local eid = g.e.first
+while eid do
+  if verbose then
+    print(eid, g.vu.target[eid], g.uv.target[eid])
+  end
+  eid = g.e.after[eid]
+end

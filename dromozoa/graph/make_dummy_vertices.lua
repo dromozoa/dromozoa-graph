@@ -28,8 +28,7 @@ return function (g, layer_map, reversed_eids)
     reversed[reversed_eids[i]] = true
   end
 
-  local prev_uid = u.last
-  local prev_eid = e.last
+  local last_eid = e.last
 
   local eid = e.first
   while eid do
@@ -54,11 +53,9 @@ return function (g, layer_map, reversed_eids)
         eid = g:subdivide_edge(eid, wid)
       end
     end
-    if eid == prev_eid then
+    if eid == last_eid then
       break
     end
     eid = e_after[eid]
   end
-
-  return u.after[prev_uid]
 end

@@ -29,10 +29,11 @@ return function (g)
   local reversed_eids = remove_cycles(g)
 
   local layer_map = promote_vertices(g, longest_path(g))
-  local dummy_uid = make_dummy_vertices(g, layer_map, reversed_eids)
+  local last_uid = g.u.last
+  make_dummy_vertices(g, layer_map, reversed_eids)
   local layers = make_layers(g, layer_map)
   local layers = minimize_crossings(g, layers)
-  local x = brandes_kopf(g, layer_map, layers, dummy_uid)
+  local x = brandes_kopf(g, layer_map, layers, last_uid)
 
   for i = 1, #reversed_eids do
     g:reverse_edge(reversed_eids[i])
@@ -52,11 +53,9 @@ return function (g)
   x.max = max
 
   local h = #layers
-  local y = {
-    max = h - 1;
-  }
+  local y = { max = h - 1 }
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
-  return dummy_uid, x, y
+  return x, y, reversed_eids
 end
