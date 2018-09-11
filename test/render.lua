@@ -20,10 +20,30 @@ local xml_document = require "dromozoa.dom.xml_document"
 local path_data = require "dromozoa.svg.path_data"
 local vecmath = require "dromozoa.vecmath"
 
+local east_asian_width = require "dromozoa.ucd.east_asian_width"
+local utf8 = require "dromozoa.utf8"
+
 local graph = require "dromozoa.graph"
 local layout = require "dromozoa.graph.layout"
 
 local _ = element
+
+local widths = {
+  ["N"]  = 1; -- neutral
+  ["Na"] = 1; -- narrow
+  ["H"]  = 1; -- halfwidth
+  ["A"]  = ambiguous_width; -- ambiguous
+  ["W"]  = 2; -- wide
+  ["F"]  = 2; -- fullwidth
+}
+
+local function width(s)
+  local width = 0
+  for _, c in utf8.codes(s) do
+    width = width + widths[east_asian_width(c)]
+  end
+  return width
+end
 
 local root = _"g" {
   _"text" {
@@ -37,6 +57,22 @@ local root = _"g" {
     y = 160;
     ["font-size"] = 72;
     "墾田永年私財法";
+  };
+  _"circle" {
+    cx = 240;
+    cy = 240;
+    r = 160;
+    fill = "none";
+    stroke = "black";
+    ["stroke-width"] = 4;
+  };
+  _"circle" {
+    cx = 240;
+    cy = 240;
+    r = 160;
+    fill = "none";
+    stroke = "white";
+    ["stroke-width"] = 2;
   };
 }
 
