@@ -131,12 +131,12 @@ while uid do
   local shape_stroke
   local text_fill
   if uid <= last_uid then
-    shape_fill = color3f()
-    shape_stroke = color3f()
-    text_fill = color3f "white"
+    shape_fill = "black"
+    shape_stroke = "black"
+    text_fill = "white"
   else
-    shape_fill = color3f "white"
-    shape_stroke = color3f()
+    shape_fill = "white"
+    shape_stroke = "black"
     text_fill = color3f(0.5, 0.5, 0.5)
   end
   local text_length
