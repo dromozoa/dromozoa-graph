@@ -22,15 +22,6 @@ local utf8 = require "dromozoa.utf8"
 local east_asian_width = require "dromozoa.ucd.east_asian_width"
 local graph = require "dromozoa.graph"
 
-local widths = {
-  ["N"]  = 1; -- neutral
-  ["Na"] = 1; -- narrow
-  ["H"]  = 1; -- halfwidth
-  ["A"]  = 2; -- ambiguous
-  ["W"]  = 2; -- wide
-  ["F"]  = 2; -- fullwidth
-}
-
 local g = graph()
 local layout = require "dromozoa.graph.layout"
 
@@ -82,18 +73,52 @@ local x, y, reversed_eids = layout(g)
 local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 
 local font_size = 15
-local text_length = 60
+local text_length = 75
 
 --
 -- svg
 --
 
-local function text_width(s)
+local widths = {
+  ["N"]  = 0.5; -- neutral
+  ["Na"] = 0.5; -- narrow
+  ["H"]  = 0.5; -- halfwidth
+  ["A"]  = 0.75; -- ambiguous
+  ["W"]  = 1; -- wide
+  ["F"]  = 1; -- fullwidth
+}
+
+local function render_text(p, s, em, max_width)
   local width = 0
   for _, c in utf8.codes(s) do
     width = width + widths[east_asian_width(c)]
   end
-  return width
+  width = width * em
+  if width > max_width then
+    width = max_width
+  end
+  return dom.element "text" {
+    x = p[1];
+    y = p[2];
+    ["font-size"] = em;
+    ["text-anchor"] = "middle";
+    ["dominant-baseline"] = "central";
+    textLength = width;
+    lengthAdjust = "spacingAndGlyphs";
+    s;
+  }, width
+end
+
+local function render_rect(p, u, r)
+  local q = vecmath.point2(p):sub(vecmath.vector2(u):scale(0.5))
+  return dom.element "rect" {
+    x = q[1];
+    y = q[2];
+    width = u[1];
+    height = u[2];
+    rx = r;
+    ry = r;
+  }
 end
 
 local _ = dom.element
@@ -111,30 +136,12 @@ while uid do
     local p = vecmath.point2(x[uid], y[uid])
     transform:transform(p)
 
-    local text = _"text" {
-      x = p.x;
-      y = p.y;
-      name;
-      ["text-anchor"] = "middle";
-      ["dominant-baseline"] = "central";
-    }
+    local text, text_width = render_text(p, name, font_size, text_length)
+    local u = vecmath.vector2(text_width, font_size):add{ font_size, font_size }
 
-    local shape = _"rect" {
-      x = p.x - text_length / 2 - font_size / 2;
-      y = p.y - font_size * 2 / 2;
-      width = text_length + font_size;
-      height = font_size * 2;
-      rx = font_size * 2 / 2;
-      ry = font_size * 2 / 2;
-      fill = "none";
-      stroke = "#333";
-    }
-
-    local width = text_width(name) * font_size / 2
-    if width >= text_length then
-      text.textLength = text_length
-      text.lengthAdjust = "spacingAndGlyphs"
-    end
+    local shape = render_rect(p, u, font_size)
+    shape.fill = "none"
+    shape.stroke = "#333"
 
     vertices[#vertices + 1] = text
     vertices[#vertices + 1] = shape
@@ -147,6 +154,7 @@ end
 --
 
 local style = [[
+/*
 @font-face {
   font-family: 'Noto Sans Mono CJK JP';
   font-style: normal;
@@ -155,6 +163,11 @@ local style = [[
 }
 text {
   font-family: 'Noto Sans Mono CJK JP';
+}
+*/
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
+text {
+  font-family: 'Noto Sans JP';
 }
 ]]
 
