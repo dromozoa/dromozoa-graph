@@ -18,8 +18,7 @@
 local element = require "dromozoa.dom.element"
 local space_separated = require "dromozoa.dom.space_separated"
 local xml_document = require "dromozoa.dom.xml_document"
-local color4d = require "dromozoa.css.color4d"
-local colors = require "dromozoa.css.colors"
+local color4f = require "dromozoa.vecmath.color4f"
 local path_data = require "dromozoa.svg.path_data"
 
 local graph = require "dromozoa.graph"
@@ -77,7 +76,7 @@ local svg = _"svg" {
       orient = "auto";
       _"path" {
         d = path_data():M(0,0):L(0,2):L(4,1):Z();
-        fill = colors.black;
+        fill = color4f "black";
         stroke = "none";
       };
     }
@@ -93,7 +92,7 @@ while eid do
     local y = calc_y(y[uid])
     svg[#svg + 1] = _"path" {
       d = path_data():M(x, y):A(10, 10, 0, 0, 0, x + 20, y):A(10, 10, 0, 0, 0, x, y);
-      stroke = colors.black;
+      stroke = color4f "black";
       fill = "none";
       ["marker-end"] = "url(#triangle)";
     }
@@ -109,14 +108,14 @@ while eid do
       y1 = y1;
       x2 = x2;
       y2 = y2;
-      stroke = colors.black;
+      stroke = color4f "black";
       fill = "none";
       ["marker-end"] = "url(#triangle)";
     }
     --[[
     svg[#svg + 1] = _"path" {
       d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
-      stroke = colors.black;
+      stroke = color4f "black";
       fill = "none";
       ["marker-end"] = "url(#triangle)";
     }
@@ -134,13 +133,13 @@ while uid do
       cx = cx;
       cy = cy;
       r = 2;
-      stroke = colors.black;
-      fill = colors.black;
+      stroke = color4f "black";
+      fill = color4f "black";
     }
     svg[#svg + 1] = _"text" {
       x = cx + 5;
       y = cy - 5;
-      fill = colors.black;
+      fill = color4f "black";
       uid;
     }
   else
@@ -148,8 +147,8 @@ while uid do
       cx = cx;
       cy = cy;
       r = 2;
-      stroke = colors.black;
-      fill = colors.white;
+      stroke = color4f "black";
+      fill = color4f "white";
     }
   end
   uid = g.u.after[uid]

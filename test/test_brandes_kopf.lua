@@ -17,7 +17,7 @@
 
 local xml_document = require "dromozoa.dom.xml_document"
 local element = require "dromozoa.dom.element"
-local colors = require "dromozoa.css.colors"
+local color4f = require "dromozoa.vecmath.color4f"
 
 local graph = require "dromozoa.graph"
 local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
@@ -200,7 +200,7 @@ while eid do
     y1 = calc_y(layer_map[uid]);
     x2 = calc_x(x[vid]);
     y2 = calc_y(layer_map[vid]);
-    stroke = colors.black;
+    stroke = color4f "black";
   }
   eid = g.e.after[eid]
 end
@@ -214,13 +214,13 @@ while uid do
       cx = cx;
       cy = cy;
       r = 5;
-      stroke = colors.black;
-      fill = colors.black;
+      stroke = color4f "black";
+      fill = color4f "black";
     }
     svg[#svg + 1] = _"text" {
       x = cx + 5;
       y = cy - 5;
-      fill = colors.black;
+      fill = color4f "black";
       uid;
     }
   else
@@ -228,8 +228,8 @@ while uid do
       cx = cx;
       cy = cy;
       r = 5;
-      stroke = colors.black;
-      fill = colors.white;
+      stroke = color4f "black";
+      fill = color4f "white";
     }
   end
   uid = g.u.after[uid]

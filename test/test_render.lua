@@ -18,8 +18,7 @@
 local element = require "dromozoa.dom.element"
 local space_separated = require "dromozoa.dom.space_separated"
 local xml_document = require "dromozoa.dom.xml_document"
-local color4d = require "dromozoa.css.color4d"
-local colors = require "dromozoa.css.colors"
+local color4f = require "dromozoa.vecmath.color4f"
 local path_data = require "dromozoa.svg.path_data"
 local vecmath = require "dromozoa.vecmath"
 
@@ -176,7 +175,7 @@ local defs = _"defs" {
     orient = "auto";
     _"polygon" {
       points = space_separated { 0, 0, 7, 3, 7, 4, 0, 7 };
-      fill = colors.black;
+      fill = color4f "black";
       stroke = "none";
     };
   }
@@ -282,7 +281,7 @@ while eid do
 
       svg[#svg + 1] = _"path" {
         d = d;
-        stroke = colors.black;
+        stroke = color4f "black";
         ["stroke-width"] = 1;
         fill = "none";
         ["marker-end"] = "url(#triangle)";
@@ -347,7 +346,7 @@ while eid do
       defs[#defs + 1] = _"path" {
         id = "e" .. eid;
         d = d;
-        stroke = colors.black;
+        stroke = color4f "black";
         ["stroke-width"] = 1;
         fill = "none";
         ["marker-end"] = "url(#triangle)";
@@ -385,13 +384,13 @@ while uid do
       cx = cx;
       cy = cy;
       r = r;
-      stroke = colors.black;
-      fill = "none"; -- colors.white;
+      stroke = color4f "black";
+      fill = "none";
     }
     svg[#svg + 1] = _"text" {
       x = cx;
       y = cy;
-      fill = colors.black;
+      fill = color4f "black";
       ["font-size"] = 10;
       ["dominant-baseline"] = "middle";
       ["text-anchor"] = "middle";
