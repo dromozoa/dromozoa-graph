@@ -62,6 +62,7 @@ for line in io.lines(filename) do
 end
 
 local last_uid = g.u.last
+local last_eid = g.e.last
 
 --
 -- parameters
@@ -73,7 +74,10 @@ local x, y, reversed_eids = layout(g)
 local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 
 local font_size = 15
-local text_length = 75
+local line_height = 2
+local max_text_length = 75
+
+-- shape type
 
 --
 -- svg
@@ -88,36 +92,36 @@ local widths = {
   ["F"]  = 1; -- fullwidth
 }
 
-local function render_text(p, s, em, max_width)
-  local width = 0
-  for _, c in utf8.codes(s) do
-    width = width + widths[east_asian_width(c)]
+local function make_text(p, text, font_size, max_text_length)
+  local text_length = 0
+  for _, c in utf8.codes(text) do
+    text_length = text_length + widths[east_asian_width(c)]
   end
-  width = width * em
-  if width > max_width then
-    width = max_width
+  text_length = text_length * font_size
+  if text_length > max_text_length then
+    text_length = max_text_length
   end
   return dom.element "text" {
     x = p[1];
     y = p[2];
-    ["font-size"] = em;
+    ["font-size"] = font_size;
     ["text-anchor"] = "middle";
     ["dominant-baseline"] = "central";
-    textLength = width;
+    textLength = text_length;
     lengthAdjust = "spacingAndGlyphs";
-    s;
-  }, width
+    text;
+  }
 end
 
-local function render_rect(p, u, r)
-  local q = vecmath.point2(p):sub(vecmath.vector2(u):scale(0.5))
-  return dom.element "rect" {
-    x = q[1];
-    y = q[2];
-    width = u[1];
-    height = u[2];
-    rx = r;
-    ry = r;
+local function make_rect(p, u, r)
+  return dom.element "path" {
+    d = svg.path_data():rect(p, u, r);
+  }
+end
+
+local function make_ellipse(p, r)
+  return dom.element "path" {
+    d = svg.path_data():ellipse(p, r);
   }
 end
 
@@ -125,6 +129,8 @@ local _ = dom.element
 
 local vertices = _"g" {}
 local edges = _"g" {}
+
+local uid_to_shape = {}
 
 local uid = g.u.first
 while uid do
@@ -136,17 +142,108 @@ while uid do
     local p = vecmath.point2(x[uid], y[uid])
     transform:transform(p)
 
-    local text, text_width = render_text(p, name, font_size, text_length)
-    local u = vecmath.vector2(text_width, font_size):add{ font_size, font_size }
-
-    local shape = render_rect(p, u, font_size)
+    local text = make_text(p, name, font_size, max_text_length)
+    local v = font_size * (line_height - 1) / 2
+    local u = vecmath.vector2(text.textLength / 2 + v, font_size / 2 + v)
+    local r = vecmath.vector2(v, v)
+    local shape = make_rect(p, u, r)
     shape.fill = "none"
     shape.stroke = "#333"
 
-    vertices[#vertices + 1] = text
-    vertices[#vertices + 1] = shape
+    uid_to_shape[uid] = shape
+    vertices[#vertices + 1] = _"g" {
+      shape;
+      text;
+    }
   end
   uid = g.u.after[uid]
+end
+
+local reversed = {}
+for i = 1, #reversed_eids do
+  reversed[reversed_eids[i]] = true
+end
+
+local eid = g.e.first
+while eid do
+  if eid <= last_eid then
+    local uid = g.vu.target[eid]
+    local vid = g.uv.target[eid]
+    if uid ~= vid then
+      local path = {}
+      if reversed[eid] then
+        path[1] = vid
+        path[2] = uid
+        local n = 2
+        while uid > last_uid do
+          n = n + 1
+          uid = g.vu.target[g.vu.first[uid]]
+          path[n] = uid
+        end
+        local m = n + 1
+        for i = 1, n / 2 do
+          local j = m - i
+          path[i], path[j] = path[j], path[i]
+        end
+      else
+        path[1] = uid
+        path[2] = vid
+        local n = 2
+        while vid > last_uid do
+          n = n + 1
+          vid = g.uv.target[g.uv.first[vid]]
+          path[n] = vid
+        end
+      end
+      local pd = svg.path_data()
+      local n = #path
+      for i = 1, n do
+        local uid = path[i]
+        local p = transform:transform(vecmath.point2(x[uid], y[uid]))
+        if i == 1 then
+          pd:M(p)
+        else
+          pd:L(p)
+        end
+      end
+      local uid = path[1]
+      local vid = path[n]
+      local b = pd:bezier({})
+      local ub = uid_to_shape[uid].d:bezier({})
+      local vb = uid_to_shape[vid].d:bezier({})
+
+      local b1 = b[1]
+      for i = 1, #ub do
+        local b2 = ub[i]
+        local r = vecmath.bezier_clipping(b1, b2)
+        local t = r[1][1]
+        if t then
+          b1:clip(t, 1)
+          pd[1]:set(b1:get(1, vecmath.point2()))
+          break
+        end
+      end
+      local b1 = b[#b]
+      for i = 1, #vb do
+        local b2 = vb[i]
+        local r = vecmath.bezier_clipping(b1, b2)
+        local t = r[1][1]
+        if t then
+          b1:clip(0, t)
+          pd[#pd]:set(b1:get(2, vecmath.point2()))
+          break
+        end
+      end
+
+      edges[#edges + 1] = _"path" {
+        d = pd;
+        fill = "none";
+        stroke = "#333";
+        ["marker-end"] = "url(#arrow)";
+      }
+    end
+  end
+  eid = g.e.after[eid]
 end
 
 --
@@ -180,6 +277,18 @@ local doc = dom.xml_document(_"svg" {
     _"style" {
       type = "text/css";
       style;
+    };
+    _"marker" {
+      id = "arrow";
+      viewBox = "0 0 4 4";
+      refX = 4;
+      refY = 2;
+      markerWidth = 8;
+      markerHeight = 8;
+      orient = "auto";
+      _"path" {
+        d = svg.path_data():M(0,0):L(0,4):L(4,2):Z();
+      };
     };
   };
   edges;
