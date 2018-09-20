@@ -61,6 +61,23 @@ for line in io.lines(filename) do
   end
 end
 
+local last_vertex_uid = g.u.last
+local last_eid = g.e.last
+
+local eid = g.e.first
+while eid do
+  local name = eid_to_name[eid]
+  if name then
+    local uid = g:add_vertex()
+    g:subdivide_edge(eid, uid)
+    uid_to_name[uid] = name
+  end
+  if eid == last_eid then
+    break
+  end
+  eid = g.e.after[eid]
+end
+
 local last_uid = g.u.last
 local last_eid = g.e.last
 
@@ -139,7 +156,7 @@ local uid_to_shape = {}
 
 local uid = g.u.first
 while uid do
-  if uid <= last_uid then
+  if uid <= last_vertex_uid then
     local name = uid_to_name[uid]
     if not name then
       name = tostring(uid)
@@ -160,6 +177,11 @@ while uid do
       shape;
       text;
     }
+  elseif uid <= last_uid then
+    local p = vecmath.point2(x[uid], y[uid])
+    transform:transform(p)
+    local name = uid_to_name[uid]
+    vertices[#vertices + 1] = make_text(p, name, font_size, max_text_length)
   end
   uid = g.u.after[uid]
 end
@@ -175,6 +197,7 @@ while eid do
     local uid = g.vu.target[eid]
     local vid = g.uv.target[eid]
     if uid ~= vid then
+      local path_eids = {}
 
       local is_multi = false
       local eid2 = g.uv.first[vid]
@@ -248,28 +271,36 @@ while eid do
         p = q
       end
 
-      local ub = uid_to_shape[uid].d:bezier({})
-      local vb = uid_to_shape[vid].d:bezier({})
-
-      local b1 = path_beziers[1]
-      for i = 1, #ub do
-        local b2 = ub[i]
-        local r = vecmath.bezier_clipping(b1, b2)
-        local t = r[1][1]
-        if t then
-          b1:clip(t, 1)
-          break
+      local ushape = uid_to_shape[uid]
+      if ushape then
+        local ub = ushape.d:bezier({})
+        local b1 = path_beziers[1]
+        for i = 1, #ub do
+          local b2 = ub[i]
+          local r = vecmath.bezier_clipping(b1, b2)
+          local t = r[1][1]
+          if t then
+            b1:clip(t, 1)
+            break
+          end
         end
       end
-      local b1 = path_beziers[#path_beziers]
-      for i = 1, #vb do
-        local b2 = vb[i]
-        local r = vecmath.bezier_clipping(b1, b2)
-        local t = r[1][1]
-        if t then
-          b1:clip(0, t)
-          break
+
+      local marker_end
+      local vshape = uid_to_shape[vid]
+      if vshape then
+        local vb = vshape.d:bezier({})
+        local b1 = path_beziers[#path_beziers]
+        for i = 1, #vb do
+          local b2 = vb[i]
+          local r = vecmath.bezier_clipping(b1, b2)
+          local t = r[1][1]
+          if t then
+            b1:clip(0, t)
+            break
+          end
         end
+        marker_end = "url(#arrow)"
       end
 
       local pd = svg.path_data()
@@ -285,7 +316,7 @@ while eid do
         d = pd;
         fill = "none";
         stroke = "#333";
-        ["marker-end"] = "url(#arrow)";
+        ["marker-end"] = marker_end;
       }
     end
   end
