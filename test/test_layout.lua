@@ -18,8 +18,11 @@
 local element = require "dromozoa.dom.element"
 local space_separated = require "dromozoa.dom.space_separated"
 local xml_document = require "dromozoa.dom.xml_document"
-local color4d = require "dromozoa.css.color4d"
-local colors = require "dromozoa.css.colors"
+
+local color3f = require "dromozoa.vecmath.color3f"
+local point2 = require "dromozoa.vecmath.point2"
+local vector2 = require "dromozoa.vecmath.vector2"
+
 local path_data = require "dromozoa.svg.path_data"
 
 local graph = require "dromozoa.graph"
@@ -33,8 +36,8 @@ g:add_edge(1, 1)
 g:add_edge(1, 2)
 g:add_edge(1, 5)
 
--- g:add_edge(1, 6)
-g:add_edge(6, 1)
+g:add_edge(1, 6)
+-- g:add_edge(6, 1)
 
 g:add_edge(2, 3)
 g:add_edge(3, 4)
@@ -42,8 +45,8 @@ g:add_edge(4, 8)
 g:add_edge(4, 8)
 g:add_edge(5, 7)
 
--- g:add_edge(6, 7)
-g:add_edge(7, 6)
+g:add_edge(6, 7)
+-- g:add_edge(7, 6)
 
 g:add_edge(7, 8)
 
@@ -69,15 +72,15 @@ local svg = _"svg" {
   _"defs" {
     _"marker" {
       id = "triangle";
-      viewBox = space_separated { 0, 0, 4, 2 };
+      viewBox = space_separated { 0, 0, 4, 4 };
       refX = 4;
-      refY = 1;
+      refY = 2;
       markerWidth = 8;
       markerHeight = 8;
       orient = "auto";
       _"path" {
-        d = path_data():M(0,0):L(0,2):L(4,1):Z();
-        fill = colors.black;
+        d = path_data():M(0,0):L(0,4):L(4,2):Z();
+        fill = "black";
         stroke = "none";
       };
     }
@@ -89,38 +92,32 @@ while eid do
   local uid = g.vu.target[eid]
   local vid = g.uv.target[eid]
   if uid == vid then
-    local x = calc_x(x[uid])
-    local y = calc_y(y[uid])
+    local p1 = point2(calc_x(x[uid]), calc_y(y[uid]))
+    local x = 25
+    local y = 10
+    local p2 = point2(p1):add{x,-y}
+    local p3 = point2(p1):add{2*x,0}
+    local p4 = point2(p1):add{x,y}
+    local p5 = point2(p1):add(vector2(x,y):normalize():scale(10))
+    p1:add(vector2(x,-y):normalize():scale(10))
     svg[#svg + 1] = _"path" {
-      d = path_data():M(x, y):A(10, 10, 0, 0, 0, x + 20, y):A(10, 10, 0, 0, 0, x, y);
-      stroke = colors.black;
+      d = path_data():M(p1):L(p2):L(p3):L(p4):L(p5);
+      stroke = "black";
       fill = "none";
       ["marker-end"] = "url(#triangle)";
     }
   else
-    local x1 = calc_x(x[uid])
-    local y1 = calc_y(y[uid])
-    local x2 = calc_x(x[vid])
-    local y2 = calc_y(y[vid])
-    local x3 = (x1 + x2) * 0.5
-    local y3 = (y1 + y2) * 0.5
-    svg[#svg + 1] = _"line" {
-      x1 = x1;
-      y1 = y1;
-      x2 = x2;
-      y2 = y2;
-      stroke = colors.black;
-      fill = "none";
-      ["marker-end"] = "url(#triangle)";
-    }
-    --[[
+    local p = point2(calc_x(x[uid]), calc_y(y[uid]))
+    local q = point2(calc_x(x[vid]), calc_y(y[vid]))
+    local v = vector2():sub(q, p):normalize():scale(10)
+    p:add(v)
+    q:sub(v)
     svg[#svg + 1] = _"path" {
-      d = path_data():M(x1, y1):Q(x1, y3, x3, y3):Q(x2, y3, x2, y2);
-      stroke = colors.black;
+      d = path_data():M(p):L(q);
+      stroke = "black";
       fill = "none";
       ["marker-end"] = "url(#triangle)";
     }
-    ]]
   end
   eid = g.e.after[eid]
 end
@@ -129,29 +126,46 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(y[uid])
+
+  local shape_fill
+  local shape_stroke
+  local text_fill
   if uid <= last_uid then
-    svg[#svg + 1] = _"circle" {
-      cx = cx;
-      cy = cy;
-      r = 2;
-      stroke = colors.black;
-      fill = colors.black;
-    }
-    svg[#svg + 1] = _"text" {
-      x = cx + 5;
-      y = cy - 5;
-      fill = colors.black;
-      uid;
-    }
+    shape_fill = "black"
+    shape_stroke = "black"
+    text_fill = "white"
   else
-    svg[#svg + 1] = _"circle" {
-      cx = cx;
-      cy = cy;
-      r = 2;
-      stroke = colors.black;
-      fill = colors.white;
-    }
+    shape_fill = "white"
+    shape_stroke = "black"
+    text_fill = color3f(0.5, 0.5, 0.5)
   end
+  local text_length
+  local length_adjust
+  if uid >= 10 then
+    text_length = 12
+    length_adjust = "spacingAndGlyphs"
+  end
+
+  svg[#svg + 1] = _"circle" {
+    cx = cx;
+    cy = cy;
+    r = 10;
+    fill = shape_fill;
+    stroke = shape_stroke;
+  }
+
+  svg[#svg + 1] = _"text" {
+    x = cx;
+    y = cy;
+    fill = text_fill;
+    ["font-size"] = 12;
+    ["text-anchor"] = "middle";
+    ["dominant-baseline"] = "central";
+    textLength = text_length;
+    lengthAdjust = length_adjust;
+    uid;
+  }
+
   uid = g.u.after[uid]
 end
 

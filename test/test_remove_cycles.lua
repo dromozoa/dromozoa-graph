@@ -17,7 +17,6 @@
 
 local graph = require "dromozoa.graph"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
-local write_dot = require "write_dot"
 
 local N = ...
 local N = tonumber(N or 6)
@@ -33,9 +32,7 @@ local e3 = g:add_edge(u3, u1)
 local e4 = g:add_edge(u3, u4)
 local e5 = g:add_edge(u4, u2)
 
-write_dot("test1.dot", g)
 local reverse = remove_cycles(g)
-write_dot("test2.dot", g)
 
 assert(#reverse == 1)
 assert(reverse[1] == e2)
@@ -52,9 +49,7 @@ for i = 1, N do
   v = w
 end
 
-write_dot("test3.dot", g)
 local reverse = remove_cycles(g)
-write_dot("test4.dot", g)
 
 if N % 2 == 0 then
   local n = N / 2
