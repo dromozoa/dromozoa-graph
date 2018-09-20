@@ -64,13 +64,18 @@ end
 local last_uid = g.u.last
 local last_eid = g.e.last
 
+local x, y, reversed_eids = layout(g)
+
+-- self edge
+-- multi edge
+-- labelled edge
+-- label vertex
+
 --
 -- parameters
 --
 
 local transform = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
-
-local x, y, reversed_eids = layout(g)
 local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 
 local font_size = 15
@@ -170,42 +175,74 @@ while eid do
     local uid = g.vu.target[eid]
     local vid = g.uv.target[eid]
     if uid ~= vid then
-      local path = {}
-      if reversed[eid] then
-        path[1] = vid
-        path[2] = uid
-        local n = 2
-        while uid > last_uid do
-          n = n + 1
-          uid = g.vu.target[g.vu.first[uid]]
-          path[n] = uid
+
+      local is_multi = false
+      local eid2 = g.uv.first[vid]
+      while eid2 do
+        local uid2 = g.uv.target[eid2]
+        if uid2 == uid then
+          is_multi = true
+          break
         end
-        local m = n + 1
-        for i = 1, n / 2 do
-          local j = m - i
-          path[i], path[j] = path[j], path[i]
-        end
-      else
-        path[1] = uid
-        path[2] = vid
-        local n = 2
-        while vid > last_uid do
-          n = n + 1
-          vid = g.uv.target[g.uv.first[vid]]
-          path[n] = vid
-        end
+        eid2 = g.uv.after[eid2]
       end
 
       local path_points = {}
-      local path_beziers = {}
+      if is_multi then
+        local px = x[uid]
+        local py = y[uid]
+        local qx = x[vid]
+        local qy = y[vid]
 
-      for i = 1, #path do
-        local uid = path[i]
-        path_points[i] = transform:transform(vecmath.point2(x[uid], y[uid]))
+        local u = vecmath.vector2()
+        if py < qy then
+          u = vecmath.vector2(0.25, 0)
+        else
+          u = vecmath.vector2(-0.25, 0)
+        end
+
+        local p1 = vecmath.point2(px, py)
+        local p3 = vecmath.point2(qx, qy)
+        local p2 = vecmath.point2(p1):add(p3):scale(0.5):add(u)
+
+        path_points[1] = transform:transform(p1)
+        path_points[2] = transform:transform(p2)
+        path_points[3] = transform:transform(p3)
+      else
+        local path = {}
+        if reversed[eid] then
+          path[1] = vid
+          path[2] = uid
+          local n = 2
+          while uid > last_uid do
+            n = n + 1
+            uid = g.vu.target[g.vu.first[uid]]
+            path[n] = uid
+          end
+          local m = n + 1
+          for i = 1, n / 2 do
+            local j = m - i
+            path[i], path[j] = path[j], path[i]
+          end
+        else
+          path[1] = uid
+          path[2] = vid
+          local n = 2
+          while vid > last_uid do
+            n = n + 1
+            vid = g.uv.target[g.uv.first[vid]]
+            path[n] = vid
+          end
+        end
+        for i = 1, #path do
+          local uid = path[i]
+          path_points[i] = transform:transform(vecmath.point2(x[uid], y[uid]))
+        end
       end
 
+      local path_beziers = {}
       local p = path_points[1]
-      for i = 2, #path do
+      for i = 2, #path_points do
         local q = path_points[i]
         path_beziers[i - 1] = vecmath.bezier(p, q)
         p = q
