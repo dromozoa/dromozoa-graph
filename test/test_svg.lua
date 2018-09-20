@@ -195,44 +195,53 @@ while eid do
           path[n] = vid
         end
       end
-      local pd = svg.path_data()
-      local n = #path
-      for i = 1, n do
+
+      local path_points = {}
+      local path_beziers = {}
+
+      for i = 1, #path do
         local uid = path[i]
-        local p = transform:transform(vecmath.point2(x[uid], y[uid]))
-        if i == 1 then
-          pd:M(p)
-        else
-          pd:L(p)
-        end
+        path_points[i] = transform:transform(vecmath.point2(x[uid], y[uid]))
       end
-      local uid = path[1]
-      local vid = path[n]
-      local b = pd:bezier({})
+
+      local p = path_points[1]
+      for i = 2, #path do
+        local q = path_points[i]
+        path_beziers[i - 1] = vecmath.bezier(p, q)
+        p = q
+      end
+
       local ub = uid_to_shape[uid].d:bezier({})
       local vb = uid_to_shape[vid].d:bezier({})
 
-      local b1 = b[1]
+      local b1 = path_beziers[1]
       for i = 1, #ub do
         local b2 = ub[i]
         local r = vecmath.bezier_clipping(b1, b2)
         local t = r[1][1]
         if t then
           b1:clip(t, 1)
-          pd[1]:set(b1:get(1, vecmath.point2()))
           break
         end
       end
-      local b1 = b[#b]
+      local b1 = path_beziers[#path_beziers]
       for i = 1, #vb do
         local b2 = vb[i]
         local r = vecmath.bezier_clipping(b1, b2)
         local t = r[1][1]
         if t then
           b1:clip(0, t)
-          pd[#pd]:set(b1:get(2, vecmath.point2()))
           break
         end
+      end
+
+      local pd = svg.path_data()
+
+      local b = path_beziers[1]
+      pd:M(b:get(1, vecmath.point2())):L(b:get(2, vecmath.point2()))
+      for i = 2, #path_beziers do
+        local b = path_beziers[i]
+        pd:L(b:get(2, vecmath.point2()))
       end
 
       edges[#edges + 1] = _"path" {
