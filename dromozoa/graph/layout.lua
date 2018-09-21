@@ -44,8 +44,6 @@ return function (g, last_uid, last_eid)
     g:set_edge(removed_eids[i], uid, uid)
   end
 
-  local paths = make_paths(g, last_uid, last_eid)
-
   local max = 0
   for _, v in pairs(x) do
     if max < v then
@@ -59,5 +57,8 @@ return function (g, last_uid, last_eid)
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
+
+  local paths = make_paths(g, last_uid, last_eid)
+
   return x, y, paths
 end
