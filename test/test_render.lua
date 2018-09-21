@@ -93,6 +93,7 @@ local x, y, reversed_eids = layout(g)
 --
 
 local transform = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
+-- local transform = vecmath.matrix3(0, 200, 50, 75, 0, 50, 0, 0, 1)
 local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 
 local font_size = 15
@@ -165,6 +166,8 @@ while uid do
     transform:transform(p)
 
     local text = make_text(p, name, font_size, max_text_length)
+    text.fill = "#333"
+
     local v = font_size * (line_height - 1) / 2
     local u = vecmath.vector2(text.textLength / 2 + v, font_size / 2 + v)
     local r = vecmath.vector2(v, v)
@@ -181,7 +184,19 @@ while uid do
     local p = vecmath.point2(x[uid], y[uid])
     transform:transform(p)
     local name = uid_to_name[uid]
-    vertices[#vertices + 1] = make_text(p, name, font_size, max_text_length)
+    local text1 = make_text(p, name, font_size, max_text_length)
+    text1.fill = "#333"
+    -- text1["text-anchor"] = "start"
+    local text2 = make_text(p, name, font_size, max_text_length)
+    text2.fill = "#FFF"
+    text2.stroke = "#FFF"
+    -- text2["text-anchor"] = "start"
+    text2["stroke-width"] = 4
+
+    vertices[#vertices + 1] = _"g" {
+      text2;
+      text1;
+    }
   end
   uid = g.u.after[uid]
 end
