@@ -19,12 +19,13 @@ local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 local longest_path = require "dromozoa.graph.longest_path"
 local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 local make_layers = require "dromozoa.graph.make_layers"
+local make_paths = require "dromozoa.graph.make_paths"
 local minimize_crossings = require "dromozoa.graph.minimize_crossings"
 local promote_vertices = require "dromozoa.graph.promote_vertices"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
 
-return function (g, last_uid)
+return function (g, last_uid, last_eid)
   local removed_eids, removed_uids = remove_self_edges(g)
   local reversed_eids = remove_cycles(g)
 
@@ -43,6 +44,8 @@ return function (g, last_uid)
     g:set_edge(removed_eids[i], uid, uid)
   end
 
+  local paths = make_paths(g, last_uid, last_eid)
+
   local max = 0
   for _, v in pairs(x) do
     if max < v then
@@ -56,5 +59,5 @@ return function (g, last_uid)
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
-  return x, y, reversed_eids
+  return x, y, paths
 end

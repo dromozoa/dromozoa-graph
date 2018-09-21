@@ -61,16 +61,20 @@ for line in io.lines(filename) do
   end
 end
 
-local last_vertex_uid = g.u.last
+local last_uid = g.u.last
 local last_eid = g.e.last
 
 local eid = g.e.first
 while eid do
-  local name = eid_to_name[eid]
-  if name then
-    local uid = g:add_vertex()
-    g:subdivide_edge(eid, uid)
-    uid_to_name[uid] = name
+  local uid = g.vu.target[eid]
+  local vid = g.uv.target[eid]
+  if uid == vid then
+    g:subdivide_edge(eid, g:add_vertex())
+  else
+    local name = eid_to_name[eid]
+    if name then
+      g:subdivide_edge(eid, g:add_vertex())
+    end
   end
   if eid == last_eid then
     break
@@ -78,15 +82,7 @@ while eid do
   eid = g.e.after[eid]
 end
 
-local last_uid = g.u.last
-local last_eid = g.e.last
-
-local x, y, reversed_eids = layout(g, last_uid)
-
--- self edge
--- multi edge
--- labelled edge
--- label vertex
+local x, y, paths = layout(g, last_uid, last_eid)
 
 --
 -- parameters
@@ -99,8 +95,6 @@ local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 local font_size = 15
 local line_height = 2
 local max_text_length = 75
-
--- shape type
 
 --
 -- svg
@@ -157,7 +151,7 @@ local uid_to_shape = {}
 
 local uid = g.u.first
 while uid do
-  if uid <= last_vertex_uid then
+  if uid <= last_uid then
     local name = uid_to_name[uid]
     if not name then
       name = tostring(uid)
@@ -180,161 +174,102 @@ while uid do
       shape;
       text;
     }
-  elseif uid <= last_uid then
-    local p = vecmath.point2(x[uid], y[uid])
-    transform:transform(p)
-    local name = uid_to_name[uid]
-    local text1 = make_text(p, name, font_size, max_text_length)
-    text1.fill = "#333"
-    -- text1["text-anchor"] = "start"
-    local text2 = make_text(p, name, font_size, max_text_length)
-    text2.fill = "#FFF"
-    text2.stroke = "#FFF"
-    -- text2["text-anchor"] = "start"
-    text2["stroke-width"] = 4
 
-    vertices[#vertices + 1] = _"g" {
-      text2;
-      text1;
-    }
+--  elseif uid <= last_uid then
+--    local p = vecmath.point2(x[uid], y[uid])
+--    transform:transform(p)
+--    local name = uid_to_name[uid]
+--    local text1 = make_text(p, name, font_size, max_text_length)
+--    text1.fill = "#333"
+--    -- text1["text-anchor"] = "start"
+--    local text2 = make_text(p, name, font_size, max_text_length)
+--    text2.fill = "#FFF"
+--    text2.stroke = "#FFF"
+--    -- text2["text-anchor"] = "start"
+--    text2["stroke-width"] = 4
+--
+--    vertices[#vertices + 1] = _"g" {
+--      text2;
+--      text1;
+--    }
   end
   uid = g.u.after[uid]
-end
-
-local reversed = {}
-for i = 1, #reversed_eids do
-  reversed[reversed_eids[i]] = true
 end
 
 local eid = g.e.first
 while eid do
   if eid <= last_eid then
-    local uid = g.vu.target[eid]
-    local vid = g.uv.target[eid]
-    if uid ~= vid then
-      local path_eids = {}
+    local path_eids = paths[eid]
 
-      local is_multi = false
-      local eid2 = g.uv.first[vid]
-      while eid2 do
-        local uid2 = g.uv.target[eid2]
-        if uid2 == uid then
-          is_multi = true
+    local uid = g.vu.target[path_eids[1]]
+    local path_points = {
+      transform:transform(vecmath.point2(x[uid], y[uid]))
+    }
+    for i = 1, #path_eids do
+      local vid = g.uv.target[path_eids[i]]
+      path_points[i + 1] = transform:transform(vecmath.point2(x[vid], y[vid]))
+    end
+
+    local path_beziers = {}
+    local p = path_points[1]
+    for i = 2, #path_points do
+      local q = path_points[i]
+      path_beziers[i - 1] = vecmath.bezier(p, q)
+      p = q
+    end
+
+    local uid = g.vu.target[path_eids[1]]
+    local vid = g.uv.target[path_eids[#path_eids]]
+
+    local ushape = uid_to_shape[uid]
+    if ushape then
+      local ub = ushape.d:bezier({})
+      local b1 = path_beziers[1]
+      for i = 1, #ub do
+        local b2 = ub[i]
+        local r = vecmath.bezier_clipping(b1, b2)
+        local t = r[1][1]
+        if t then
+          b1:clip(t, 1)
           break
         end
-        eid2 = g.uv.after[eid2]
       end
-
-      local path_points = {}
-      if is_multi then
-        local px = x[uid]
-        local py = y[uid]
-        local qx = x[vid]
-        local qy = y[vid]
-
-        local u = vecmath.vector2()
-        if py < qy then
-          u = vecmath.vector2(0.25, 0)
-        else
-          u = vecmath.vector2(-0.25, 0)
-        end
-
-        local p1 = vecmath.point2(px, py)
-        local p3 = vecmath.point2(qx, qy)
-        local p2 = vecmath.point2(p1):add(p3):scale(0.5):add(u)
-
-        path_points[1] = transform:transform(p1)
-        path_points[2] = transform:transform(p2)
-        path_points[3] = transform:transform(p3)
-      else
-        local path = {}
-        if reversed[eid] then
-          path[1] = vid
-          path[2] = uid
-          local n = 2
-          while uid > last_uid do
-            n = n + 1
-            uid = g.vu.target[g.vu.first[uid]]
-            path[n] = uid
-          end
-          local m = n + 1
-          for i = 1, n / 2 do
-            local j = m - i
-            path[i], path[j] = path[j], path[i]
-          end
-        else
-          path[1] = uid
-          path[2] = vid
-          local n = 2
-          while vid > last_uid do
-            n = n + 1
-            vid = g.uv.target[g.uv.first[vid]]
-            path[n] = vid
-          end
-        end
-        for i = 1, #path do
-          local uid = path[i]
-          path_points[i] = transform:transform(vecmath.point2(x[uid], y[uid]))
-        end
-      end
-
-      local path_beziers = {}
-      local p = path_points[1]
-      for i = 2, #path_points do
-        local q = path_points[i]
-        path_beziers[i - 1] = vecmath.bezier(p, q)
-        p = q
-      end
-
-      local ushape = uid_to_shape[uid]
-      if ushape then
-        local ub = ushape.d:bezier({})
-        local b1 = path_beziers[1]
-        for i = 1, #ub do
-          local b2 = ub[i]
-          local r = vecmath.bezier_clipping(b1, b2)
-          local t = r[1][1]
-          if t then
-            b1:clip(t, 1)
-            break
-          end
-        end
-      end
-
-      local marker_end
-      local vshape = uid_to_shape[vid]
-      if vshape then
-        local vb = vshape.d:bezier({})
-        local b1 = path_beziers[#path_beziers]
-        for i = 1, #vb do
-          local b2 = vb[i]
-          local r = vecmath.bezier_clipping(b1, b2)
-          local t = r[1][1]
-          if t then
-            b1:clip(0, t)
-            break
-          end
-        end
-        marker_end = "url(#arrow)"
-      end
-
-      local pd = svg.path_data()
-
-      local b = path_beziers[1]
-      pd:M(b:get(1, vecmath.point2())):L(b:get(2, vecmath.point2()))
-      for i = 2, #path_beziers do
-        local b = path_beziers[i]
-        pd:L(b:get(2, vecmath.point2()))
-      end
-
-      edges[#edges + 1] = _"path" {
-        d = pd;
-        fill = "none";
-        stroke = "#333";
-        ["marker-end"] = marker_end;
-      }
     end
+
+    local marker_end
+    local vshape = uid_to_shape[vid]
+    if vshape then
+      local vb = vshape.d:bezier({})
+      local b1 = path_beziers[#path_beziers]
+      for i = 1, #vb do
+        local b2 = vb[i]
+        local r = vecmath.bezier_clipping(b1, b2)
+        local t = r[1][1]
+        if t then
+          b1:clip(0, t)
+          break
+        end
+      end
+      marker_end = "url(#arrow)"
+    end
+
+    local pd = svg.path_data()
+
+    local b = path_beziers[1]
+    pd:M(b:get(1, vecmath.point2())):L(b:get(2, vecmath.point2()))
+    for i = 2, #path_beziers do
+      local b = path_beziers[i]
+      pd:L(b:get(2, vecmath.point2()))
+    end
+
+    edges[#edges + 1] = _"path" {
+      d = pd;
+      fill = "none";
+      stroke = "#333";
+      ["marker-end"] = marker_end;
+    }
   end
+
   eid = g.e.after[eid]
 end
 
