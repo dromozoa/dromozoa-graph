@@ -81,7 +81,7 @@ end
 local last_uid = g.u.last
 local last_eid = g.e.last
 
-local x, y, reversed_eids = layout(g)
+local x, y, reversed_eids = layout(g, last_uid)
 
 -- self edge
 -- multi edge

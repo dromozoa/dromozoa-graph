@@ -24,12 +24,11 @@ local promote_vertices = require "dromozoa.graph.promote_vertices"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
 
-return function (g)
+return function (g, last_uid)
   local removed_eids, removed_uids = remove_self_edges(g)
   local reversed_eids = remove_cycles(g)
 
   local layer_map = promote_vertices(g, longest_path(g))
-  local last_uid = g.u.last
   make_dummy_vertices(g, layer_map, reversed_eids)
   local layers = make_layers(g, layer_map)
   local layers = minimize_crossings(g, layers)

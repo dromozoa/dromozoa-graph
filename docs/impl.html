@@ -26,6 +26,8 @@
 
 <h1>実装ノート</h1>
 
+<h2>ダミー頂点</h2>
+
 <p>
 頂点集合を階層に分割する際にダミー頂点が挿入される。
 BrandesとK&ouml;pfのアルゴリズムは、
@@ -47,9 +49,11 @@ BrandesとK&ouml;pfのアルゴリズムは、
 非閉路化のアルゴリズムが意図した結果を与えない場合に有効かもしれない。
 </p>
 
-
-
-
+<p>
+ダミー頂点は入力エッジと出力エッジをただひとつだけ持つ。
+また、非ダミー頂点と非ダミー頂点をつなぐエッジ列をパスと呼ぶことにする。
+ダミー頂点を挿入する前のエッジ集合に対して、一対一で対応するパスが存在する。
+</p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js"></script>
