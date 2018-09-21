@@ -24,6 +24,7 @@ build = {
     ["dromozoa.graph.longest_path"] = "dromozoa/graph/longest_path.lua";
     ["dromozoa.graph.make_dummy_vertices"] = "dromozoa/graph/make_dummy_vertices.lua";
     ["dromozoa.graph.make_layers"] = "dromozoa/graph/make_layers.lua";
+    ["dromozoa.graph.make_paths"] = "dromozoa/graph/make_paths.lua";
     ["dromozoa.graph.minimize_crossings"] = "dromozoa/graph/minimize_crossings.lua";
     ["dromozoa.graph.promote_vertices"] = "dromozoa/graph/promote_vertices.lua";
     ["dromozoa.graph.remove_cycles"] = "dromozoa/graph/remove_cycles.lua";
