@@ -22,46 +22,47 @@ return function (g, x, y)
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
-  local vu = g.vu
-  local vu_first = vu.first
-  local vu_after = vu.after
-  local vu_target = vu.target
+  local vu_target = g.vu.target
 
   local last_eid = e.last
 
-  local eid = e.first
-  while eid do
-    local uid = vu_target[eid]
-    local vid = uv_target[eid]
-    local is_multi = false
+  local eid1 = e.first
+  while eid1 do
+    local uid = vu_target[eid1]
+    local vid = uv_target[eid1]
     local eid2 = uv_first[vid]
     while eid2 do
-      local uid2 = uv_target[eid2]
-      if uid == uid2 then
-        is_multi = true
+      if uid == uv_target[eid2] then
         break
       end
       eid2 = uv_after[eid2]
     end
-    if is_multi then
-      local wid = g:add_vertex()
-      g:subdivide_edge(eid, wid)
-
+    if eid2 then
       local ux = x[uid]
       local uy = y[uid]
       local vx = x[vid]
       local vy = y[vid]
+      local wx = (ux + vx) / 2
+      local wy = (uy + vy) / 2
+
+      local wid1 = g:add_vertex()
+      g:subdivide_edge(eid1, wid1)
+      local wid2 = g:add_vertex()
+      g:subdivide_edge(eid2, wid2)
 
       if uy < vy then
-        x[wid] = (ux + vx) / 2 + 0.25
+        x[wid1] = wx + 0.25
+        x[wid2] = wx - 0.25
       else
-        x[wid] = (ux + vx) / 2 - 0.25
+        x[wid1] = wx - 0.25
+        x[wid2] = wx + 0.25
       end
-      y[wid] = (uy + vy) / 2
+      y[wid1] = wy
+      y[wid2] = wy
     end
-    if eid == last_eid then
+    if eid1 == last_eid then
       break
     end
-    eid = e_after[eid]
+    eid1 = e_after[eid1]
   end
 end
