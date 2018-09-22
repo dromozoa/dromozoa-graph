@@ -24,6 +24,7 @@ local minimize_crossings = require "dromozoa.graph.minimize_crossings"
 local promote_vertices = require "dromozoa.graph.promote_vertices"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
+local subdivide_multi_edges = require "dromozoa.graph.subdivide_multi_edges"
 
 return function (g, last_uid, last_eid, reversed_eids)
   local removed_eids, removed_uids = remove_self_edges(g)
@@ -58,6 +59,7 @@ return function (g, last_uid, last_eid, reversed_eids)
     y[k] = h - v
   end
 
+  subdivide_multi_edges(g, x, y)
   local paths = make_paths(g, last_uid, last_eid)
 
   return x, y, paths
