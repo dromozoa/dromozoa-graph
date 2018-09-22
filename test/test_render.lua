@@ -63,13 +63,16 @@ end
 
 local last_uid = g.u.last
 local last_eid = g.e.last
+local revered_eids = {}
 
 local eid = g.e.first
 while eid do
   local uid = g.vu.target[eid]
   local vid = g.uv.target[eid]
   if uid == vid then
-    g:subdivide_edge(eid, g:add_vertex())
+    local new_eid = g:subdivide_edge(eid, g:add_vertex())
+    g:reverse_edge(new_eid)
+    revered_eids[#revered_eids + 1] = new_eid
   else
     local name = eid_to_name[eid]
     if name then
@@ -82,7 +85,7 @@ while eid do
   eid = g.e.after[eid]
 end
 
-local x, y, paths = layout(g, last_uid, last_eid)
+local x, y, paths = layout(g, last_uid, last_eid, revered_eids)
 
 --
 -- parameters
