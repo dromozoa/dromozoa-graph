@@ -51,11 +51,11 @@ return function (g, x, y)
       g:subdivide_edge(eid2, wid2)
 
       if uy < vy then
-        x[wid1] = wx + 0.25
-        x[wid2] = wx - 0.25
+        x[wid1] = wx + 1/6
+        x[wid2] = wx - 1/6
       else
-        x[wid1] = wx - 0.25
-        x[wid2] = wx + 0.25
+        x[wid1] = wx - 1/6
+        x[wid2] = wx + 1/6
       end
       y[wid1] = wy
       y[wid2] = wy

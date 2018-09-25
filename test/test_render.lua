@@ -24,6 +24,7 @@ local graph = require "dromozoa.graph"
 
 local g = graph()
 local layout = require "dromozoa.graph.layout"
+local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 --
 -- load graph
@@ -63,27 +64,28 @@ end
 
 local last_uid = g.u.last
 local last_eid = g.e.last
-local revered_eids = {}
+local revered_eids = subdivide_special_edges(g, eid_to_name)
 
-local eid = g.e.first
-while eid do
-  local uid = g.vu.target[eid]
-  local vid = g.uv.target[eid]
-  if uid == vid then
-    local new_eid = g:subdivide_edge(eid, g:add_vertex())
-    g:reverse_edge(new_eid)
-    revered_eids[#revered_eids + 1] = new_eid
-  else
-    local name = eid_to_name[eid]
-    if name then
-      g:subdivide_edge(eid, g:add_vertex())
-    end
-  end
-  if eid == last_eid then
-    break
-  end
-  eid = g.e.after[eid]
-end
+-- local revered_eids = {}
+-- local eid = g.e.first
+-- while eid do
+--   local uid = g.vu.target[eid]
+--   local vid = g.uv.target[eid]
+--   if uid == vid then
+--     local new_eid = g:subdivide_edge(eid, g:add_vertex())
+--     g:reverse_edge(new_eid)
+--     revered_eids[#revered_eids + 1] = new_eid
+--   else
+--     local name = eid_to_name[eid]
+--     if name then
+--       g:subdivide_edge(eid, g:add_vertex())
+--     end
+--   end
+--   if eid == last_eid then
+--     break
+--   end
+--   eid = g.e.after[eid]
+-- end
 
 local x, y, paths = layout(g, last_uid, last_eid, revered_eids)
 
@@ -99,17 +101,6 @@ local font_size = 15
 local line_height = 2
 local max_text_length = 75
 local curve_alpha = 0.5
-
---[[
-
-vertex shapes
-vertex labels
-
-edge paths
-edge labels
-
-
-]]
 
 --
 -- svg
@@ -209,31 +200,40 @@ while eid do
 
     local path_beziers = {}
     local n = #path_eids
-    for i = 1, n do
-      local eid = path_eids[i]
+    if n == 1 then
+      local eid = path_eids[1]
       local uid = g.vu.target[eid]
       local vid = g.uv.target[eid]
       local p1 = transform:transform(vecmath.point2(x[uid], y[uid]))
       local p2 = transform:transform(vecmath.point2(x[vid], y[vid]))
-      if i == n then
-        local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
-        path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2)
-      else
-        if i == 1 then
-          local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
-          path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p)
+      path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p2)
+    else
+      for i = 1, n do
+        local eid = path_eids[i]
+        local uid = g.vu.target[eid]
+        local vid = g.uv.target[eid]
+        local p1 = transform:transform(vecmath.point2(x[uid], y[uid]))
+        local p2 = transform:transform(vecmath.point2(x[vid], y[vid]))
+        if i == n then
+          local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
+          path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2)
         else
-          if curve_alpha < 0.5 then
-            local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
-            local q = vecmath.point2():interpolate(p2, p1, curve_alpha)
-            path_beziers[#path_beziers + 1] = vecmath.bezier(p, q)
+          if i == 1 then
+            local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
+            path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p)
+          else
+            if curve_alpha < 0.5 then
+              local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
+              local q = vecmath.point2():interpolate(p2, p1, curve_alpha)
+              path_beziers[#path_beziers + 1] = vecmath.bezier(p, q)
+            end
           end
+          local wid = g.uv.target[path_eids[i + 1]]
+          local p3 = transform:transform(vecmath.point2(x[wid], y[wid]))
+          local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
+          local q = vecmath.point2():interpolate(p2, p3, curve_alpha)
+          path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2, q)
         end
-        local wid = g.uv.target[path_eids[i + 1]]
-        local p3 = transform:transform(vecmath.point2(x[wid], y[wid]))
-        local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
-        local q = vecmath.point2():interpolate(p2, p3, curve_alpha)
-        path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2, q)
       end
     end
 
