@@ -99,6 +99,17 @@ local font_size = 15
 local line_height = 2
 local max_text_length = 75
 
+--[[
+
+vertex shapes
+vertex labels
+
+edge paths
+edge labels
+
+
+]]
+
 --
 -- svg
 --
@@ -124,11 +135,7 @@ local function make_text(p, text, font_size, max_text_length)
   return dom.element "text" {
     x = p[1];
     y = p[2];
-    ["font-size"] = font_size;
-    ["text-anchor"] = "middle";
-    ["dominant-baseline"] = "central";
     textLength = text_length;
-    lengthAdjust = "spacingAndGlyphs";
     text;
   }
 end
@@ -147,6 +154,22 @@ end
 
 local _ = dom.element
 
+local vertex_paths = _"g" {
+  class = "vertex_paths";
+}
+
+local vertex_labels = _"g" {
+  class = "vertex_labels";
+}
+
+local edge_paths = _"g" {
+  class = "edge_paths";
+}
+
+local edge_labels = _"g" {
+  class = "edge_labels";
+}
+
 local vertices = _"g" {}
 local edges = _"g" {}
 
@@ -163,20 +186,15 @@ while uid do
     transform:transform(p)
 
     local text = make_text(p, name, font_size, max_text_length)
-    text.fill = "#333"
 
     local v = font_size * (line_height - 1) / 2
     local u = vecmath.vector2(text.textLength / 2 + v, font_size / 2 + v)
     local r = vecmath.vector2(v, v)
     local shape = make_rect(p, u, r)
-    shape.fill = "none"
-    shape.stroke = "#333"
 
     uid_to_shape[uid] = shape
-    vertices[#vertices + 1] = _"g" {
-      shape;
-      text;
-    }
+    vertex_paths[#vertex_paths + 1] = shape
+    vertex_labels[#vertex_labels + 1] = text
   end
   uid = g.u.after[uid]
 end
@@ -259,11 +277,8 @@ while eid do
       end
     end
 
-    edges[#edges + 1] = _"path" {
+    edge_paths[#edge_paths + 1] = _"path" {
       d = pd;
-      fill = "none";
-      stroke = "#333";
-      ["marker-end"] = "url(#arrow)";
     }
 
     local name = eid_to_name[eid]
@@ -274,8 +289,7 @@ while eid do
       local vid = g.uv.target[eid]
       local p = transform:transform(vecmath.point2(x[vid], y[vid]))
       local text = make_text(p, name, font_size, max_text_length)
-      text.fill = "#333"
-      edges[#edges + 1] = text
+      edge_labels[#edge_labels + 1] = text
     end
   end
 
@@ -301,6 +315,21 @@ text {
 @import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
 text {
   font-family: 'Noto Sans JP';
+  font-size: 15;
+  text-anchor: middle;
+  dominant-baseline: central;
+  lengthAdjust: spacingAndGlyphs;
+  fill: #333;
+  stroke: none;
+}
+.vertex_paths path {
+  fill: none;
+  stroke: #333;
+}
+.edge_paths path {
+  fill: none;
+  stroke: #333;
+  marker-end: url(#arrow);
 }
 ]]
 
@@ -327,8 +356,10 @@ local doc = dom.xml_document(_"svg" {
       };
     };
   };
-  edges;
-  vertices;
+  edge_paths;
+  edge_labels;
+  vertex_paths;
+  vertex_labels;
 })
 local out = assert(io.open("test.svg", "w"))
 doc:serialize(out)
