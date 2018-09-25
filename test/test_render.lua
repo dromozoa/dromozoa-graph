@@ -177,24 +177,6 @@ while uid do
       shape;
       text;
     }
-
---  elseif uid <= last_uid then
---    local p = vecmath.point2(x[uid], y[uid])
---    transform:transform(p)
---    local name = uid_to_name[uid]
---    local text1 = make_text(p, name, font_size, max_text_length)
---    text1.fill = "#333"
---    -- text1["text-anchor"] = "start"
---    local text2 = make_text(p, name, font_size, max_text_length)
---    text2.fill = "#FFF"
---    text2.stroke = "#FFF"
---    -- text2["text-anchor"] = "start"
---    text2["stroke-width"] = 4
---
---    vertices[#vertices + 1] = _"g" {
---      text2;
---      text1;
---    }
   end
   uid = g.u.after[uid]
 end
