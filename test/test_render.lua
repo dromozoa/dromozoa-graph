@@ -199,40 +199,58 @@ while uid do
   uid = g.u.after[uid]
 end
 
+local function bezier_to_string(b)
+  local buffer = {}
+  for i = 1, b:size() do
+    local p = b:get(i, vecmath.point2())
+    buffer[#buffer + 1] = tostring(p)
+  end
+  return table.concat(buffer, " ")
+end
+
 local eid = g.e.first
 while eid do
   if eid <= last_eid then
     local path_eids = paths[eid]
 
     local uid = g.vu.target[path_eids[1]]
-    local path_points = {
-      transform:transform(vecmath.point2(x[uid], y[uid]))
-    }
+    local path_points = { transform:transform(vecmath.point2(x[uid], y[uid])) }
     for i = 1, #path_eids do
       local vid = g.uv.target[path_eids[i]]
       path_points[i + 1] = transform:transform(vecmath.point2(x[vid], y[vid]))
     end
 
     local path_beziers = {}
-    local p = path_points[1]
-    for i = 2, #path_points do
-      local q = path_points[i]
-      path_beziers[i - 1] = vecmath.bezier(p, q)
-      p = q
+    for i = 1, #path_points - 1 do
+      local p1 = path_points[i - 1]
+      local p2 = path_points[i]
+      local p3 = path_points[i + 1]
+      local p4 = path_points[i + 2]
+      if not p1 then
+        p1 = path_points[1]
+      end
+      if not p4 then
+        p4 = path_points[#path_points]
+      end
+      path_beziers[#path_beziers + 1] = vecmath.bezier():set_catmull_rom(p1, p2, p3, p4)
     end
 
     local uid = g.vu.target[path_eids[1]]
     local vid = g.uv.target[path_eids[#path_eids]]
 
     local ushape = uid_to_shape[uid]
+    assert(ushape)
     if ushape then
       local ub = ushape.d:bezier({})
       local b1 = path_beziers[1]
+      print("b1", bezier_to_string(b1))
       for i = 1, #ub do
         local b2 = ub[i]
+        print("b2", bezier_to_string(b2))
         local r = vecmath.bezier_clipping(b1, b2)
         local t = r[1][1]
         if t then
+          print("clipped", 1)
           b1:clip(t, 1)
           break
         end
@@ -241,14 +259,18 @@ while eid do
 
     local marker_end
     local vshape = uid_to_shape[vid]
+    assert(vshape)
     if vshape then
       local vb = vshape.d:bezier({})
       local b1 = path_beziers[#path_beziers]
+      print("b1", bezier_to_string(b1))
       for i = 1, #vb do
         local b2 = vb[i]
+        print("b2", bezier_to_string(b2))
         local r = vecmath.bezier_clipping(b1, b2)
         local t = r[1][1]
         if t then
+          print("clipped", 2)
           b1:clip(0, t)
           break
         end
@@ -259,10 +281,21 @@ while eid do
     local pd = svg.path_data()
 
     local b = path_beziers[1]
-    pd:M(b:get(1, vecmath.point2())):L(b:get(2, vecmath.point2()))
-    for i = 2, #path_beziers do
+    pd:M(b:get(1, vecmath.point2()))
+    for i = 1, #path_beziers do
       local b = path_beziers[i]
-      pd:L(b:get(2, vecmath.point2()))
+      if b:size() == 2 then
+        pd:L(b:get(2, vecmath.point2()))
+      elseif b:size() == 3 then
+        pd:Q(
+            b:get(2, vecmath.point2()),
+            b:get(3, vecmath.point2()))
+      elseif b:size() == 4 then
+        pd:C(
+            b:get(2, vecmath.point2()),
+            b:get(3, vecmath.point2()),
+            b:get(4, vecmath.point2()))
+      end
     end
 
     edges[#edges + 1] = _"path" {
