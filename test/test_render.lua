@@ -98,6 +98,7 @@ local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 local font_size = 15
 local line_height = 2
 local max_text_length = 75
+local curve_alpha = 0.5
 
 --[[
 
@@ -214,17 +215,25 @@ while eid do
       local vid = g.uv.target[eid]
       local p1 = transform:transform(vecmath.point2(x[uid], y[uid]))
       local p2 = transform:transform(vecmath.point2(x[vid], y[vid]))
-      local p3 = vecmath.point2(p1):add(p2):scale(0.5)
-      if i == 1 then
-        path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p3)
-      end
       if i == n then
-        path_beziers[#path_beziers + 1] = vecmath.bezier(p2, p3)
+        local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
+        path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2)
       else
+        if i == 1 then
+          local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
+          path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p)
+        else
+          if curve_alpha < 0.5 then
+            local p = vecmath.point2():interpolate(p1, p2, curve_alpha)
+            local q = vecmath.point2():interpolate(p2, p1, curve_alpha)
+            path_beziers[#path_beziers + 1] = vecmath.bezier(p, q)
+          end
+        end
         local wid = g.uv.target[path_eids[i + 1]]
-        local p4 = transform:transform(vecmath.point2(x[wid], y[wid]))
-        local p5 = vecmath.point2(p2):add(p4):scale(0.5)
-        path_beziers[#path_beziers + 1] = vecmath.bezier(p3, p2, p5)
+        local p3 = transform:transform(vecmath.point2(x[wid], y[wid]))
+        local p = vecmath.point2():interpolate(p2, p1, curve_alpha)
+        local q = vecmath.point2():interpolate(p2, p3, curve_alpha)
+        path_beziers[#path_beziers + 1] = vecmath.bezier(p, p2, q)
       end
     end
 
@@ -330,6 +339,8 @@ text {
   fill: none;
   stroke: #333;
   marker-end: url(#arrow);
+}
+.edge_labels text {
 }
 ]]
 
