@@ -214,69 +214,59 @@ while eid do
     local path_eids = paths[eid]
 
     local uid = g.vu.target[path_eids[1]]
-    local path_points = { transform:transform(vecmath.point2(x[uid], y[uid])) }
-    for i = 1, #path_eids do
-      local vid = g.uv.target[path_eids[i]]
-      path_points[i + 1] = transform:transform(vecmath.point2(x[vid], y[vid]))
-    end
 
     local path_beziers = {}
-    for i = 1, #path_points - 1 do
-      local p1 = path_points[i - 1]
-      local p2 = path_points[i]
-      local p3 = path_points[i + 1]
-      local p4 = path_points[i + 2]
-      if not p1 then
-        p1 = path_points[1]
+    local n = #path_eids
+    for i = 1, n do
+      local eid = path_eids[i]
+      local uid = g.vu.target[eid]
+      local vid = g.uv.target[eid]
+      local p1 = transform:transform(vecmath.point2(x[uid], y[uid]))
+      local p2 = transform:transform(vecmath.point2(x[vid], y[vid]))
+      local p3 = vecmath.point2(p1):add(p2):scale(0.5)
+      if i == 1 then
+        path_beziers[#path_beziers + 1] = vecmath.bezier(p1, p3)
       end
-      if not p4 then
-        p4 = path_points[#path_points]
+      if i == n then
+        path_beziers[#path_beziers + 1] = vecmath.bezier(p2, p3)
+      else
+        local wid = g.uv.target[path_eids[i + 1]]
+        local p4 = transform:transform(vecmath.point2(x[wid], y[wid]))
+        local p5 = vecmath.point2(p2):add(p4):scale(0.5)
+        path_beziers[#path_beziers + 1] = vecmath.bezier(p3, p2, p5)
       end
-      path_beziers[#path_beziers + 1] = vecmath.bezier():set_catmull_rom(p1, p2, p3, p4)
     end
 
     local uid = g.vu.target[path_eids[1]]
     local vid = g.uv.target[path_eids[#path_eids]]
 
     local ushape = uid_to_shape[uid]
-    assert(ushape)
-    if ushape then
-      local ub = ushape.d:bezier({})
-      local b1 = path_beziers[1]
-      print("b1", bezier_to_string(b1))
-      for i = 1, #ub do
-        local b2 = ub[i]
-        print("b2", bezier_to_string(b2))
-        local r = vecmath.bezier_clipping(b1, b2)
-        local t = r[1][1]
-        if t then
-          print("clipped", 1)
-          b1:clip(t, 1)
-          break
-        end
+    local ub = ushape.d:bezier({})
+    local b1 = path_beziers[1]
+    for i = 1, #ub do
+      local b2 = ub[i]
+      local r = vecmath.bezier_clipping(b1, b2)
+      local t = r[1][1]
+      if t then
+        b1:clip(t, 1)
+        break
       end
     end
 
     local marker_end
     local vshape = uid_to_shape[vid]
-    assert(vshape)
-    if vshape then
-      local vb = vshape.d:bezier({})
-      local b1 = path_beziers[#path_beziers]
-      print("b1", bezier_to_string(b1))
-      for i = 1, #vb do
-        local b2 = vb[i]
-        print("b2", bezier_to_string(b2))
-        local r = vecmath.bezier_clipping(b1, b2)
-        local t = r[1][1]
-        if t then
-          print("clipped", 2)
-          b1:clip(0, t)
-          break
-        end
+    local vb = vshape.d:bezier({})
+    local b1 = path_beziers[#path_beziers]
+    for i = 1, #vb do
+      local b2 = vb[i]
+      local r = vecmath.bezier_clipping(b1, b2)
+      local t = r[1][1]
+      if t then
+        b1:clip(0, t)
+        break
       end
-      marker_end = "url(#arrow)"
     end
+    marker_end = "url(#arrow)"
 
     local pd = svg.path_data()
 
