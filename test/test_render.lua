@@ -199,15 +199,6 @@ while uid do
   uid = g.u.after[uid]
 end
 
-local function bezier_to_string(b)
-  local buffer = {}
-  for i = 1, b:size() do
-    local p = b:get(i, vecmath.point2())
-    buffer[#buffer + 1] = tostring(p)
-  end
-  return table.concat(buffer, " ")
-end
-
 local eid = g.e.first
 while eid do
   if eid <= last_eid then
@@ -253,7 +244,6 @@ while eid do
       end
     end
 
-    local marker_end
     local vshape = uid_to_shape[vid]
     local vb = vshape.d:bezier({})
     local b1 = path_beziers[#path_beziers]
@@ -266,7 +256,6 @@ while eid do
         break
       end
     end
-    marker_end = "url(#arrow)"
 
     local pd = svg.path_data()
 
@@ -292,8 +281,20 @@ while eid do
       d = pd;
       fill = "none";
       stroke = "#333";
-      ["marker-end"] = marker_end;
+      ["marker-end"] = "url(#arrow)";
     }
+
+    local name = eid_to_name[eid]
+    if name then
+      local m = n / 2
+      m = m - m % 1
+      local eid = path_eids[m]
+      local vid = g.uv.target[eid]
+      local p = transform:transform(vecmath.point2(x[vid], y[vid]))
+      local text = make_text(p, name, font_size, max_text_length)
+      text.fill = "#333"
+      edges[#edges + 1] = text
+    end
   end
 
   eid = g.e.after[eid]
