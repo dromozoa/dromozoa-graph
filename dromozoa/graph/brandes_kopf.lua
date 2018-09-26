@@ -51,7 +51,7 @@ local function preprocessing(g, layers, index_map, last_uid)
       end
       if uid > last_uid then
         local vid = vu_target[vu_first[uid]]
-        if vid > last_uid then
+        if vid and vid > last_uid then
           d = index_map[vid]
         end
       end

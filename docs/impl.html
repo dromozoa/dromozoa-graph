@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>dromozoa-graph</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css">
+</head>
+<style>
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+}
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+</style>
+<body>
+<div class="markdown-body">
+
+<h1>実装ノート</h1>
+
+<h2>ダミー頂点</h2>
+
+<p>
+頂点集合を階層に分割する際にダミー頂点が挿入される。
+BrandesとK&ouml;pfのアルゴリズムは、
+両端点がダミー頂点であるエッジを垂直にレイアウトする。
+</p>
+
+<p>
+ダミー頂点は入力エッジと出力エッジをただひとつだけ持つ。
+非ダミー頂点と非ダミー頂点をつなぐエッジ列をパスと呼ぶことにすると、
+ダミー頂点を挿入する前の各エッジについて、一対一で対応するパスが存在する。
+</p>
+
+<p>
+それ以外にもダミー頂点の挿入が役に立つ場合が考えられる。
+</p>
+
+<ol>
+  <li>自己エッジを分割する</li>
+  <li>多重エッジを分割する</li>
+  <li>ラベルを持つエッジを分割する</li>
+</ol>
+
+<p>
+自己エッジを分割すると閉路になる。
+明示的な非閉路化あるいは非閉路化のアルゴリズムによってエッジを反転させると、
+入力エッジと出力エッジをただひとつだけ持つという条件が満たされなくなる。
+このように非閉路化されたグラフにBrandesとK&ouml;pfのアルゴリズムを適用すると、
+ダミー頂点の扱いで問題が発生しうる。
+</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  renderMathInElement(document.body);
+});
+</script>
+</div>
+</body>
+</html>

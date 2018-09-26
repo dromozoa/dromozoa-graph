@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
+text {
+  font-family: 'Noto Sans JP';
+}
+
+/*
+@font-face {
+  font-family: 'Noto Sans Mono CJK JP';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://dromozoa.s3.amazonaws.com/mirror/NotoSansCJKjp-2017-10-24/NotoSansMonoCJKjp-Regular.otf') format('opentype');
+}
+text {
+  font-family: 'Noto Sans Mono CJK JP';
+}
+*/
+
+text {
+  font-size: 16;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: #333;
+  stroke: none;
+}
+
+.u_paths path {
+  fill: none;
+  stroke: #333;
+}
+
+.e_paths path {
+  fill: none;
+  stroke: #333;
+  marker-end: url('#arrow');
+}
