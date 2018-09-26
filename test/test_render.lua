@@ -81,7 +81,6 @@ local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 local font_size = 15
 local line_height = 2
 local max_text_length = 75
-local curve_alpha = 0.5
 
 local node = render(g, last_uid, last_eid, x, y, paths, {
   matrix = transform;
@@ -90,7 +89,7 @@ local node = render(g, last_uid, last_eid, x, y, paths, {
   font_size = font_size;
   line_height = line_height;
   max_text_length = max_text_length;
-  curve_parameter = 0.5;
+  curve_parameter = 1;
 })
 
 --
