@@ -29,5 +29,8 @@ build = {
     ["dromozoa.graph.promote_vertices"] = "dromozoa/graph/promote_vertices.lua";
     ["dromozoa.graph.remove_cycles"] = "dromozoa/graph/remove_cycles.lua";
     ["dromozoa.graph.remove_self_edges"] = "dromozoa/graph/remove_self_edges.lua";
+    ["dromozoa.graph.render"] = "dromozoa/graph/render.lua";
+    ["dromozoa.graph.subdivide_double_edges"] = "dromozoa/graph/subdivide_double_edges.lua";
+    ["dromozoa.graph.subdivide_special_edges"] = "dromozoa/graph/subdivide_special_edges.lua";
   };
 }
