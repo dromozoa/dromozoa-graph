@@ -17,13 +17,12 @@
 
 local xml_document = require "dromozoa.dom.xml_document"
 local element = require "dromozoa.dom.element"
-local colors = require "dromozoa.css.colors"
+local color3f = require "dromozoa.vecmath.color3f"
 
 local graph = require "dromozoa.graph"
 local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 local make_layers = require "dromozoa.graph.make_layers"
 local brandes_kopf = require "dromozoa.graph.brandes_kopf"
-local write_dot = require "write_dot"
 
 local g = graph()
 for i = 1, 11 do
@@ -39,7 +38,7 @@ g:add_edge(2, 8)
 g:add_edge(3, 9)
 g:add_edge(3, 10)
 g:add_edge(3, 11)
-local dummy_uid = 12
+local last_uid = 11
 
 local layer = {
   { 1 };
@@ -61,7 +60,7 @@ for i = 1, #layer do
   end
 end
 
-local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+local x = brandes_kopf(g, layer_map, layer, last_uid)
 
 local uid = g.u.first
 while uid do
@@ -131,7 +130,8 @@ for i = 1, #layer do
   end
 end
 
-local dummy_uid = make_dummy_vertices(g, layer_map, {})
+local last_uid = g.u.last
+make_dummy_vertices(g, layer_map, {})
 
 local layer = make_layers(g, layer_map)
 
@@ -142,9 +142,7 @@ assert(order[6] == 55)
 order[5] = 55
 order[6] = 20
 
-write_dot("test1.dot", g)
-
-local x = brandes_kopf(g, layer_map, layer, dummy_uid)
+local x = brandes_kopf(g, layer_map, layer, last_uid)
 
 local expect = {
   [0.0] = { 13, 17 };
@@ -168,7 +166,7 @@ end
 local uid = g.u.first
 while uid do
   assert(x[uid] >= 0)
-  if uid < dummy_uid then
+  if uid <= last_uid then
     assert(x[uid] == expect_map[uid])
   end
   uid = g.u.after[uid]
@@ -199,7 +197,7 @@ while eid do
     y1 = calc_y(layer_map[uid]);
     x2 = calc_x(x[vid]);
     y2 = calc_y(layer_map[vid]);
-    stroke = colors.black;
+    stroke = color3f();
   }
   eid = g.e.after[eid]
 end
@@ -208,29 +206,46 @@ local uid = g.u.first
 while uid do
   local cx = calc_x(x[uid])
   local cy = calc_y(layer_map[uid])
-  if uid < dummy_uid then
-    svg[#svg + 1] = _"circle" {
-      cx = cx;
-      cy = cy;
-      r = 5;
-      stroke = colors.black;
-      fill = colors.black;
-    }
-    svg[#svg + 1] = _"text" {
-      x = cx + 5;
-      y = cy - 5;
-      fill = colors.black;
-      uid;
-    }
+
+  local shape_fill
+  local shape_stroke
+  local text_fill
+  if uid <= last_uid then
+    shape_fill = color3f()
+    shape_stroke = color3f()
+    text_fill = color3f "white"
   else
-    svg[#svg + 1] = _"circle" {
-      cx = cx;
-      cy = cy;
-      r = 5;
-      stroke = colors.black;
-      fill = colors.white;
-    }
+    shape_fill = color3f "white"
+    shape_stroke = color3f()
+    text_fill = color3f(0.5, 0.5, 0.5)
   end
+  local text_length
+  local length_adjust
+  if uid >= 10 then
+    text_length = 12
+    length_adjust = "spacingAndGlyphs"
+  end
+
+  svg[#svg + 1] = _"circle" {
+    cx = cx;
+    cy = cy;
+    r = 10;
+    fill = shape_fill;
+    stroke = shape_stroke;
+  }
+
+  svg[#svg + 1] = _"text" {
+    x = cx;
+    y = cy;
+    fill = text_fill;
+    ["font-size"] = 12;
+    ["text-anchor"] = "middle";
+    ["dominant-baseline"] = "central";
+    textLength = text_length;
+    lengthAdjust = length_adjust;
+    uid;
+  }
+
   uid = g.u.after[uid]
 end
 

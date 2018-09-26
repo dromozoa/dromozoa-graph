@@ -19,20 +19,22 @@ local brandes_kopf = require "dromozoa.graph.brandes_kopf"
 local longest_path = require "dromozoa.graph.longest_path"
 local make_dummy_vertices = require "dromozoa.graph.make_dummy_vertices"
 local make_layers = require "dromozoa.graph.make_layers"
+local make_paths = require "dromozoa.graph.make_paths"
 local minimize_crossings = require "dromozoa.graph.minimize_crossings"
 local promote_vertices = require "dromozoa.graph.promote_vertices"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
+local subdivide_double_edges = require "dromozoa.graph.subdivide_double_edges"
 
-return function (g)
+return function (g, last_uid, last_eid, reversed_eids)
   local removed_eids, removed_uids = remove_self_edges(g)
-  local reversed_eids = remove_cycles(g)
+  remove_cycles(g, reversed_eids)
 
   local layer_map = promote_vertices(g, longest_path(g))
-  local dummy_uid = make_dummy_vertices(g, layer_map, reversed_eids)
+  make_dummy_vertices(g, layer_map, reversed_eids)
   local layers = make_layers(g, layer_map)
   local layers = minimize_crossings(g, layers)
-  local x = brandes_kopf(g, layer_map, layers, dummy_uid)
+  local x = brandes_kopf(g, layer_map, layers, last_uid)
 
   for i = 1, #reversed_eids do
     g:reverse_edge(reversed_eids[i])
@@ -52,11 +54,13 @@ return function (g)
   x.max = max
 
   local h = #layers
-  local y = {
-    max = h - 1;
-  }
+  local y = { max = h - 1 }
   for k, v in pairs(layer_map) do
     y[k] = h - v
   end
-  return dummy_uid, x, y
+
+  subdivide_double_edges(g, x, y)
+  local paths = make_paths(g, last_uid, last_eid)
+
+  return x, y, paths
 end

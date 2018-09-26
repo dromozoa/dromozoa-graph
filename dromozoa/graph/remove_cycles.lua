@@ -170,7 +170,7 @@ local function greedy_linear_ordering(g)
   return order_map
 end
 
-return function (g)
+return function (g, reversed_eids)
   local order_map = greedy_linear_ordering(g)
 
   local e = g.e
@@ -178,21 +178,21 @@ return function (g)
   local uv_target = g.uv.target
   local vu_target = g.vu.target
 
-  local reverse_eids = {}
-  local n = 0
+  local n = #reversed_eids
+  local m = n + 1
 
   local eid = e.first
   while eid do
     if order_map[uv_target[eid]] < order_map[vu_target[eid]] then
       n = n + 1
-      reverse_eids[n] = eid
+      reversed_eids[n] = eid
     end
     eid = e_after[eid]
   end
 
-  for i = 1, n do
-    g:reverse_edge(reverse_eids[i])
+  for i = m, n do
+    g:reverse_edge(reversed_eids[i])
   end
 
-  return reverse_eids
+  return reversed_eids
 end

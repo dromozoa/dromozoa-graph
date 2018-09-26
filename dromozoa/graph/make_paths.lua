@@ -15,42 +15,44 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local graph = require "dromozoa.graph"
-local write_dot = require "write_dot"
+return function (g, last_uid, last_eid)
+  local e = g.e
+  local e_after = e.after
+  local uv = g.uv
+  local uv_first = uv.first
+  local uv_target = uv.target
+  local vu = g.vu
+  local vu_first = vu.first
+  local vu_target = vu.target
 
-local function check(uv, uid, expect)
-  local n = #expect
+  local paths = {}
 
-  local result = {}
-  local eid = uv.first[uid]
+  local eid = e.first
   while eid do
-    result[#result + 1] = uv.target[eid]
-    eid = uv.after[eid]
+    if eid <= last_eid then
+      local eid = eid
+      local path = {}
+      paths[eid] = path
+
+      local uid = vu_target[eid]
+      while uid > last_uid do
+        eid = vu_first[uid]
+        uid = vu_target[eid]
+      end
+
+      local n = 1
+      path[1] = eid
+
+      local vid = uv_target[eid]
+      while vid > last_uid do
+        eid = uv_first[vid]
+        vid = uv_target[eid]
+        n = n + 1
+        path[n] = eid
+      end
+    end
+    eid = e_after[eid]
   end
-  assert(n == #result)
-  for i = 1, n do
-    assert(result[i] == expect[i])
-  end
+
+  return paths
 end
-
-local g = graph()
-
-local u1 = g:add_vertex()
-local u2 = g:add_vertex()
-local u3 = g:add_vertex()
-
-local e1 = g:add_edge(u1, u2)
-local e2 = g:add_edge(u1, u2)
-local e3 = g:add_edge(u2, u3)
-local e4 = g:add_edge(u3, u1)
-
-write_dot("test1.dot", g)
-
-g:reverse_edge(e2, u2, u1)
-
-write_dot("test2.dot", g)
-
-g:remove_edge(e2)
-g:set_edge(e2, u1, u1)
-
-write_dot("test3.dot", g)

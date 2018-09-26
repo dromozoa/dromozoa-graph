@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>dromozoa-graph</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css">
+<style>
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+}
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="markdown-body">
+
+<h1>dromozoa-graph</h1>
+
+<h2>楕円とベジェ曲線</h2>
+
+<svg width="722" height="212">
+  <rect x="0" y="0" width="722" height="212" fill="#CCC"/>
+  <g transform="translate(16,16)">
+    <circle cx="30" cy="10" r="10" fill="#F66"/>
+    <circle cx="30" cy="170" r="2" fill="#000"/>
+    <circle cx="30" cy="10" r="2" fill="#000"/>
+    <path d="
+      M 30,10
+      A 20,80 0,0,1 30,170
+        20,80 0,0,1 30,10
+    " fill="none" stroke="black"/>
+
+    <g transform="translate(70,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="37.7737" cy="16.2904" r="2" fill="#000"/>
+      <circle cx="30" cy="170" r="2" fill="#000"/>
+      <circle cx="22.2263" cy="16.2904" r="2" fill="#000"/>
+      <path d="
+        M 37.7737 16.2904
+        A 20,80 0,0,1 30,170
+          20,80 0,0,1 22.2263 16.2904
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(140,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="30" cy="170" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        C 41.0457,10 50,45.8173 50,90
+          50,134.1827 41.0457,170 30,170
+          18.9543,170 10,134.1827 10,90
+          10,45.8173 18.9543,10 30,10
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(210,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="30" cy="170" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        L 50,90
+          30,170
+          10,90
+        Z
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(280,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="30" cy="170" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        L 40,50 50,50 50,90
+          50,130 40,130 30,170
+          20,130 10,130 10,90
+          10,50 20,50 30,10
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(350,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="30" cy="170" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        C 40,50 50,50 50,90
+          50,130 40,130 30,170
+          20,130 10,130 10,90
+          10,50 20,50 30,10
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(420,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        L 40,50 50,50 50,90
+        A 20,80 0,0,1 10,90
+        L 10,50 20,50 30,10
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(490,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="50" cy="90" r="2" fill="#000"/>
+      <circle cx="10" cy="90" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        C 40,50 50,50 50,90
+        A 20,80 0,0,1 10,90
+        C 10,50 20,50 30,10
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(560,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="60" cy="170" r="2" fill="#000"/>
+      <circle cx="0" cy="170" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        L 60,170 0,170 Z
+      " fill="none" stroke="black"/>
+    </g>
+
+    <g transform="translate(630,0)">
+      <circle cx="30" cy="10" r="10" fill="#F66"/>
+      <path d="
+        M 21.33974755,10
+        L 38.66025245,10 38.66025245,130 21.33974755,130 Z
+      " fill="none" stroke="#999"/>
+      <circle cx="30" cy="10" r="2" fill="#000"/>
+      <circle cx="60" cy="170" r="2" fill="#000"/>
+      <circle cx="0" cy="170" r="2" fill="#000"/>
+      <path d="
+        M 30,10
+        C 60,170 0,170 30,10
+      " fill="none" stroke="black"/>
+    </g>
+  </g>
+</svg>
+
+<p>
+\[
+  \frac{4\left(\sqrt{2}-1\right)}{3} = 0.552284749830793\dots
+\]
+</p>
+
+</div>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    undefinedFamily: "sans-serif"
+  }
+});
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML"></script>
+</body>
+</html>

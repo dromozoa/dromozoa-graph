@@ -15,47 +15,54 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-return function (g, layer_map, reversed_eids)
-  local u = g.u
+return function (g, x, y)
   local e = g.e
   local e_after = e.after
-  local uv_target = g.uv.target
+  local uv = g.uv
+  local uv_first = uv.first
+  local uv_after = uv.after
+  local uv_target = uv.target
   local vu_target = g.vu.target
-
-  local reversed = {}
-  local n = #reversed_eids
-  for i = 1, n do
-    reversed[reversed_eids[i]] = true
-  end
 
   local last_eid = e.last
 
-  local eid = e.first
-  while eid do
-    if reversed[eid] then
-      local eid = eid
-      local w_max = layer_map[vu_target[eid]] - 1
-      local w_min = layer_map[uv_target[eid]] + 1
-      for w = w_max, w_min, -1 do
-        local wid = g:add_vertex()
-        layer_map[wid] = w
-        eid = g:subdivide_edge(eid, wid)
-        n = n + 1
-        reversed_eids[n] = eid
+  local eid1 = e.first
+  while eid1 do
+    local uid = vu_target[eid1]
+    local vid = uv_target[eid1]
+    local eid2 = uv_first[vid]
+    while eid2 do
+      if uid == uv_target[eid2] then
+        break
       end
-    else
-      local eid = eid
-      local w_max = layer_map[vu_target[eid]] - 1
-      local w_min = layer_map[uv_target[eid]] + 1
-      for w = w_max, w_min, -1 do
-        local wid = g:add_vertex()
-        layer_map[wid] = w
-        eid = g:subdivide_edge(eid, wid)
-      end
+      eid2 = uv_after[eid2]
     end
-    if eid == last_eid then
+    if eid2 then
+      local ux = x[uid]
+      local uy = y[uid]
+      local vx = x[vid]
+      local vy = y[vid]
+      local wx = (ux + vx) / 2
+      local wy = (uy + vy) / 2
+
+      local wid1 = g:add_vertex()
+      g:subdivide_edge(eid1, wid1)
+      local wid2 = g:add_vertex()
+      g:subdivide_edge(eid2, wid2)
+
+      if uy < vy then
+        x[wid1] = wx + 1/6
+        x[wid2] = wx - 1/6
+      else
+        x[wid1] = wx - 1/6
+        x[wid2] = wx + 1/6
+      end
+      y[wid1] = wy
+      y[wid2] = wy
+    end
+    if eid1 == last_eid then
       break
     end
-    eid = e_after[eid]
+    eid1 = e_after[eid1]
   end
 end

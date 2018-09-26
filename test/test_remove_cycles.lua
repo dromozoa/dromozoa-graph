@@ -17,7 +17,6 @@
 
 local graph = require "dromozoa.graph"
 local remove_cycles = require "dromozoa.graph.remove_cycles"
-local write_dot = require "write_dot"
 
 local N = ...
 local N = tonumber(N or 6)
@@ -33,12 +32,10 @@ local e3 = g:add_edge(u3, u1)
 local e4 = g:add_edge(u3, u4)
 local e5 = g:add_edge(u4, u2)
 
-write_dot("test1.dot", g)
-local reverse = remove_cycles(g)
-write_dot("test2.dot", g)
+local reversed_eids = remove_cycles(g, {})
 
-assert(#reverse == 1)
-assert(reverse[1] == e2)
+assert(#reversed_eids == 1)
+assert(reversed_eids[1] == e2)
 
 local g = graph()
 local u = g:add_vertex()
@@ -52,21 +49,19 @@ for i = 1, N do
   v = w
 end
 
-write_dot("test3.dot", g)
-local reverse = remove_cycles(g)
-write_dot("test4.dot", g)
+local reversed_eids = remove_cycles(g, {})
 
 if N % 2 == 0 then
   local n = N / 2
-  assert(#reverse == n)
+  assert(#reversed_eids == n)
   for i = 1, n do
-    assert(reverse[i] == i * 4 - 2)
+    assert(reversed_eids[i] == i * 4 - 2)
   end
 else
   local n = (N + 1) / 2
-  assert(#reverse == n)
-  assert(reverse[1] == 3)
+  assert(#reversed_eids == n)
+  assert(reversed_eids[1] == 3)
   for i = 2, n do
-    assert(reverse[i] == i * 4 - 4)
+    assert(reversed_eids[i] == i * 4 - 4)
   end
 end
