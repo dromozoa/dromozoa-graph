@@ -18,16 +18,13 @@
 local dom = require "dromozoa.dom"
 local svg = require "dromozoa.svg"
 local vecmath = require "dromozoa.vecmath"
-local utf8 = require "dromozoa.utf8"
-local east_asian_width = require "dromozoa.ucd.east_asian_width"
 local graph = require "dromozoa.graph"
-
-local g = graph()
 local layout = require "dromozoa.graph.layout"
 local render = require "dromozoa.graph.render"
 local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 local _ = dom.element
+local g = graph()
 
 --
 -- load graph
@@ -76,68 +73,25 @@ local x, y, paths = layout(g, last_uid, last_eid, revered_eids)
 
 local transform = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
 -- local transform = vecmath.matrix3(0, 200, 50, 75, 0, 50, 0, 0, 1)
-local view_size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
-
-local font_size = 15
-local line_height = 2
-local max_text_length = 75
+local size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
 
 local node = render(g, last_uid, last_eid, x, y, paths, {
   matrix = transform;
   u_labels = u_labels;
   e_labels = e_labels;
-  font_size = font_size;
-  line_height = line_height;
-  max_text_length = max_text_length;
+  max_text_length = 72;
   curve_parameter = 1;
 })
-
---
--- write svg
---
-
-local style = [[
-/*
-@font-face {
-  font-family: 'Noto Sans Mono CJK JP';
-  font-style: normal;
-  font-weight: 400;
-  src: url('https://dromozoa.s3.amazonaws.com/mirror/NotoSansCJKjp-2017-10-24/NotoSansMonoCJKjp-Regular.otf') format('opentype');
-}
-text {
-  font-family: 'Noto Sans Mono CJK JP';
-}
-*/
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
-text {
-  font-family: 'Noto Sans JP';
-  font-size: 15;
-  text-anchor: middle;
-  dominant-baseline: central;
-  lengthAdjust: spacingAndGlyphs;
-  fill: #333;
-  stroke: none;
-}
-.u_paths path {
-  fill: none;
-  stroke: #333;
-}
-.e_paths path {
-  fill: none;
-  stroke: #333;
-  marker-end: url(#arrow);
-}
-]]
 
 local doc = dom.xml_document(_"svg" {
   version = "1.1";
   xmlns = "http://www.w3.org/2000/svg";
-  width = view_size.x;
-  height = view_size.y;
+  width = size.x;
+  height = size.y;
   _"defs" {
     _"style" {
       type = "text/css";
-      style;
+      "@import url('docs/sample.css');";
     };
     _"marker" {
       id = "arrow";
@@ -153,11 +107,8 @@ local doc = dom.xml_document(_"svg" {
     };
   };
   node;
-  -- edge_paths;
-  -- edge_labels;
-  -- vertex_paths;
-  -- vertex_labels;
 })
+
 local out = assert(io.open("test.svg", "w"))
 doc:serialize(out)
 out:write "\n"

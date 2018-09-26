@@ -39,13 +39,20 @@ local function make_text(p, text, font_size, max_text_length)
     text_length = text_length + widths[east_asian_width(c)]
   end
   text_length = text_length * font_size
-  if text_length > max_text_length then
+
+  local length_adjust
+  if text_length < font_size then
+    text_length = font_size
+  elseif text_length > max_text_length then
     text_length = max_text_length
+    length_adjust = "spacingAndGlyphs"
   end
+
   return element "text" {
     x = p[1];
     y = p[2];
     textLength = text_length;
+    lengthAdjust = length_adjust;
     text;
   }
 end
@@ -101,7 +108,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local e_labels = attrs.e_labels or {}
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
-  local max_text_length = attrs.max_text_length or 70
+  local max_text_length = attrs.max_text_length or 80
   local curve_parameter = attrs.curve_parameter or 1
 
   local font_hs = font_size / 2
