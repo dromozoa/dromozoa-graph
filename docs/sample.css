@@ -1,9 +1,10 @@
+/*
 @import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
 text {
   font-family: 'Noto Sans JP';
 }
+*/
 
-/*
 @font-face {
   font-family: 'Noto Sans Mono CJK JP';
   font-style: normal;
@@ -13,7 +14,6 @@ text {
 text {
   font-family: 'Noto Sans Mono CJK JP';
 }
-*/
 
 text {
   font-size: 16;

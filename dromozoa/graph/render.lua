@@ -115,6 +115,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local matrix = attrs.matrix or matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
   local u_labels = attrs.u_labels
   local e_labels = attrs.e_labels
+  local shape = attrs.shape
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
   local max_text_length = attrs.max_text_length or 80
@@ -123,6 +124,10 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local font_hs = font_size / 2
   local rect_r = font_hs * (line_height - 1)
   local rect_hh = font_hs + rect_r
+  local ellipse_hh = rect_hh
+  local ellipse_ry = ellipse_hh + rect_r
+  local ellipse_rx = ellipse_ry / math.sqrt(ellipse_ry * ellipse_ry - ellipse_hh * ellipse_hh)
+
   local curve_a = curve_parameter / 2
   if curve_a < 0 then
     curve_a = 0
@@ -155,7 +160,12 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
       matrix:transform(p1:set(x[uid], y[uid]))
       local text = make_text(p1, label, font_size, max_text_length)
       text["data-uid"] = uid
-      local d = path_data():rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
+      local d = path_data()
+      if shape == "ellipse" then
+        d:ellipse(p1[1], p1[2], text.textLength / 2 * ellipse_rx, ellipse_ry)
+      else
+        d:rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
+      end
       u_beziers[uid] = d:bezier {}
       u_paths[#u_paths + 1] = element "path" { d = d, ["data-uid"] = uid }
       u_texts[#u_texts + 1] = text
