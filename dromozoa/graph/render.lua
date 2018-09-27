@@ -21,16 +21,17 @@ local utf8 = require "dromozoa.utf8"
 local path_data = require "dromozoa.svg.path_data"
 local matrix3 = require "dromozoa.vecmath.matrix3"
 local point2 = require "dromozoa.vecmath.point2"
+local vector2 = require "dromozoa.vecmath.vector2"
 local bezier = require "dromozoa.vecmath.bezier"
 local bezier_clipping = require "dromozoa.vecmath.bezier_clipping"
 
 local widths = {
-  ["N"]  = 0.5;  -- neutral
-  ["Na"] = 0.5;  -- narrow
-  ["H"]  = 0.5;  -- halfwidth
-  ["A"]  = 0.75; -- ambiguous
-  ["W"]  = 1;    -- wide
-  ["F"]  = 1;    -- fullwidth
+  N  = 0.5;  -- neutral
+  Na = 0.5;  -- narrow
+  H  = 0.5;  -- halfwidth
+  A  = 0.75; -- ambiguous
+  W  = 1;    -- wide
+  F  = 1;    -- fullwidth
 }
 
 local function make_text(p, text, font_size, max_text_length)
@@ -63,18 +64,22 @@ local function clip_path(u_path_beziers, v_path_beziers, e_path_beziers)
 
   for i = 1, last do
     local eb = e_path_beziers[i]
+    local t
     for j = 1, #u_path_beziers do
       local ub = u_path_beziers[j]
-      local r = bezier_clipping(eb, ub)
-      local t = r[1][1]
+      t = bezier_clipping(eb, ub)[1][1]
       if t then
-        eb:clip(t, 1)
-        eb = nil
         break
       end
     end
-    if not eb then
-      first = i
+    if t then
+      if t == 1 then
+        e_path_beziers[i] = nil
+        first = i + 1
+      else
+        eb:clip(t, 1)
+        first = i
+      end
       break
     end
     e_path_beziers[i] = nil
@@ -82,18 +87,22 @@ local function clip_path(u_path_beziers, v_path_beziers, e_path_beziers)
 
   for i = last, first, -1 do
     local eb = e_path_beziers[i]
+    local t
     for j = 1, #v_path_beziers do
       local vb = v_path_beziers[j]
-      local r = bezier_clipping(eb, vb)
-      local t = r[1][1]
+      t = bezier_clipping(eb, vb)[1][1]
       if t then
-        eb:clip(0, t)
-        eb = nil
         break
       end
     end
-    if not eb then
-      last = i
+    if t then
+      if t == 0 then
+        e_path_beziers[i] = nil
+        last = i - 1
+      else
+        eb:clip(0, t)
+        last = i
+      end
       break
     end
     e_path_beziers[i] = nil
@@ -104,8 +113,8 @@ end
 
 return function (g, last_uid, last_eid, x, y, paths, attrs)
   local matrix = attrs.matrix or matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
-  local u_labels = attrs.u_labels or {}
-  local e_labels = attrs.e_labels or {}
+  local u_labels = attrs.u_labels
+  local e_labels = attrs.e_labels
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
   local max_text_length = attrs.max_text_length or 80
@@ -142,15 +151,13 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local uid = u.first
   while uid do
     if uid <= last_uid then
-      local label = u_labels[uid]
-      if not label then
-        label = tostring(uid)
-      end
+      local label = u_labels and u_labels[uid] or tostring(uid)
       matrix:transform(p1:set(x[uid], y[uid]))
       local text = make_text(p1, label, font_size, max_text_length)
+      text["data-uid"] = uid
       local d = path_data():rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
       u_beziers[uid] = d:bezier {}
-      u_paths[#u_paths + 1] = element "path" { d = d }
+      u_paths[#u_paths + 1] = element "path" { d = d, ["data-uid"] = uid }
       u_texts[#u_texts + 1] = text
     end
     uid = u_after[uid]
@@ -214,18 +221,25 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
           d:Q(b:get(2, p1), b:get(3, p2))
         end
       end
-      e_paths[#e_paths + 1] = element "path" { d = d }
+      e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
 
-      local label = e_labels[eid]
+      local label = e_labels and e_labels[eid]
       if label then
         local i = m / 2
         local uid = vu_target[path_eids[i - i % 1 + 1]]
         matrix:transform(p1:set(x[uid], y[uid]))
-        e_texts[#e_texts + 1] = make_text(p1, label, font_size, max_text_length)
+        local text = make_text(p1, label, font_size, max_text_length)
+        text["data-eid"] = eid
+        e_texts[#e_texts + 1] = text
       end
     end
     eid = e_after[eid]
   end
 
-  return element "g" { u_paths, u_texts, e_paths, e_texts }
+  local size = matrix:transform(vector2(x.max + 1, y.max + 1))
+  return element "g" {
+    ["data-width"] = size[1];
+    ["data-height"] = size[2];
+    u_paths, u_texts, e_paths, e_texts;
+  }
 end

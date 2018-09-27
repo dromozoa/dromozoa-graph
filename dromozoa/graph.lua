@@ -16,7 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
+local layout = require "dromozoa.graph.layout"
 local linked_list = require "dromozoa.graph.linked_list"
+local render = require "dromozoa.graph.render"
+local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 local class = {}
 local metatable = { __index = class }
@@ -89,6 +92,14 @@ function class:subdivide_edge(eid, wid)
   vu:add_edge(eid, wid, uid)
 
   return new_eid
+end
+
+function class:render(attrs)
+  local last_uid = self.u.last
+  local last_eid = self.e.last
+  local revered_eids = subdivide_special_edges(self, attrs.e_labels)
+  local x, y, paths = layout(self, last_uid, last_eid, revered_eids)
+  return render(self, last_uid, last_eid, x, y, paths, attrs)
 end
 
 return setmetatable(class, {

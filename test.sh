@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-LUA_PATH="test/?.lua;?.lua;;"
+LUA_PATH="?.lua;;"
 export LUA_PATH
 
 for i in test/test*.lua
@@ -29,40 +29,3 @@ do
 done
 
 rm -f test*.dot test*.svg
-
-# (cd test && make)
-
-# mkdir -p out
-
-# for i in data/undirected*.txt
-# do
-#   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
-#   test/boost_graph undirected "$i" >"out/$name-boost.txt"
-#   lua test/graph.lua undirected "$i" >"out/$name.txt"
-#   diff -u "out/$name-boost.txt" "out/$name.txt"
-# done
-
-# for i in data/directed*.txt
-# do
-#   name=`expr "x$i" : 'xdata/\(.*\)\.txt$'`
-#   test/boost_graph directed "$i" >"out/$name-boost.txt"
-#   lua test/graph.lua directed "$i" >"out/$name.txt"
-#   diff -u "out/$name-boost.txt" "out/$name.txt"
-# done
-
-# for i in data/cycle_removal*.txt
-# do
-#   lua test/cycle_removal.lua "$i"
-# done
-
-# for i in data/layer_assignment*.txt
-# do
-#   lua test/layer_assignment.lua "$i"
-# done
-
-# for i in data/transitive_reduction*.txt
-# do
-#   lua test/transitive_reduction.lua "$i"
-# done
-
-# rm -f -r out
