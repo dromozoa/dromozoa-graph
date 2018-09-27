@@ -63,18 +63,22 @@ local function clip_path(u_path_beziers, v_path_beziers, e_path_beziers)
 
   for i = 1, last do
     local eb = e_path_beziers[i]
+    local t
     for j = 1, #u_path_beziers do
       local ub = u_path_beziers[j]
-      local r = bezier_clipping(eb, ub)
-      local t = r[1][1]
+      t = bezier_clipping(eb, ub)[1][1]
       if t then
-        eb:clip(t, 1)
-        eb = nil
         break
       end
     end
-    if not eb then
-      first = i
+    if t then
+      if t == 1 then
+        e_path_beziers[i] = nil
+        first = i + 1
+      else
+        eb:clip(t, 1)
+        first = i
+      end
       break
     end
     e_path_beziers[i] = nil
@@ -82,18 +86,22 @@ local function clip_path(u_path_beziers, v_path_beziers, e_path_beziers)
 
   for i = last, first, -1 do
     local eb = e_path_beziers[i]
+    local t
     for j = 1, #v_path_beziers do
       local vb = v_path_beziers[j]
-      local r = bezier_clipping(eb, vb)
-      local t = r[1][1]
+      t = bezier_clipping(eb, vb)[1][1]
       if t then
-        eb:clip(0, t)
-        eb = nil
         break
       end
     end
-    if not eb then
-      last = i
+    if t then
+      if t == 0 then
+        e_path_beziers[i] = nil
+        last = i - 1
+      else
+        eb:clip(0, t)
+        last = i
+      end
       break
     end
     e_path_beziers[i] = nil

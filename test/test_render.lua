@@ -23,10 +23,6 @@ local graph = require "dromozoa.graph"
 local _ = dom.element
 local g = graph()
 
---
--- load graph
---
-
 local filename = ...
 if not filename then
   filename = "docs/fsm.gv"
@@ -68,6 +64,32 @@ local node, size = g:render {
   curve_parameter = 1;
 }
 
+local style = [[
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
+text {
+  font-family: 'Noto Sans JP';
+}
+
+text {
+  font-size: 16;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: #333;
+  stroke: none;
+}
+
+.u_paths path {
+  fill: none;
+  stroke: #333;
+}
+
+.e_paths path {
+  fill: none;
+  stroke: #333;
+  marker-end: url('#arrow');
+}
+]]
+
 local doc = dom.xml_document(_"svg" {
   version = "1.1";
   xmlns = "http://www.w3.org/2000/svg";
@@ -76,7 +98,7 @@ local doc = dom.xml_document(_"svg" {
   _"defs" {
     _"style" {
       type = "text/css";
-      "@import url('docs/sample.css');";
+      style;
     };
     _"marker" {
       id = "arrow";
