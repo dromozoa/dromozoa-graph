@@ -118,15 +118,14 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local shape = attrs.shape
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
-  local max_text_length = attrs.max_text_length or 80
+  local max_text_length = attrs.max_text_length or 72
   local curve_parameter = attrs.curve_parameter or 1
 
-  local font_hs = font_size / 2
-  local rect_r = font_hs * (line_height - 1)
-  local rect_hh = font_hs + rect_r
-  local ellipse_hh = rect_hh
-  local ellipse_ry = ellipse_hh + rect_r
-  local ellipse_rx = ellipse_ry / math.sqrt(ellipse_ry * ellipse_ry - ellipse_hh * ellipse_hh)
+  local font_half_size = font_size / 2
+  local margin = font_half_size * (line_height - 1)
+  local half_height = font_half_size + margin
+  local ellipse_ry = half_height + margin
+  local ellipse_rx = ellipse_ry / math.sqrt((ellipse_ry + half_height) * margin)
 
   local curve_a = curve_parameter / 2
   if curve_a < 0 then
@@ -164,7 +163,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
       if shape == "ellipse" then
         d:ellipse(p1[1], p1[2], text.textLength / 2 * ellipse_rx, ellipse_ry)
       else
-        d:rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
+        d:rect(p1[1], p1[2], text.textLength / 2 + margin, half_height, margin, margin)
       end
       u_beziers[uid] = d:bezier {}
       u_paths[#u_paths + 1] = element "path" { d = d, ["data-uid"] = uid }
