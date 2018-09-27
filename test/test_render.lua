@@ -19,9 +19,6 @@ local dom = require "dromozoa.dom"
 local svg = require "dromozoa.svg"
 local vecmath = require "dromozoa.vecmath"
 local graph = require "dromozoa.graph"
-local layout = require "dromozoa.graph.layout"
-local render = require "dromozoa.graph.render"
-local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 local _ = dom.element
 local g = graph()
@@ -62,26 +59,14 @@ for line in io.lines(filename) do
   end
 end
 
-local last_uid = g.u.last
-local last_eid = g.e.last
-local revered_eids = subdivide_special_edges(g, e_labels)
-local x, y, paths = layout(g, last_uid, last_eid, revered_eids)
-
---
--- parameters
---
-
-local transform = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
--- local transform = vecmath.matrix3(0, 200, 50, 75, 0, 50, 0, 0, 1)
-local size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
-
-local node = render(g, last_uid, last_eid, x, y, paths, {
-  matrix = transform;
+local node, size = g:render {
+  -- matrix = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1);
+  matrix = vecmath.matrix3(0, 80, 50, 50, 0, 25, 0, 0, 1);
   u_labels = u_labels;
   e_labels = e_labels;
   max_text_length = 72;
   curve_parameter = 1;
-})
+}
 
 local doc = dom.xml_document(_"svg" {
   version = "1.1";

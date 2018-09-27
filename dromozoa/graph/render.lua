@@ -104,8 +104,8 @@ end
 
 return function (g, last_uid, last_eid, x, y, paths, attrs)
   local matrix = attrs.matrix or matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
-  local u_labels = attrs.u_labels or {}
-  local e_labels = attrs.e_labels or {}
+  local u_labels = attrs.u_labels
+  local e_labels = attrs.e_labels
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
   local max_text_length = attrs.max_text_length or 80
@@ -142,10 +142,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local uid = u.first
   while uid do
     if uid <= last_uid then
-      local label = u_labels[uid]
-      if not label then
-        label = tostring(uid)
-      end
+      local label = u_labels and u_labels[uid] or tostring(uid)
       matrix:transform(p1:set(x[uid], y[uid]))
       local text = make_text(p1, label, font_size, max_text_length)
       text["data-uid"] = uid
@@ -217,7 +214,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
       end
       e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
 
-      local label = e_labels[eid]
+      local label = e_labels and e_labels[eid]
       if label then
         local i = m / 2
         local uid = vu_target[path_eids[i - i % 1 + 1]]
@@ -230,5 +227,5 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
     eid = e_after[eid]
   end
 
-  return element "g" { u_paths, u_texts, e_paths, e_texts }
+  return element "g" { u_paths, u_texts, e_paths, e_texts }, matrix
 end

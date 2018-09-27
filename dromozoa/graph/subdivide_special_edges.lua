@@ -40,7 +40,7 @@ return function (g, e_labels)
       g:reverse_edge(eid2)
       m = m + 1
       reversed_eids[m] = eid2
-    elseif e_labels[eid1] then
+    elseif e_labels and e_labels[eid1] then
       n = n + 1
       subdivided_eids[n] = eid1
     else
