@@ -148,9 +148,10 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
       end
       matrix:transform(p1:set(x[uid], y[uid]))
       local text = make_text(p1, label, font_size, max_text_length)
+      text["data-uid"] = uid
       local d = path_data():rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
       u_beziers[uid] = d:bezier {}
-      u_paths[#u_paths + 1] = element "path" { d = d }
+      u_paths[#u_paths + 1] = element "path" { d = d, ["data-uid"] = uid }
       u_texts[#u_texts + 1] = text
     end
     uid = u_after[uid]
@@ -214,14 +215,16 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
           d:Q(b:get(2, p1), b:get(3, p2))
         end
       end
-      e_paths[#e_paths + 1] = element "path" { d = d }
+      e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
 
       local label = e_labels[eid]
       if label then
         local i = m / 2
         local uid = vu_target[path_eids[i - i % 1 + 1]]
         matrix:transform(p1:set(x[uid], y[uid]))
-        e_texts[#e_texts + 1] = make_text(p1, label, font_size, max_text_length)
+        local text = make_text(p1, label, font_size, max_text_length)
+        text["data-eid"] = eid
+        e_texts[#e_texts + 1] = text
       end
     end
     eid = e_after[eid]
