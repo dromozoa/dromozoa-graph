@@ -19,16 +19,9 @@ local dom = require "dromozoa.dom"
 local svg = require "dromozoa.svg"
 local vecmath = require "dromozoa.vecmath"
 local graph = require "dromozoa.graph"
-local layout = require "dromozoa.graph.layout"
-local render = require "dromozoa.graph.render"
-local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 local _ = dom.element
 local g = graph()
-
---
--- load graph
---
 
 local filename = ...
 if not filename then
@@ -62,36 +55,47 @@ for line in io.lines(filename) do
   end
 end
 
-local last_uid = g.u.last
-local last_eid = g.e.last
-local revered_eids = subdivide_special_edges(g, e_labels)
-local x, y, paths = layout(g, last_uid, last_eid, revered_eids)
-
---
--- parameters
---
-
-local transform = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
--- local transform = vecmath.matrix3(0, 200, 50, 75, 0, 50, 0, 0, 1)
-local size = transform:transform(vecmath.vector2(x.max + 1, y.max + 1))
-
-local node = render(g, last_uid, last_eid, x, y, paths, {
-  matrix = transform;
+local node = g:render {
+  -- matrix = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1);
+  matrix = vecmath.matrix3(0, 80, 50, 50, 0, 25, 0, 0, 1);
   u_labels = u_labels;
   e_labels = e_labels;
   max_text_length = 72;
   curve_parameter = 1;
-})
+}
+
+local style = [[
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
+
+text {
+  font-size: 16;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: #333;
+  stroke: none;
+}
+
+.u_paths path {
+  fill: none;
+  stroke: #333;
+}
+
+.e_paths path {
+  fill: none;
+  stroke: #333;
+  marker-end: url('#arrow');
+}
+]]
 
 local doc = dom.xml_document(_"svg" {
   version = "1.1";
   xmlns = "http://www.w3.org/2000/svg";
-  width = size.x;
-  height = size.y;
+  width = node["data-width"];
+  height = node["data-height"];
   _"defs" {
     _"style" {
       type = "text/css";
-      "@import url('docs/sample.css');";
+      style;
     };
     _"marker" {
       id = "arrow";
