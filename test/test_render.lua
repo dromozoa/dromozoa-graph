@@ -55,7 +55,7 @@ for line in io.lines(filename) do
   end
 end
 
-local node, size = g:render {
+local node = g:render {
   -- matrix = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1);
   matrix = vecmath.matrix3(0, 80, 50, 50, 0, 25, 0, 0, 1);
   u_labels = u_labels;
@@ -66,9 +66,6 @@ local node, size = g:render {
 
 local style = [[
 @import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
-text {
-  font-family: 'Noto Sans JP';
-}
 
 text {
   font-size: 16;
@@ -93,8 +90,8 @@ text {
 local doc = dom.xml_document(_"svg" {
   version = "1.1";
   xmlns = "http://www.w3.org/2000/svg";
-  width = size.x;
-  height = size.y;
+  width = node["data-width"];
+  height = node["data-height"];
   _"defs" {
     _"style" {
       type = "text/css";

@@ -15,7 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local vector2 = require "dromozoa.vecmath.vector2"
 local adjacency_list = require "dromozoa.graph.adjacency_list"
 local layout = require "dromozoa.graph.layout"
 local linked_list = require "dromozoa.graph.linked_list"
@@ -96,14 +95,11 @@ function class:subdivide_edge(eid, wid)
 end
 
 function class:render(attrs)
-  local e_labels = attrs.e_labels
   local last_uid = self.u.last
   local last_eid = self.e.last
-  local revered_eids = subdivide_special_edges(self, e_labels)
+  local revered_eids = subdivide_special_edges(self, attrs.e_labels)
   local x, y, paths = layout(self, last_uid, last_eid, revered_eids)
-  local node, matrix = render(self, last_uid, last_eid, x, y, paths, attrs)
-  local size = matrix:transform(vector2(x.max + 1, y.max + 1))
-  return node, size
+  return render(self, last_uid, last_eid, x, y, paths, attrs)
 end
 
 return setmetatable(class, {

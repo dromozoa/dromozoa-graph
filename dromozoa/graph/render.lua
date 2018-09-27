@@ -21,16 +21,17 @@ local utf8 = require "dromozoa.utf8"
 local path_data = require "dromozoa.svg.path_data"
 local matrix3 = require "dromozoa.vecmath.matrix3"
 local point2 = require "dromozoa.vecmath.point2"
+local vector2 = require "dromozoa.vecmath.vector2"
 local bezier = require "dromozoa.vecmath.bezier"
 local bezier_clipping = require "dromozoa.vecmath.bezier_clipping"
 
 local widths = {
-  ["N"]  = 0.5;  -- neutral
-  ["Na"] = 0.5;  -- narrow
-  ["H"]  = 0.5;  -- halfwidth
-  ["A"]  = 0.75; -- ambiguous
-  ["W"]  = 1;    -- wide
-  ["F"]  = 1;    -- fullwidth
+  N  = 0.5;  -- neutral
+  Na = 0.5;  -- narrow
+  H  = 0.5;  -- halfwidth
+  A  = 0.75; -- ambiguous
+  W  = 1;    -- wide
+  F  = 1;    -- fullwidth
 }
 
 local function make_text(p, text, font_size, max_text_length)
@@ -235,5 +236,10 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
     eid = e_after[eid]
   end
 
-  return element "g" { u_paths, u_texts, e_paths, e_texts }, matrix
+  local size = matrix:transform(vector2(x.max + 1, y.max + 1))
+  return element "g" {
+    ["data-width"] = size[1];
+    ["data-height"] = size[2];
+    u_paths, u_texts, e_paths, e_texts;
+  }
 end
