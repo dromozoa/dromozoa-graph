@@ -221,16 +221,18 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
 
       local first, last = clip_path(u_beziers[uid], u_beziers[uv_target[path_eids[m]]], path_beziers)
       local b = path_beziers[first]
-      local d = path_data():M(b:get(1, p1))
-      for i = first, last do
-        local b = path_beziers[i]
-        if b:size() == 2 then
-          d:L(b:get(2, p1))
-        else
-          d:Q(b:get(2, p1), b:get(3, p2))
+      if b then
+        local d = path_data():M(b:get(1, p1))
+        for i = first, last do
+          local b = path_beziers[i]
+          if b:size() == 2 then
+            d:L(b:get(2, p1))
+          else
+            d:Q(b:get(2, p1), b:get(3, p2))
+          end
         end
+        e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
       end
-      e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
 
       local label = e_labels and e_labels[eid]
       if label then
