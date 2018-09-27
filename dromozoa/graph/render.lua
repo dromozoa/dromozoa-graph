@@ -115,14 +115,18 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local matrix = attrs.matrix or matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1)
   local u_labels = attrs.u_labels
   local e_labels = attrs.e_labels
+  local shape = attrs.shape
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
-  local max_text_length = attrs.max_text_length or 80
+  local max_text_length = attrs.max_text_length or 72
   local curve_parameter = attrs.curve_parameter or 1
 
-  local font_hs = font_size / 2
-  local rect_r = font_hs * (line_height - 1)
-  local rect_hh = font_hs + rect_r
+  local font_half_size = font_size / 2
+  local margin = font_half_size * (line_height - 1)
+  local half_height = font_half_size + margin
+  local ellipse_ry = half_height + margin
+  local ellipse_rx = ellipse_ry / math.sqrt((ellipse_ry + half_height) * margin)
+
   local curve_a = curve_parameter / 2
   if curve_a < 0 then
     curve_a = 0
@@ -155,7 +159,12 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
       matrix:transform(p1:set(x[uid], y[uid]))
       local text = make_text(p1, label, font_size, max_text_length)
       text["data-uid"] = uid
-      local d = path_data():rect(p1[1], p1[2], text.textLength / 2 + rect_r, rect_hh, rect_r, rect_r)
+      local d = path_data()
+      if shape == "ellipse" then
+        d:ellipse(p1[1], p1[2], text.textLength / 2 * ellipse_rx, ellipse_ry)
+      else
+        d:rect(p1[1], p1[2], text.textLength / 2 + margin, half_height, margin, margin)
+      end
       u_beziers[uid] = d:bezier {}
       u_paths[#u_paths + 1] = element "path" { d = d, ["data-uid"] = uid }
       u_texts[#u_texts + 1] = text
@@ -212,16 +221,18 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
 
       local first, last = clip_path(u_beziers[uid], u_beziers[uv_target[path_eids[m]]], path_beziers)
       local b = path_beziers[first]
-      local d = path_data():M(b:get(1, p1))
-      for i = first, last do
-        local b = path_beziers[i]
-        if b:size() == 2 then
-          d:L(b:get(2, p1))
-        else
-          d:Q(b:get(2, p1), b:get(3, p2))
+      if b then
+        local d = path_data():M(b:get(1, p1))
+        for i = first, last do
+          local b = path_beziers[i]
+          if b:size() == 2 then
+            d:L(b:get(2, p1))
+          else
+            d:Q(b:get(2, p1), b:get(3, p2))
+          end
         end
+        e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
       end
-      e_paths[#e_paths + 1] = element "path" { d = d, ["data-eid"] = eid }
 
       local label = e_labels and e_labels[eid]
       if label then
