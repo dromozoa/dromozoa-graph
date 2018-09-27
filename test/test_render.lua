@@ -56,36 +56,14 @@ for line in io.lines(filename) do
 end
 
 local node = g:render {
-  -- matrix = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1);
-  matrix = vecmath.matrix3(0, 80, 50, 50, 0, 25, 0, 0, 1);
+  matrix = vecmath.matrix3(100, 0, 50, 0, 100, 50, 0, 0, 1);
+  -- matrix = vecmath.matrix3(0, 80, 50, 50, 0, 25, 0, 0, 1);
   u_labels = u_labels;
   e_labels = e_labels;
-  max_text_length = 72;
+  shape = "ellipse";
+  max_text_length = 64;
   curve_parameter = 1;
 }
-
-local style = [[
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans+JP:100&subset=japanese');
-
-text {
-  font-size: 16;
-  text-anchor: middle;
-  dominant-baseline: central;
-  fill: #333;
-  stroke: none;
-}
-
-.u_paths path {
-  fill: none;
-  stroke: #333;
-}
-
-.e_paths path {
-  fill: none;
-  stroke: #333;
-  marker-end: url('#arrow');
-}
-]]
 
 local doc = dom.xml_document(_"svg" {
   version = "1.1";
@@ -112,6 +90,9 @@ local doc = dom.xml_document(_"svg" {
   };
   node;
 })
+doc.stylesheets = {
+  { href = "docs/sample.css" };
+}
 
 local out = assert(io.open("test.svg", "w"))
 doc:serialize(out)

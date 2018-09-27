@@ -58,6 +58,22 @@ BrandesとK&ouml;pfのアルゴリズムは、
 ダミー頂点の扱いで問題が発生しうる。
 </p>
 
+<h2>楕円</h2>
+
+<p>
+\[\begin{aligned}
+  \frac{x^2}{r_x^2} + \frac{y^2}{r_y^2} &amp;= 1 \\
+  r_y^2 x^2 + r_x^2 y^2 &amp;= r_x^2 r_y^2 \\
+  r_x^2 r_y^2 - r_x^2 y^2 &amp;= r_y^2 x^2 \\
+  r_x^2 (r_y^2 - y^2) &amp;= r_y^2 x^2 \\
+  r_x &amp;= \frac{
+    r_y
+  }{
+    \sqrt{r_y^2 - y^2}
+  } x \\
+\end{aligned}\]
+</p>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js"></script>
 <script>
