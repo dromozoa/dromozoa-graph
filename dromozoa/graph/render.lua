@@ -44,7 +44,7 @@ local function make_text(p, text, font_size, max_text_length)
   local length_adjust
   if text_length < font_size then
     text_length = font_size
-  elseif text_length > max_text_length then
+  elseif max_text_length and text_length > max_text_length then
     text_length = max_text_length
     length_adjust = "spacingAndGlyphs"
   end
@@ -118,7 +118,8 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
   local shape = attrs.shape
   local font_size = attrs.font_size or 16
   local line_height = attrs.line_height or 1.5
-  local max_text_length = attrs.max_text_length or 72
+  local u_max_text_length = attrs.u_max_text_length or 64
+  local e_max_text_length = attrs.e_max_text_length
   local curve_parameter = attrs.curve_parameter or 1
 
   local font_half_size = font_size / 2
@@ -157,7 +158,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
     if uid <= last_uid then
       local label = u_labels and u_labels[uid] or tostring(uid)
       matrix:transform(p1:set(x[uid], y[uid]))
-      local text = make_text(p1, label, font_size, max_text_length)
+      local text = make_text(p1, label, font_size, u_max_text_length)
       text["data-uid"] = uid
       local d = path_data()
       if shape == "ellipse" then
@@ -239,7 +240,7 @@ return function (g, last_uid, last_eid, x, y, paths, attrs)
         local i = m / 2
         local uid = vu_target[path_eids[i - i % 1 + 1]]
         matrix:transform(p1:set(x[uid], y[uid]))
-        local text = make_text(p1, label, font_size, max_text_length)
+        local text = make_text(p1, label, font_size, e_max_text_length)
         text["data-eid"] = eid
         e_texts[#e_texts + 1] = text
       end
