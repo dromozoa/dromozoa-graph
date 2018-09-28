@@ -61,7 +61,7 @@ local node = g:render {
   u_labels = u_labels;
   e_labels = e_labels;
   shape = "ellipse";
-  max_text_length = 64;
+  u_max_text_length = 32;
   curve_parameter = 1;
 }
 
