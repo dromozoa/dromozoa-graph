@@ -15,50 +15,41 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function visit(uv_first, uv_after, uv_target, layer_map, layers, color, uid)
-  color[uid] = 1
+local function visit(uv_first, uv_after, uv_target, order, color, uid)
+  color[uid] = true
 
   local eid = uv_first[uid]
   while eid do
     local vid = uv_target[eid]
-    local c = color[vid]
-    if not c then
-      visit(uv_first, uv_after, uv_target, layer_map, layers, color, vid)
-    elseif c == 1 then
-      error "not a dag"
+    if not color[vid] then
+      visit(uv_first, uv_after, uv_target, order, color, vid)
     end
     eid = uv_after[eid]
   end
 
-  color[uid] = 2
-
-  local u = layer_map[uid]
-  local order = layers[u]
-  if not order then
-    layers[u] = { uid }
-  else
-    order[#order + 1] = uid
-  end
+  order[#order + 1] = uid
 end
 
-return function (g, layer_map)
-  local u = g.u
+return function (u, uv, uid)
   local u_after = u.after
-  local uv = g.uv
   local uv_first = uv.first
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local layers = {}
   local color = {}
+  local order = {}
 
-  local uid = u.first
-  while uid do
-    if not color[uid] then
-      visit(uv_first, uv_after, uv_target, layer_map, layers, color, uid)
+  if uid then
+    visit(uv_first, uv_after, uv_target, order, color, uid)
+  else
+    local uid = u.first
+    while uid do
+      if not color[uid] then
+        visit(uv_first, uv_after, uv_target, order, color, uid)
+      end
+      uid = u_after[uid]
     end
-    uid = u_after[uid]
   end
 
-  return layers
+  return order
 end

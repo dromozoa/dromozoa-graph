@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "dromozoa-graph"
-version = "1.32-1"
+version = "1.33-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.32.tar.gz";
-  file = "dromozoa-graph-1.32.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.33.tar.gz";
+  file = "dromozoa-graph-1.33.tar.gz";
 }
 description = {
   summary = "Graph data structures and algorithms";
@@ -36,6 +36,7 @@ build = {
     ["dromozoa.graph.make_layers"] = "dromozoa/graph/make_layers.lua";
     ["dromozoa.graph.make_paths"] = "dromozoa/graph/make_paths.lua";
     ["dromozoa.graph.minimize_crossings"] = "dromozoa/graph/minimize_crossings.lua";
+    ["dromozoa.graph.postorder"] = "dromozoa/graph/postorder.lua";
     ["dromozoa.graph.promote_vertices"] = "dromozoa/graph/promote_vertices.lua";
     ["dromozoa.graph.remove_cycles"] = "dromozoa/graph/remove_cycles.lua";
     ["dromozoa.graph.remove_self_edges"] = "dromozoa/graph/remove_self_edges.lua";
