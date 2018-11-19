@@ -15,19 +15,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local function visit(first, after, target, layer_map, layers, color, uid)
+local function visit(uv_first, uv_after, uv_target, layer_map, layers, color, uid)
   color[uid] = 1
 
-  local eid = first[uid]
+  local eid = uv_first[uid]
   while eid do
-    local vid = target[eid]
+    local vid = uv_target[eid]
     local c = color[vid]
     if not c then
-      visit(first, after, target, layer_map, layers, color, vid)
+      visit(uv_first, uv_after, uv_target, layer_map, layers, color, vid)
     elseif c == 1 then
       error "not a dag"
     end
-    eid = after[eid]
+    eid = uv_after[eid]
   end
 
   color[uid] = 2
