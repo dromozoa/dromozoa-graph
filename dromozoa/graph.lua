@@ -18,6 +18,7 @@
 local adjacency_list = require "dromozoa.graph.adjacency_list"
 local layout = require "dromozoa.graph.layout"
 local linked_list = require "dromozoa.graph.linked_list"
+local postorder = require "dromozoa.graph.postorder"
 local render = require "dromozoa.graph.render"
 local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
@@ -100,6 +101,14 @@ function class:render(attrs)
   local revered_eids = subdivide_special_edges(self, attrs.e_labels)
   local x, y, paths = layout(self, last_uid, last_eid, revered_eids)
   return render(self, last_uid, last_eid, x, y, paths, attrs)
+end
+
+function class:uv_postorder(uid)
+  return postorder(self.u, self.uv, uid)
+end
+
+function class:vu_postorder(uid)
+  return postorder(self.u, self.vu, uid)
 end
 
 return setmetatable(class, {

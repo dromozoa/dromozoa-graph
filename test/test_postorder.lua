@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local postorder = require "dromozoa.graph.postorder"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
@@ -46,7 +45,7 @@ g:add_edge(M, C)
 
 local expect = { M, G, D, E, C, B, T, X }
 
-local result = postorder(g.u, g.uv)
+local result = g:uv_postorder(X)
 if verbose then
   print(table.concat(expect, " "))
   print(table.concat(result, " "))
