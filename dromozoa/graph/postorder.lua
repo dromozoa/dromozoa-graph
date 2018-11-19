@@ -41,14 +41,14 @@ return function (u, uv, uid)
 
   if uid then
     visit(uv_first, uv_after, uv_target, order, color, uid)
-  else
-    local uid = u.first
-    while uid do
-      if not color[uid] then
-        visit(uv_first, uv_after, uv_target, order, color, uid)
-      end
-      uid = u_after[uid]
+  end
+
+  local uid = u.first
+  while uid do
+    if not color[uid] then
+      visit(uv_first, uv_after, uv_target, order, color, uid)
     end
+    uid = u_after[uid]
   end
 
   return order
