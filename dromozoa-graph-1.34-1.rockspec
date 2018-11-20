@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "dromozoa-graph"
-version = "1.33-1"
+version = "1.34-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.33.tar.gz";
-  file = "dromozoa-graph-1.33.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.34.tar.gz";
+  file = "dromozoa-graph-1.34.tar.gz";
 }
 description = {
   summary = "Graph data structures and algorithms";
