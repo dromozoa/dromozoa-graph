@@ -88,19 +88,25 @@ function class:link(vid, wid)
   local size = self.size
 
   local sid = wid
-  while semi[label[wid]] < semi[label[child[sid]]] do
-    if size[sid] + size[child[child[sid]]] >= 2 - size[child[sid]] then
-      ancestor[child[sid]] = sid
-      child[sid] = child[child[sid]]
+  local label_wid = label[wid]
+  local child_sid = child[sid]
+  while semi[label_wid] < semi[label[child_sid]] do
+    if size[sid] + size[child[child_sid]] >= 2 - size[child_sid] then
+      ancestor[child_sid] = sid
+      child_sid = child[child_sid]
+      child[sid] = child_sid
     else
-      size[child[sid]] = size[sid]
-      ancestor[sid] = child[sid]
-      sid = child[sid]
+      size[child_sid] = size[sid]
+      ancestor[sid] = child_sid
+      child_sid = child[child_sid]
+      sid = child_sid
     end
   end
-  label[sid] = label[wid]
-  size[vid] = size[vid] + size[wid]
-  if size[vid] < 2 - size[wid] then
+  label[sid] = label_wid
+  local size_wid = size[wid]
+  local size_vid = size[vid] + size_wid
+  size[vid] = size_vid
+  if size_vid < 2 - size_wid then
     sid, child[vid] = child[vid], sid
   end
   while sid ~= 0 do
