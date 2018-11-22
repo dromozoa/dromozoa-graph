@@ -20,6 +20,65 @@ local find_dominators = require "dromozoa.graph.find_dominators"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
+-- A Fast Algorithm for Finding Dominators in a Flowgraph
+local g = graph()
+
+local R = g:add_vertex()
+local A = g:add_vertex()
+local B = g:add_vertex()
+local C = g:add_vertex()
+local D = g:add_vertex()
+local E = g:add_vertex()
+local F = g:add_vertex()
+local G = g:add_vertex()
+local H = g:add_vertex()
+local I = g:add_vertex()
+local J = g:add_vertex()
+local K = g:add_vertex()
+local L = g:add_vertex()
+
+g:add_edge(R, A)
+g:add_edge(R, B)
+g:add_edge(R, C)
+g:add_edge(A, D)
+g:add_edge(B, A)
+g:add_edge(B, D)
+g:add_edge(B, E)
+g:add_edge(C, F)
+g:add_edge(C, G)
+g:add_edge(D, L)
+g:add_edge(E, H)
+g:add_edge(F, I)
+g:add_edge(G, I)
+g:add_edge(G, J)
+g:add_edge(H, E)
+g:add_edge(H, K)
+g:add_edge(I, K)
+g:add_edge(J, I)
+g:add_edge(L, H)
+g:add_edge(K, R)
+g:add_edge(K, I)
+
+local idom = find_dominators(g, R)
+if verbose then
+  for uid = R, K do
+    print(uid, idom[uid])
+  end
+end
+assert(idom[R] == 0 or idom[R] == nil)
+assert(idom[A] == R)
+assert(idom[B] == R)
+assert(idom[C] == R)
+assert(idom[D] == R)
+assert(idom[E] == R)
+assert(idom[F] == C)
+assert(idom[G] == C)
+assert(idom[H] == R)
+assert(idom[I] == R)
+assert(idom[J] == G)
+assert(idom[K] == R)
+assert(idom[L] == D)
+
 -- ssa-external-japanese.pdf
 local g = graph()
 
@@ -41,9 +100,15 @@ g:add_edge(L5, L7)
 g:add_edge(L6, L7)
 
 local idom = find_dominators(g, L1)
-
 if verbose then
   for uid = 1, 7 do
     print(uid, idom[uid])
   end
 end
+assert(idom[L1] == 0 or idom[L1] == nil)
+assert(idom[L2] == L1)
+assert(idom[L3] == L2)
+assert(idom[L4] == L2)
+assert(idom[L5] == L2)
+assert(idom[L6] == L1)
+assert(idom[L7] == L1)
