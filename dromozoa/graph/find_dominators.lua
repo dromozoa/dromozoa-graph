@@ -170,18 +170,20 @@ return function (g, start_uid)
     while eid do
       local vid = vu_target[eid]
       local uid = self:eval(vid)
-      if semi[uid] < semi[wid] then
-        semi[wid] = semi[uid]
+      local semi_uid = semi[uid]
+      if semi_uid < semi[wid] then
+        semi[wid] = semi_uid
       end
       eid = vu_after[eid]
     end
 
     bucket[vertex[semi[wid]]][wid] = true
 
-    self:link(parent[wid], wid)
-
-    for vid in pairs(bucket[parent[wid]]) do
-      bucket[parent[wid]][vid] = nil
+    local parent_wid = parent[wid]
+    self:link(parent_wid, wid)
+    local bucket_parent_wid = bucket[parent_wid]
+    for vid in pairs(bucket_parent_wid) do
+      bucket_parent_wid[vid] = nil
       local uid = self:eval(vid)
       if semi[uid] < semi[vid] then
         dom[vid] = uid
@@ -193,9 +195,9 @@ return function (g, start_uid)
 
   for i = 2, n do
     local wid = vertex[i]
-
-    if dom[wid] ~= vertex[semi[wid]] then
-      dom[wid] = dom[dom[wid]]
+    local dom_wid = dom[wid]
+    if dom_wid ~= vertex[semi[wid]] then
+      dom[wid] = dom[dom_wid]
     end
   end
 
