@@ -26,7 +26,6 @@ function class:dfs(uv_first, uv_after, uv_target, vid, n)
   local label = self.label
   local semi = self.semi
   local size = self.size
-  local pred = self.pred
 
   n = n + 1
 
@@ -36,6 +35,7 @@ function class:dfs(uv_first, uv_after, uv_target, vid, n)
   ancestor[vid] = 0
   child[vid] = 0
   size[vid] = 1
+
   local eid = uv_first[vid]
   while eid do
     local wid = uv_target[eid]
@@ -43,8 +43,6 @@ function class:dfs(uv_first, uv_after, uv_target, vid, n)
       parent[wid] = vid
       n = self:dfs(uv_first, uv_after, uv_target, wid, n)
     end
-    local p = pred[vid]
-    p[#p + 1] = vid
     eid = uv_after[eid]
   end
 
@@ -136,7 +134,6 @@ return function (g, start_uid)
   local semi = {}
   local size = {}
   -- integer set array (1::n)
-  local pred = {}
   local bucket = {}
 
   local self = setmetatable({
@@ -149,13 +146,10 @@ return function (g, start_uid)
     label = label;
     semi = semi;
     size = size;
-    -- integer set array (1::n)
-    pred = pred;
   }, metatable)
 
   local uid = u.first
   while uid do
-    pred[uid] = {}
     bucket[uid] = {}
     semi[uid] = 0
     uid = u_after[uid]
