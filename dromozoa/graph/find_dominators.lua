@@ -70,10 +70,12 @@ function class:eval(vid)
     return label[vid]
   else
     self:compress(vid)
-    if semi[label[ancestor[vid]]] >= semi[label[vid]] then
-      return label[vid]
+    local label_ancestor_vid = label[ancestor[vid]]
+    local label_vid = label[vid]
+    if semi[label_ancestor_vid] >= semi[label_vid] then
+      return label_vid
     else
-      return label[ancestor[vid]]
+      return label_ancestor_vid
     end
   end
 end
