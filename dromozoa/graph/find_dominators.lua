@@ -130,9 +130,9 @@ return function (g, start_uid)
   local child = {}
   local vertex = {}
   -- integer array (0::n)
-  local label = {}
-  local semi = {}
-  local size = {}
+  local label = { [0] = 0 }
+  local semi = { [0] = 0 }
+  local size = { [0] = 0 }
   -- integer set array (1::n)
   local bucket = {}
 
@@ -156,10 +156,6 @@ return function (g, start_uid)
   end
 
   local n = self:dfs(uv_first, uv_after, uv_target, start_uid, 0)
-
-  size[0] = 0
-  label[0] = 0
-  semi[0] = 0
 
   for i = n, 2, -1 do
     local wid = vertex[i]
