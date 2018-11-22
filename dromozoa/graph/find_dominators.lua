@@ -151,7 +151,6 @@ return function (g, start_uid)
     size = size;
     -- integer set array (1::n)
     pred = pred;
-    bucket = bucket;
   }, metatable)
 
   local uid = u.first
@@ -181,15 +180,12 @@ return function (g, start_uid)
       eid = vu_after[eid]
     end
 
-    local b = bucket[vertex[semi[wid]]]
-    b[#b + 1] = wid
+    bucket[vertex[semi[wid]]][wid] = true
 
     self:link(parent[wid], wid)
 
-    local b = bucket[parent[wid]]
-    for j = 1, #b do
-      local vid = b[j]
-      b[j] = nil
+    for vid in pairs(bucket[parent[wid]]) do
+      bucket[parent[wid]][vid] = nil
       local uid = self:eval(vid)
       if semi[uid] < semi[vid] then
         dom[vid] = uid
