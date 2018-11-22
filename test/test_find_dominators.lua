@@ -65,7 +65,7 @@ if verbose then
     print(uid, idom[uid])
   end
 end
-assert(idom[R] == 0 or idom[R] == nil)
+assert(idom[R] == nil)
 assert(idom[A] == R)
 assert(idom[B] == R)
 assert(idom[C] == R)
@@ -105,7 +105,7 @@ if verbose then
     print(uid, idom[uid])
   end
 end
-assert(idom[L1] == 0 or idom[L1] == nil)
+assert(idom[L1] == nil)
 assert(idom[L2] == L1)
 assert(idom[L3] == L2)
 assert(idom[L4] == L2)

@@ -184,7 +184,7 @@ return function (g, start_uid)
     end
   end
 
-  dom[start_uid] = 0
+  -- dom[start_uid] = 0
 
   return dom
 end
