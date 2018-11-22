@@ -20,21 +20,16 @@ local metatable = { __index = class }
 
 function class:dfs(uv_first, uv_after, uv_target, vid, n)
   local parent = self.parent
-  local ancestor = self.ancestor
-  local child = self.child
-  local vertex = self.vertex
-  local label = self.label
   local semi = self.semi
-  local size = self.size
 
   n = n + 1
 
   semi[vid] = n
-  vertex[n] = vid
-  label[vid] = vid
-  ancestor[vid] = 0
-  child[vid] = 0
-  size[vid] = 1
+  self.vertex[n] = vid
+  self.label[vid] = vid
+  self.ancestor[vid] = 0
+  self.child[vid] = 0
+  self.size[vid] = 1
 
   local eid = uv_first[vid]
   while eid do
