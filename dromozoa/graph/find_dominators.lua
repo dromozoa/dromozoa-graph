@@ -53,38 +53,48 @@ function class:compress(vid)
 end
 
 function class:eval(vid)
-  if self.ancestor[vid] == 0 then
-    return self.label[vid]
+  local ancestor = self.ancestor
+  local label = self.label
+  local semi = self.semi
+
+  if ancestor[vid] == 0 then
+    return label[vid]
   else
     self:compress(vid)
-    if self.semi[self.label[self.ancestor[vid]]] >= self.semi[self.label[vid]] then
-      return self.label[vid]
+    if semi[label[ancestor[vid]]] >= semi[label[vid]] then
+      return label[vid]
     else
-      return self.label[self.ancestor[vid]]
+      return label[ancestor[vid]]
     end
   end
 end
 
 function class:link(vid, wid)
+  local ancestor = self.ancestor
+  local child = self.child
+  local label = self.label
+  local semi = self.semi
+  local size = self.size
+
   local sid = wid
-  while self.semi[self.label[wid]] < self.semi[self.label[self.child[sid]]] do
-    if self.size[sid] + self.size[self.child[self.child[sid]]] >= 2 - self.size[self.child[sid]] then
-      self.ancestor[self.child[sid]] = sid
-      self.child[sid] = self.child[self.child[sid]]
+  while semi[label[wid]] < semi[label[child[sid]]] do
+    if size[sid] + size[child[child[sid]]] >= 2 - size[child[sid]] then
+      ancestor[child[sid]] = sid
+      child[sid] = child[child[sid]]
     else
-      self.size[self.child[sid]] = self.size[sid]
-      self.ancestor[sid] = self.child[sid]
-      sid = self.child[sid]
+      size[child[sid]] = size[sid]
+      ancestor[sid] = child[sid]
+      sid = child[sid]
     end
   end
-  self.label[sid] = self.label[wid]
-  self.size[vid] = self.size[vid] + self.size[wid]
-  if self.size[vid] < 2 - self.size[wid] then
+  label[sid] = label[wid]
+  size[vid] = size[vid] + size[wid]
+  if size[vid] < 2 - size[wid] then
     sid, child[vid] = child[vid], sid
   end
   while sid ~= 0 do
-    self.ancestor[sid] = vid
-    sid = self.child[sid]
+    ancestor[sid] = vid
+    sid = child[sid]
   end
 end
 
@@ -183,8 +193,6 @@ return function (g, start_uid)
       dom[wid] = dom[dom[wid]]
     end
   end
-
-  -- dom[start_uid] = 0
 
   return dom
 end
