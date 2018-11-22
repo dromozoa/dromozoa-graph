@@ -16,7 +16,6 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local graph = require "dromozoa.graph"
-local find_dominators = require "dromozoa.graph.find_dominators"
 
 local verbose = os.getenv "VERBOSE" == "1"
 
@@ -59,7 +58,7 @@ g:add_edge(L, H)
 g:add_edge(K, R)
 g:add_edge(K, I)
 
-local idom = find_dominators(g, R)
+local idom = g:find_dominators(R)
 if verbose then
   for uid = R, K do
     print(uid, idom[uid])
@@ -99,7 +98,7 @@ g:add_edge(L4, L5)
 g:add_edge(L5, L7)
 g:add_edge(L6, L7)
 
-local idom = find_dominators(g, L1)
+local idom = g:find_dominators(L1)
 if verbose then
   for uid = 1, 7 do
     print(uid, idom[uid])
