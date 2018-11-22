@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "dromozoa-graph"
-version = "1.34-1"
+version = "1.35-1"
 source = {
-  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.34.tar.gz";
-  file = "dromozoa-graph-1.34.tar.gz";
+  url = "https://github.com/dromozoa/dromozoa-graph/archive/v1.35.tar.gz";
+  file = "dromozoa-graph-1.35.tar.gz";
 }
 description = {
   summary = "Graph data structures and algorithms";
@@ -29,6 +29,7 @@ build = {
     ["dromozoa.graph.brandes_kopf"] = "dromozoa/graph/brandes_kopf.lua";
     ["dromozoa.graph.count_crossings"] = "dromozoa/graph/count_crossings.lua";
     ["dromozoa.graph.count_crossings_bilayer"] = "dromozoa/graph/count_crossings_bilayer.lua";
+    ["dromozoa.graph.find_dominators"] = "dromozoa/graph/find_dominators.lua";
     ["dromozoa.graph.layout"] = "dromozoa/graph/layout.lua";
     ["dromozoa.graph.linked_list"] = "dromozoa/graph/linked_list.lua";
     ["dromozoa.graph.longest_path"] = "dromozoa/graph/longest_path.lua";
