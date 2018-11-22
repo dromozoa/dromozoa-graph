@@ -30,7 +30,7 @@ local function visit(uv_first, uv_after, uv_target, order, color, uid)
   order[#order + 1] = uid
 end
 
-return function (u, uv, uid)
+return function (u, uv, start_uid)
   local u_after = u.after
   local uv_first = uv.first
   local uv_after = uv.after
@@ -39,8 +39,8 @@ return function (u, uv, uid)
   local color = {}
   local order = {}
 
-  if uid then
-    visit(uv_first, uv_after, uv_target, order, color, uid)
+  if start_uid then
+    visit(uv_first, uv_after, uv_target, order, color, start_uid)
   end
 
   local uid = u.first

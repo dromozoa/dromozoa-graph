@@ -16,6 +16,7 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local adjacency_list = require "dromozoa.graph.adjacency_list"
+local find_dominators = require "dromozoa.graph.find_dominators"
 local layout = require "dromozoa.graph.layout"
 local linked_list = require "dromozoa.graph.linked_list"
 local postorder = require "dromozoa.graph.postorder"
@@ -103,12 +104,16 @@ function class:render(attrs)
   return render(self, last_uid, last_eid, x, y, paths, attrs)
 end
 
-function class:uv_postorder(uid)
-  return postorder(self.u, self.uv, uid)
+function class:uv_postorder(start_uid)
+  return postorder(self.u, self.uv, start_uid)
 end
 
-function class:vu_postorder(uid)
-  return postorder(self.u, self.vu, uid)
+function class:vu_postorder(start_uid)
+  return postorder(self.u, self.vu, start_uid)
+end
+
+function class:find_dominators(start_uid)
+  return find_dominators(self, start_uid)
 end
 
 return setmetatable(class, {
