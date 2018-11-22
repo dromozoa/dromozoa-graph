@@ -19,23 +19,32 @@ local class = {}
 local metatable = { __index = class }
 
 function class:dfs(uv_first, uv_after, uv_target, vid, n)
-  n = n + 1
-  self.semi[vid] = n
-  self.vertex[n] = vid
-  self.label[vid] = vid
-  self.ancestor[vid] = 0
-  self.child[vid] = 0
-  self.size[vid] = 1
+  local parent = self.parent
+  local ancestor = self.ancestor
+  local child = self.child
+  local vertex = self.vertex
+  local label = self.label
+  local semi = self.semi
+  local size = self.size
+  local pred = self.pred
 
+  n = n + 1
+
+  semi[vid] = n
+  vertex[n] = vid
+  label[vid] = vid
+  ancestor[vid] = 0
+  child[vid] = 0
+  size[vid] = 1
   local eid = uv_first[vid]
   while eid do
     local wid = uv_target[eid]
-    if self.semi[wid] == 0 then
-      self.parent[wid] = vid
+    if semi[wid] == 0 then
+      parent[wid] = vid
       n = self:dfs(uv_first, uv_after, uv_target, wid, n)
     end
-    local pred = self.pred[vid]
-    pred[#pred + 1] = vid
+    local p = pred[vid]
+    p[#p + 1] = vid
     eid = uv_after[eid]
   end
 
@@ -43,12 +52,16 @@ function class:dfs(uv_first, uv_after, uv_target, vid, n)
 end
 
 function class:compress(vid)
-  if self.ancestor[self.ancestor[vid]] ~= 0 then
-    self:compress(self.ancestor[vid])
-    if self.semi[self.label[self.ancestor[vid]]] < self.semi[self.label[vid]] then
-      self.label[vid] = self.label[self.ancestor[vid]]
+  local ancestor = self.ancestor
+  local label = self.label
+  local semi = self.semi
+
+  if ancestor[ancestor[vid]] ~= 0 then
+    self:compress(ancestor[vid])
+    if semi[label[ancestor[vid]]] < semi[label[vid]] then
+      label[vid] = label[ancestor[vid]]
     end
-    self.ancestor[vid] = self.ancestor[self.ancestor[vid]]
+    ancestor[vid] = ancestor[ancestor[vid]]
   end
 end
 
