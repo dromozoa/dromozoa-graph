@@ -49,12 +49,15 @@ function class:compress(vid)
   local label = self.label
   local semi = self.semi
 
-  if ancestor[ancestor[vid]] ~= 0 then
-    self:compress(ancestor[vid])
-    if semi[label[ancestor[vid]]] < semi[label[vid]] then
-      label[vid] = label[ancestor[vid]]
+  local ancestor_vid = ancestor[vid]
+  if ancestor[ancestor_vid] ~= 0 then
+    self:compress(ancestor_vid)
+    local ancestor_vid = ancestor[vid]
+    local label_ancestor_vid = label[ancestor_vid]
+    if semi[label_ancestor_vid] < semi[label[vid]] then
+      label[vid] = label_ancestor_vid
     end
-    ancestor[vid] = ancestor[ancestor[vid]]
+    ancestor[vid] = ancestor[ancestor_vid]
   end
 end
 
