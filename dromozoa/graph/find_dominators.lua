@@ -143,12 +143,10 @@ return function (g, start_uid)
   local bucket = {}
 
   local self = setmetatable({
-    -- integer array (1::n)
     parent = parent;
     ancestor = ancestor;
     child = child;
     vertex = vertex;
-    -- integer array (0::n)
     label = label;
     semi = semi;
     size = size;
