@@ -36,8 +36,8 @@ return function (u, uv, start_uid)
   local uv_after = uv.after
   local uv_target = uv.target
 
-  local color = {}
   local order = {}
+  local color = {}
 
   if start_uid then
     visit(uv_first, uv_after, uv_target, order, color, start_uid)
@@ -51,5 +51,5 @@ return function (u, uv, start_uid)
     end
   end
 
-  return order
+  return order, color
 end
