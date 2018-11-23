@@ -30,6 +30,7 @@ local E = g:add_vertex()
 local D = g:add_vertex()
 local G = g:add_vertex()
 local M = g:add_vertex()
+local Z = g:add_vertex()
 
 g:add_edge(X, C)
 g:add_edge(X, B)
@@ -42,16 +43,21 @@ g:add_edge(E, D)
 g:add_edge(D, G)
 g:add_edge(G, D)
 g:add_edge(M, C)
+g:add_edge(Z, C)
 
 local expect = { M, G, D, E, C, B, T, X }
 
-local result = g:uv_postorder(X)
+local result, color = g:uv_postorder(X)
 if verbose then
   print(table.concat(expect, " "))
   print(table.concat(result, " "))
+  print(color[X])
+  print(color[Z])
 end
 
 assert(#result == #expect)
 for i = 1, #expect do
   assert(result[i] == expect[i])
 end
+assert(color[X])
+assert(not color[Z])
