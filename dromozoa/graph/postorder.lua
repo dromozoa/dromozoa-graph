@@ -16,17 +16,19 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local function visit(uv_first, uv_after, uv_target, order, color, uid)
-  color[uid] = true
+  color[uid] = 1
 
   local eid = uv_first[uid]
   while eid do
     local vid = uv_target[eid]
-    if not color[vid] then
+    local c = color[vid]
+    if not c then
       visit(uv_first, uv_after, uv_target, order, color, vid)
     end
     eid = uv_after[eid]
   end
 
+  color[uid] = 2
   order[#order + 1] = uid
 end
 

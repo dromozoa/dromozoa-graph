@@ -59,5 +59,5 @@ assert(#result == #expect)
 for i = 1, #expect do
   assert(result[i] == expect[i])
 end
-assert(color[X])
-assert(not color[Z])
+assert(color[X] == 2)
+assert(color[Z] == nil)
