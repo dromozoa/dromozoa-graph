@@ -47,17 +47,26 @@ g:add_edge(Z, C)
 
 local expect = { M, G, D, E, C, B, T, X }
 
-local result, color = g:uv_postorder(X)
+local result, u_color, e_color = g:uv_postorder(X)
 if verbose then
   print(table.concat(expect, " "))
   print(table.concat(result, " "))
-  print(color[X])
-  print(color[Z])
+  print(u_color[X])
+  print(u_color[Z])
+
+  for eid, color in pairs(e_color) do
+    print(eid, color)
+  end
 end
 
 assert(#result == #expect)
 for i = 1, #expect do
   assert(result[i] == expect[i])
 end
-assert(color[X] == 2)
-assert(color[Z] == nil)
+assert(u_color[X] == 2)
+assert(u_color[Z] == nil)
+
+assert(e_color[10] == 1)
+assert(e_color[11] == 1)
+assert(e_color[4] == 2)
+assert(e_color[5] == 2)
