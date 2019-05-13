@@ -34,7 +34,7 @@ local function promote(vu_first, vu_after, vu_target, layer_map, d_map, uid)
   return d
 end
 
-return function (g, layer_map)
+return function (g, layer_map, max_iteration)
   local u = g.u
   local u_first = u.first
   local u_after = u.after
@@ -53,6 +53,7 @@ return function (g, layer_map)
     uid = u_after[uid]
   end
 
+  local iteration = 0
   repeat
     local promoted
     local uid = u_first
@@ -72,7 +73,11 @@ return function (g, layer_map)
       end
       uid = u_after[uid]
     end
+    iteration = iteration + 1
+    if max_iteration and max_iteration <= iteration then
+      break
+    end
   until not promoted
 
-  return layer_map
+  return layer_map, iteration
 end

@@ -19,6 +19,8 @@ local graph = require "dromozoa.graph"
 local longest_path = require "dromozoa.graph.longest_path"
 local promote_vertices = require "dromozoa.graph.promote_vertices"
 
+local verbose = os.getenv "VERBOSE" == "1"
+
 local function check(result, expect)
   local n = #result
   assert(n == #expect)
@@ -41,8 +43,12 @@ g:add_edge(1, 7)
 local layer_map1 = longest_path(g)
 check(layer_map1, { 4, 3, 2, 1, 1, 1, 1 })
 
-local layer_map2 = promote_vertices(g, layer_map1)
+local layer_map2, iteration = promote_vertices(g, layer_map1)
 check(layer_map2, { 4, 3, 2, 1, 1, 2, 3 })
+if verbose then
+  io.write("iteration ", iteration, "\n")
+end
+assert(iteration > 0)
 
 -- Fig.6
 local g = graph()

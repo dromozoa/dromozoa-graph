@@ -1,4 +1,4 @@
--- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -26,11 +26,19 @@ local remove_cycles = require "dromozoa.graph.remove_cycles"
 local remove_self_edges = require "dromozoa.graph.remove_self_edges"
 local subdivide_double_edges = require "dromozoa.graph.subdivide_double_edges"
 
-return function (g, last_uid, last_eid, reversed_eids)
+return function (g, last_uid, last_eid, reversed_eids, attrs)
   local removed_eids, removed_uids = remove_self_edges(g)
   remove_cycles(g, reversed_eids)
 
-  local layer_map = promote_vertices(g, longest_path(g))
+  local max_iteration
+  if attrs then
+    max_iteration = attrs.promote_vertices_max_iteration
+  end
+  local layer_map, iteration = promote_vertices(g, longest_path(g), max_iteration)
+  if attrs then
+    attrs.promote_vertices_iteration = iteration
+  end
+
   make_dummy_vertices(g, layer_map, reversed_eids)
   local layers = make_layers(g, layer_map)
   local layers = minimize_crossings(g, layers)
