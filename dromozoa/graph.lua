@@ -100,7 +100,7 @@ function class:render(attrs)
   local last_uid = self.u.last
   local last_eid = self.e.last
   local revered_eids = subdivide_special_edges(self, attrs.e_labels)
-  local x, y, paths = layout(self, last_uid, last_eid, revered_eids, attrs)
+  local x, y, paths = layout(self, last_uid, last_eid, revered_eids, attrs.skip_promote_vertices)
   return render(self, last_uid, last_eid, x, y, paths, attrs)
 end
 
