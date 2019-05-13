@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -100,7 +100,7 @@ function class:render(attrs)
   local last_uid = self.u.last
   local last_eid = self.e.last
   local revered_eids = subdivide_special_edges(self, attrs.e_labels)
-  local x, y, paths = layout(self, last_uid, last_eid, revered_eids)
+  local x, y, paths = layout(self, last_uid, last_eid, revered_eids, attrs.skip_promote_vertices)
   return render(self, last_uid, last_eid, x, y, paths, attrs)
 end
 
