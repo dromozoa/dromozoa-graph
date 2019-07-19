@@ -88,13 +88,16 @@ function class:degree(uid)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      first = {};
-      last = {};
-      before = {};
-      after = {};
-      target = {};
-    }, metatable)
+  __call = function (_, self)
+    if not self then
+      self = {
+        first = {};
+        last = {};
+        before = {};
+        after = {};
+        target = {};
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })

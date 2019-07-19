@@ -181,12 +181,15 @@ function class:decrease(uid, u)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      n = 0;
-      heap = {};
-      key = {};
-      value = {};
-    }, metatable)
+  __call = function (_, self)
+    if not self then
+      self = {
+        n = 0;
+        heap = {};
+        key = {};
+        value = {};
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })

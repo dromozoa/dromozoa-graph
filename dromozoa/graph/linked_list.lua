@@ -90,12 +90,15 @@ function class:remove(id)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      id = 0;
-      n = 0;
-      before = {};
-      after = {};
-    }, metatable)
+  __call = function (_, self)
+    if not self then
+      self = {
+        id = 0;
+        n = 0;
+        before = {};
+        after = {};
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })
