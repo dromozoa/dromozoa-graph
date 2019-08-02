@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,7 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
+local serializer = require "dromozoa.serializer"
 local graph = require "dromozoa.graph"
+
+local verbose = os.getenv "VERBOSE" == "1"
 
 local function check(uv, uid, expect)
   local n = #expect
@@ -63,6 +66,18 @@ local e3 = g:add_edge(u1, u4)
 local e4 = g:add_edge(u1, u3)
 local e5 = g:add_edge(u3, u4)
 local e6 = g:subdivide_edge(e3, u5)
+
+check(g.uv, u1, { u2, u5, u3 })
+check(g.uv, u5, { u4 })
+
+check(g.vu, u4, { u2, u5, u3 })
+check(g.vu, u5, { u1 })
+
+local s = serializer.encode(g)
+if verbose then
+  print(("%q"):format(s))
+end
+local g = graph(serializer.decode(s))
 
 check(g.uv, u1, { u2, u5, u3 })
 check(g.uv, u5, { u4 })
