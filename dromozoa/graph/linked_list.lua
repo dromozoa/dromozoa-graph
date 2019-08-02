@@ -1,4 +1,4 @@
--- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,7 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local class = {}
-local metatable = { __index = class }
+local metatable = {
+  __index = class;
+  __name = "dromozoa.graph.linked_list";
+}
 
 function class:add(id)
   if id then
