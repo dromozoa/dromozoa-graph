@@ -1,4 +1,4 @@
--- Copyright (C) 2017 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -69,7 +69,10 @@ local function down_heap(heap, key, value, uid, u, i)
 end
 
 local class = {}
-local metatable = { __index = class }
+local metatable = {
+  __index = class;
+  __name = "dromozoa.graph.binary_heap";
+}
 
 function class:push(uid, u)
   local heap = self.heap
@@ -181,12 +184,15 @@ function class:decrease(uid, u)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      n = 0;
-      heap = {};
-      key = {};
-      value = {};
-    }, metatable)
+  __call = function (_, self)
+    if not self then
+      self = {
+        n = 0;
+        heap = {};
+        key = {};
+        value = {};
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })
