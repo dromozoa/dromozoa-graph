@@ -117,12 +117,20 @@ function class:find_dominators(start_uid)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      u = linked_list();
-      e = linked_list();
-      uv = adjacency_list();
-      vu = adjacency_list();
-    }, metatable)
+  __call = function (_, self)
+    if self then
+      self.u = linked_list(self.u)
+      self.e = linked_list(self.e)
+      self.uv = adjacency_list(self.uv)
+      self.vu = adjacency_list(self.vu)
+    else
+      self = {
+        u = linked_list();
+        e = linked_list();
+        uv = adjacency_list();
+        vu = adjacency_list();
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })

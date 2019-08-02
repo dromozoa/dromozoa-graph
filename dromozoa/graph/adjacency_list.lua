@@ -1,4 +1,4 @@
--- Copyright (C) 2015,2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2015,2017-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -16,7 +16,10 @@
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
 local class = {}
-local metatable = { __index = class }
+local metatable = {
+  __index = class;
+  __name = "dromozoa.graph.adjacency_list";
+}
 
 function class:add_edge(eid, uid, vid)
   local last = self.last
@@ -88,13 +91,16 @@ function class:degree(uid)
 end
 
 return setmetatable(class, {
-  __call = function ()
-    return setmetatable({
-      first = {};
-      last = {};
-      before = {};
-      after = {};
-      target = {};
-    }, metatable)
+  __call = function (_, self)
+    if not self then
+      self = {
+        first = {};
+        last = {};
+        before = {};
+        after = {};
+        target = {};
+      }
+    end
+    return setmetatable(self, metatable)
   end;
 })

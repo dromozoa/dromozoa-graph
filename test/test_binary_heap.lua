@@ -1,4 +1,4 @@
--- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -100,3 +100,11 @@ x:increase(3, 1)
 check(x, { 3, 4, 2, 1 })
 x:decrease(3, 2)
 check(x, { 4, 3, 2, 1 })
+
+local r, message = pcall(function ()
+  return binary_heap() .. "foo"
+end)
+assert(not r)
+if verbose then
+  print("message", message)
+end
