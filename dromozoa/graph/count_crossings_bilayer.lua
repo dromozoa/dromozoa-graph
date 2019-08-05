@@ -1,4 +1,4 @@
--- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local sort = table.sort
+local table_sort = table.sort
 
 local function count(uv, south, north)
   local n = #south
@@ -53,7 +53,7 @@ local function count(uv, south, north)
     for j = m + 1, #p do
       p[j] = nil
     end
-    sort(p)
+    table_sort(p)
     for j = 1, m do
       positions[n + j] = p[j]
     end

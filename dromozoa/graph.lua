@@ -24,7 +24,10 @@ local render = require "dromozoa.graph.render"
 local subdivide_special_edges = require "dromozoa.graph.subdivide_special_edges"
 
 local class = {}
-local metatable = { __index = class }
+local metatable = {
+  __index = class;
+  __name = "dromozoa.graph";
+}
 
 function class:add_vertex()
   return self.u:add()
