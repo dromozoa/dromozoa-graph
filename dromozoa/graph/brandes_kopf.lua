@@ -1,4 +1,4 @@
--- Copyright (C) 2017,2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2017-2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
 
-local sort = table.sort
+local table_sort = table.sort
 
 local function preprocessing(g, layers, index_map, last_uid)
   if last_uid == g.u.last then
@@ -120,7 +120,7 @@ local function vertical_alignment_left(u, vu, layers, index_map, mark, layer_fir
         for k = en + 1, #eids do
           eids[k] = nil
         end
-        sort(eids, compare)
+        table_sort(eids, compare)
         if en % 2 == 0 then
           m1 = en / 2
           m2 = m1 + 1
@@ -195,7 +195,7 @@ local function vertical_alignment_right(u, vu, layers, index_map, mark, layer_fi
         for k = en + 1, #eids do
           eids[k] = nil
         end
-        sort(eids, compare)
+        table_sort(eids, compare)
         if en % 2 == 0 then
           m1 = en / 2
           m2 = m1 + 1
