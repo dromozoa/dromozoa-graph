@@ -1,4 +1,4 @@
--- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -14,17 +14,6 @@
 --
 -- You should have received a copy of the GNU General Public License
 -- along with dromozoa-graph.  If not, see <http://www.gnu.org/licenses/>.
-
-
---[[
-
-| value | u_color | e_color               |
-|:-----:|---------|-----------------------|
-|  nil  | WHITE   | tree edge             |
-|   1   | GRAY    | back edge             |
-|   2   | BLACK   | forward or cross edge |
-
-]]
 
 local function visit(uv_first, uv_after, uv_target, order, u_color, e_color, uid)
   u_color[uid] = 1

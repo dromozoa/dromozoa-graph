@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>dromozoa-graph</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css">
 <style>
 .markdown-body {
   box-sizing: border-box;
@@ -34,6 +34,39 @@
   <li><a href="impl.html">実装ノート</a></li>
 </ul>
 
+<h2>アルゴリズム</h2>
+
+<h3>postorder</h3>
+
+<pre class="prettyprint lang-lua">
+local order, u_color, e_color = g:uv_postorder()
+local order, u_color, e_color = g:vu_postorder()
+</pre>
+
+<table>
+  <tr>
+    <th>value</th>
+    <th>u_color</th>
+    <th>e_color</th>
+  </tr>
+  <tr>
+    <td><code>nil</code></td>
+    <td>WHITE</td>
+    <td>tree edge</td>
+  </tr>
+  <tr>
+    <td><code>1</code></td>
+    <td>GRAY</td>
+    <td>back edge</td>
+  </tr>
+  <tr>
+    <td><code>2</code></td>
+    <td>BLACK</td>
+    <td>forward or cross edge</td>
+  </tr>
+</table>
+
 </div>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 </body>
 </html>

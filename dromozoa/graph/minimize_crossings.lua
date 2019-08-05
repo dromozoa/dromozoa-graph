@@ -1,4 +1,4 @@
--- Copyright (C) 2018 Tomoyuki Fujimori <moyu@dromozoa.com>
+-- Copyright (C) 2018,2019 Tomoyuki Fujimori <moyu@dromozoa.com>
 --
 -- This file is part of dromozoa-graph.
 --
@@ -17,7 +17,7 @@
 
 local count_crossings = require "dromozoa.graph.count_crossings"
 
-local sort = table.sort
+local table_sort = table.sort
 
 local function save(source_layers, target_layers)
   for i = 1, #source_layers do
@@ -73,7 +73,7 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
         elseif m == 2 then
           median_map[uid] = (p[1] + p[2]) / 2
         else
-          sort(p)
+          table_sort(p)
           if m % 2 == 1 then
             median_map[uid] = p[(m + 1) / 2]
           else
@@ -88,7 +88,7 @@ local function median(uv, layers, layer_first, layer_last, layer_step)
       end
     end
 
-    sort(order, compare)
+    table_sort(order, compare)
 
     local j = 0
     for k = 1, #order do
